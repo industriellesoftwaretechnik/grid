@@ -4,7 +4,7 @@ The styled data grid of [ISTEC Grid](https://github.com/industriellesoftwaretech
 [`@istec/grid-core`](https://www.npmjs.com/package/@istec/grid-core) with Tailwind CSS v4 and shadcn-style
 components.
 
-> `0.x`: placeholders only while the grid moves in.
+> `0.x`: the API may still change between minor versions.
 
 ## Install
 
@@ -43,12 +43,24 @@ There is no prebuilt stylesheet for apps without Tailwind yet.
 ## Usage
 
 ```tsx
-import { GridPlaceholder } from '@istec/grid-ui';
+import { createGridColumnHelper, DataGrid, selectionColumn, useDataGrid } from '@istec/grid-ui';
 
-export function People() {
-  return <GridPlaceholder data={[{ name: 'Ada' }, { name: 'Grace' }]} />;
+type Person = { id: string; name: string; age: number };
+const helper = createGridColumnHelper<Person>();
+const columns = helper.columns([
+  selectionColumn<Person>(),
+  helper.accessor('name', { header: 'Name' }),
+  helper.accessor('age', { header: 'Age', aggregationFn: 'mean' }),
+]);
+
+export function People({ people }: { people: Person[] }) {
+  const table = useDataGrid({ id: 'people', columns, data: people, getRowId: (person) => person.id });
+  return <DataGrid table={table} showFloatingFilters />;
 }
 ```
+
+This package re-exports all of `@istec/grid-core`, so an app imports from here alone. `apps/demo` in the repository
+shows the rest: editing, grouping, tree and detail rows, server rows, and German texts.
 
 ## License
 

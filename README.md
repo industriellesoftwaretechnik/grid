@@ -3,8 +3,7 @@
 A data grid for React, built on [TanStack Table](https://tanstack.com/table) v9: an open alternative to AG Grid
 for apps that use Tailwind CSS and shadcn/ui.
 
-> Early days: the packages are at `0.x` and contain placeholders while the grid moves in. Expect breaking changes
-> until the API settles.
+> Early days: the packages are at `0.x`. Expect breaking changes until the API settles.
 
 ## Packages
 

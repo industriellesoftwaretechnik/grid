@@ -1,0 +1,77 @@
+import type { Ref } from 'react';
+
+import type { RowData } from '@tanstack/react-table';
+
+import { gridMeta } from '#/core/gridMeta.ts';
+import type { GridCell, GridRow } from '#/core/types.ts';
+import type { CellEvents } from '#/headless/body/useBodyCell.ts';
+import { useGridSelector } from '#/headless/useGridSelector.ts';
+import { cellLayout, selectColumnLayout, type LayoutSlot, type Placed } from '#/logic/layout.ts';
+import { rowSelectionState } from '#/logic/selection/rowSelectionState.ts';
+
+export interface RowOptions<TData extends RowData> extends CellEvents<TData> {
+  rowHeight: number;
+  onRowClick?: (row: GridRow<TData>) => void;
+  onRowDoubleClick?: (row: GridRow<TData>) => void;
+}
+
+/** A group row of `groupDisplay: 'rows'`: locked columns such as the checkbox keep their cell, one spans the rest. */
+export interface FullWidthGroup<TData extends RowData> {
+  kept: Placed<GridCell<TData>>[];
+  colSpan: number;
+  /** Where the label stays while the columns scroll sideways, past the pinned kept cells. */
+  stickyLeft: number;
+}
+
+function fullWidthGroup<TData extends RowData>(slots: LayoutSlot<GridCell<TData>>[]): FullWidthGroup<TData> {
+  const kept: Placed<GridCell<TData>>[] = [];
+  for (const slot of slots) {
+    if (slot === 'filler' || !slot.item.column.columnDef.meta?.lockPosition) break;
+    kept.push(slot);
+  }
+  const stickyLeft = kept
+    .filter((slot) => slot.region === 'start')
+    .reduce((width, slot) => width + slot.item.column.getSize(), 0);
+  return { kept, colSpan: slots.length - kept.length, stickyLeft };
+}
+
+/**
+ * A body row: whether it is selected, its cells in display order (`'filler'` takes the spare width), or for a group
+ * row of `groupDisplay: 'rows'` its full-width layout, and the props for its element.
+ */
+export function useDataRow<TData extends RowData, TElement extends HTMLElement = HTMLTableRowElement>(
+  row: GridRow<TData>,
+  {
+    rowHeight,
+    onRowClick,
+    onRowDoubleClick,
+    index,
+    measureRef,
+  }: RowOptions<TData> & { index?: number; measureRef?: Ref<TElement> }
+) {
+  'use no memo';
+  const selected = useGridSelector(row.table.atoms.rowSelection, () => rowSelectionState(row).checked);
+  useGridSelector(row.table.store, selectColumnLayout);
+  const { groupDisplay } = gridMeta(row.table);
+  const slots = cellLayout(row);
+  const groupRow = groupDisplay === 'rows' && row.getIsGrouped() ? fullWidthGroup(slots) : undefined;
+
+  return {
+    selected,
+    grouped: row.getIsGrouped(),
+    clickable: onRowClick !== undefined,
+    /** Unset for a full-width group row. */
+    cells: groupRow ? undefined : slots,
+    groupRow,
+    /** Whether the cells of grouped columns hold their group's toggle. */
+    groupToggles: groupDisplay === 'columns',
+    rowProps: {
+      'data-index': index,
+      ref: measureRef,
+      'data-state': selected ? 'selected' : undefined,
+      style: { height: rowHeight },
+      onClick: onRowClick && (() => onRowClick(row)),
+      onDoubleClick: onRowDoubleClick && (() => onRowDoubleClick(row)),
+    },
+  };
+}

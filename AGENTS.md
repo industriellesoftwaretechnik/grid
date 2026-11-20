@@ -27,6 +27,10 @@ Every config matches `packages/*` and `apps/*`, so a new package or app is only 
 
 ## Rules
 
+- Logic lives in `grid-core`; `grid-ui` renders. A part of the grid gets a hook or model in
+  `packages/grid-core/src/headless/` that returns state, texts and element props, so another UI layer (MUI, …) needs
+  only markup. Hooks that read table methods subscribe with `useGridSelector` and opt out of the React Compiler
+  (`'use no memo'`); see its doc comment.
 - `grid-core` has no styling and no Tailwind. `grid-ui` uses only the standard shadcn CSS variables, so it takes on
   the host's theme, and never relies on the host's shadcn setup: primitives are copied into
   `packages/grid-ui/src/internal/components/` (shadcn naming, not linted) and their deps are real dependencies.
