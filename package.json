@@ -1,0 +1,38 @@
+{
+  "name": "istec-grid",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vp -C apps/demo dev",
+    "build": "pnpm -r build",
+    "test": "vp test",
+    "test:watch": "vp test watch",
+    "typecheck": "tsc -b --noEmit && pnpm -r typecheck",
+    "check": "vp check",
+    "check:fix": "vp check --fix",
+    "check:packages": "node scripts/checkPackages.ts",
+    "verify": "pnpm check && pnpm typecheck && pnpm test && pnpm build && pnpm check:packages",
+    "changeset": "changeset",
+    "version-packages": "changeset version"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.2",
+    "@changesets/cli": "^3.0.3",
+    "@rolldown/plugin-babel": "catalog:",
+    "@types/node": "^26",
+    "@typescript/native": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "babel-plugin-react-compiler": "catalog:",
+    "publint": "^0.3.15",
+    "typescript": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.18.0",
+      "onFail": "download"
+    }
+  }
+}

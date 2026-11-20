@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
+    // In the workspace, sibling packages resolve to their sources, so nothing has to be built first.
+    "paths": {
+      "@istec/grid-core": ["../grid-core/src/index.ts"]
+    }
+  },
+  "include": ["src"]
+}
