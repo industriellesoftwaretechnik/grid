@@ -1,0 +1,48 @@
+# `packages/*` are the published libraries, `apps/*` the private apps (demo now, docs later). A new folder under
+# either glob joins the workspace, lint, tests and CI without further config.
+packages:
+  - apps/*
+  - packages/*
+
+allowBuilds:
+  esbuild: true
+
+# Every version used by more than one workspace package is defined here once; a package.json refers to it with
+# `catalog:`. A dependency of a single package keeps its literal range there. `peerDependencies` stay literal and
+# wider than the catalog pin: what we develop against and what a host may supply are different questions.
+catalog:
+  '@base-ui/react': ^1.9.0
+  '@rolldown/plugin-babel': ^0.3.0
+  '@tanstack/react-table': ^9.3.1
+  '@types/react': ^19.3.0
+  '@types/react-dom': ^19.3.0
+  # `tsc` is TypeScript 7 (`@typescript/native`); `typescript` stays the TS 6 JS API for tools that
+  # import it (tsdown's declaration build, attw), which TS 7 no longer ships.
+  '@typescript/native': npm:typescript@7.0.2
+  '@vitejs/plugin-react': ^6.2.1
+  babel-plugin-react-compiler: ^1.0.0
+  lucide-react: ^1.69.0
+  react: ^19.3.1
+  react-dom: ^19.3.1
+  tailwindcss: ^4.3.4
+  typescript: npm:@typescript/typescript6@6.0.2
+  # Vite+: bump these three together by hand. `vite` is the Vite+ core at the `vite-plus` version,
+  # `vitest` is what `vp toolchain vitest` reports.
+  vite: npm:@voidzero-dev/vite-plus-core@1.5.0
+  vite-plus: 1.5.0
+  vitest: 5.1.0
+
+# Every `vite`/`vitest` in the tree resolves to the Vite+ core, never a second upstream copy.
+# Import test APIs from `vite-plus/test`, never declare `vitest` directly.
+overrides:
+  vite@*: 'catalog:'
+  vitest@*: 'catalog:'
+
+# `vp` manages Node (`.node-version`) and pnpm (`devEngines`), so pnpm must not enforce them itself.
+runtimeOnFail: ignore
+pmOnFail: ignore
+
+# Plugins peer-depend on upstream `vite@^8`, which the core's own version number never satisfies.
+peerDependencyRules:
+  allowAny:
+    - vite

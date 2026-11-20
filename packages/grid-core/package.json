@@ -1,0 +1,57 @@
+{
+  "name": "@istec/grid-core",
+  "version": "0.0.0",
+  "description": "Headless data grid for React: hooks, TanStack Table features and pure logic, no styling.",
+  "keywords": [
+    "data-grid",
+    "headless",
+    "react",
+    "table",
+    "tanstack-table"
+  ],
+  "homepage": "https://github.com/industriellesoftwaretechnik/grid/tree/main/packages/grid-core#readme",
+  "bugs": "https://github.com/industriellesoftwaretechnik/grid/issues",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/industriellesoftwaretechnik/grid.git",
+    "directory": "packages/grid-core"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "vp pack",
+    "typecheck": "tsc -b --noEmit"
+  },
+  "devDependencies": {
+    "@tanstack/react-table": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@typescript/native": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "peerDependencies": {
+    "@tanstack/react-table": "^9",
+    "react": "^19"
+  }
+}

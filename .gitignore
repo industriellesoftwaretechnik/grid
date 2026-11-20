@@ -1,0 +1,33 @@
+node_modules
+dist
+*.local
+*.log
+*.tgz
+.env
+.env.*
+!.env.example
+
+# packed tarballs checked by `pnpm check:packages`
+.pack
+
+# Vite+ / Vite / TanStack caches
+.vite-plus
+.vite
+.tanstack
+
+# Test coverage
+coverage
+
+# Editors and IDEs (shared VS Code settings may be committed explicitly)
+.idea
+*.iml
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
