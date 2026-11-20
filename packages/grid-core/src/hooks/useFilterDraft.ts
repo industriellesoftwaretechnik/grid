@@ -18,7 +18,7 @@ interface Draft<T> {
 /**
  * The typed text of a filter input that several places show at once, such as the header, the floating filter and the
  * side bar. Typing writes the filter, debounced; a change from elsewhere replaces the text. stored is the filter
- * value from a FilterSubscription.
+ * value from `useFilterValue`.
  */
 export function useFilterDraft<TData extends RowData, T>(
   column: GridColumn<TData>,

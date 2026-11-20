@@ -3,7 +3,7 @@ import { ChevronRight, X } from 'lucide-react';
 
 import { FilterEditor } from '#/grid/filters/FilterEditor.tsx';
 import { Button } from '#/internal/components/button.tsx';
-import { columnMeta, useFiltersPanel, type GridInstance } from '@istec/grid-core';
+import { useFiltersPanel, type GridInstance } from '@istec/grid-core';
 
 /** Every filterable column with its filter as text; opening one shows its editor in place. */
 export function FiltersPanel<TData extends object>({ table }: { table: GridInstance<TData> }) {
@@ -17,8 +17,7 @@ export function FiltersPanel<TData extends object>({ table }: { table: GridInsta
           {clearAllLabel}
         </Button>
       )}
-      {items.map(({ column, label, summary, open, toggle }) => {
-        const { filter } = columnMeta(column);
+      {items.map(({ column, filter, label, summary, open, toggle }) => {
         return (
           <div key={column.id} className="border-b">
             <button
@@ -37,7 +36,7 @@ export function FiltersPanel<TData extends object>({ table }: { table: GridInsta
                 )}
               </span>
             </button>
-            {open && filter && (
+            {open && (
               <div className="flex flex-col gap-2 pt-1 pr-2 pb-3 pl-7">
                 <FilterEditor column={column} kind={filter} />
               </div>

@@ -1,7 +1,7 @@
 import type { RowData } from '@tanstack/react-table';
 
 import { AggregationSymbol } from '#/grid/grouping/AggregationSymbol.tsx';
-import { aggregationMark, formatAggregate, type GridColumn } from '@istec/grid-core';
+import { aggregatedValue, type GridColumn } from '@istec/grid-core';
 
 /** An aggregated value in a group row, marked with its aggregation like the totals row. */
 export function AggregatedCell<TData extends RowData>({
@@ -11,10 +11,11 @@ export function AggregatedCell<TData extends RowData>({
   column: GridColumn<TData>;
   getValue: () => unknown;
 }) {
+  const { mark, text } = aggregatedValue(column, getValue());
   return (
     <>
-      <AggregationSymbol mark={aggregationMark(column.table, column.columnDef.aggregationFn)} className="mr-1.5" />
-      {formatAggregate(getValue(), column)}
+      <AggregationSymbol mark={mark} className="mr-1.5" />
+      {text}
     </>
   );
 }

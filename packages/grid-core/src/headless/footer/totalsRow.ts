@@ -25,6 +25,14 @@ export function aggregationMark<TData extends RowData>(
   return { symbol: aggregationSymbols[aggregation], name: gridMeta(table).t(`aggregation.${aggregation}`) };
 }
 
+/** An aggregated value as text with the mark of its aggregation, for a group row's cell or a total. */
+export function aggregatedValue<TData extends RowData>(
+  column: GridColumn<TData>,
+  value: unknown
+): { mark?: AggregationMark; text: string } {
+  return { mark: aggregationMark(column.table, column.columnDef.aggregationFn), text: formatAggregate(value, column) };
+}
+
 export interface TotalsCell<TData extends RowData> {
   column: GridColumn<TData>;
   region: Region;
@@ -40,19 +48,13 @@ export function totalsRow<TData extends RowData>(table: CoreTable<TData>): (Tota
   return columnLayout(table).map((slot) => {
     if (slot === 'filler') return slot;
     const { item: column, region, index, edge } = slot;
-    const { aggregationFn } = column.columnDef;
     return {
       column,
       region,
       edge,
       style: cellStickyStyle(region, index),
       align: columnMeta(column).align,
-      total: showsTotal(column)
-        ? {
-            mark: aggregationMark(table, aggregationFn),
-            text: formatAggregate(column.getAggregationValue(), column),
-          }
-        : undefined,
+      total: showsTotal(column) ? aggregatedValue(column, column.getAggregationValue()) : undefined,
     };
   });
 }

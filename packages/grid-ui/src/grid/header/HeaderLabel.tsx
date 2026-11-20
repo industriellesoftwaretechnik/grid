@@ -5,9 +5,9 @@ import type { HeaderSlot } from '@istec/grid-core';
 
 const sortIcons = { asc: <ArrowUp />, desc: <ArrowDown /> };
 
-/** The header's label; a button that sorts where the column can be sorted, with Ctrl adding to a multi-sort. */
+/** The header's label; a button that sorts where the column can be sorted. */
 export function HeaderLabel<TData extends object>({
-  slot: { header, sorted, sortPosition },
+  slot: { header, toggleSorting, sorted, sortPosition },
 }: {
   slot: HeaderSlot<TData>;
 }) {
@@ -16,12 +16,12 @@ export function HeaderLabel<TData extends object>({
       <FlexRender header={header} />
     </span>
   );
-  if (!header.column.getCanSort()) return label;
+  if (!toggleSorting) return label;
 
   return (
     <button
       type="button"
-      onClick={header.column.getToggleSortingHandler()}
+      onClick={toggleSorting}
       className="flex min-w-0 cursor-pointer items-center gap-1 [&_svg]:size-3.5 [&_svg]:shrink-0"
     >
       {label}

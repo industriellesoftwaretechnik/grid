@@ -9,9 +9,9 @@ import type { CoreTable, GridColumn, GridRow } from '#/core/types.ts';
  * else it renders itself with the headless hooks, so column definitions work with any UI layer.
  */
 export interface GridComponents {
-  /** An aggregated value in a group row; `useAggregationMark` gives its mark. */
+  /** An aggregated value in a group row; `aggregatedValue` gives its mark and text. */
   AggregatedCell: <TData extends RowData>(props: { column: GridColumn<TData>; getValue: () => unknown }) => ReactNode;
-  /** The cell of the group column (`groupDisplay: 'groupColumn'`); `useGroupColumnCell` gives its content. */
+  /** The cell of the group column (`groupDisplay: 'groupColumn'`); `groupingCell` gives the cell it shows. */
   GroupColumnCell: <TData extends RowData>(props: { row: GridRow<TData> }) => ReactNode;
   /** The header checkbox of `selectionColumn`; `useSelectAllCheckbox` gives its state. */
   SelectAllCheckbox: <TData extends RowData>(props: { table: CoreTable<TData> }) => ReactNode;

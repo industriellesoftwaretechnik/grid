@@ -24,6 +24,7 @@ export function useFiltersPanel<TData extends RowData>(table: CoreTable<TData>) 
   return {
     items: columns.map((column) => ({
       column,
+      filter: columnMeta(column).filter || 'text',
       label: columnLabel(column),
       /** The filter as text; empty while the column is not filtered. */
       summary: filterSummaryText(column, filters.find((filter) => filter.id === column.id)?.value),

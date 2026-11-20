@@ -37,6 +37,7 @@ export function GroupChipList<TData extends object>({
   renderPending: (column: GridColumn<TData>, first: boolean) => ReactNode;
   renderOverlay: (column: GridColumn<TData>) => ReactNode;
 }) {
+  'use no memo';
   const { grouping, sorting } = table.state;
   const [dragging, setDragging] = useState<string>();
   const dragAndDrop = useColumnDragAndDrop(({ active, over }) => {

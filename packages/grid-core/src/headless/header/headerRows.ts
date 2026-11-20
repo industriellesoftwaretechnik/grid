@@ -14,6 +14,8 @@ export interface HeaderSlot<TData extends object> {
   edge: boolean;
   /** Keeps a pinned header in place. */
   style: CSSProperties | undefined;
+  /** Sorts by the column, with Ctrl adding it to a multi-sort; unset where it cannot be sorted. */
+  toggleSorting: ((event: unknown) => void) | undefined;
   sorted: false | SortDirection;
   /** The column's place in a multi-sort, from 1; 0 when the table sorts by one column or none. */
   sortPosition: number;
@@ -39,6 +41,7 @@ export function headerRows<TData extends object>(
         region,
         edge,
         style: headerStickyStyle(header, region),
+        toggleSorting: header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined,
         sorted: header.column.getIsSorted(),
         sortPosition: multiSort ? header.column.getSortIndex() + 1 : 0,
         filtered: header.column.getIsFiltered(),

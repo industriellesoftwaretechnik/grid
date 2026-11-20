@@ -91,7 +91,13 @@ export { useVirtualList } from '#/headless/filters/useVirtualList.ts';
 export { useGroupPanel } from '#/headless/grouping/useGroupPanel.ts';
 export { GroupChipList, type GroupChip } from '#/headless/grouping/GroupChipList.tsx';
 export { useGroupChip } from '#/headless/grouping/useGroupChip.ts';
-export { aggregationMark, totalsRow, type AggregationMark, type TotalsCell } from '#/headless/footer/totalsRow.ts';
+export {
+  aggregatedValue,
+  aggregationMark,
+  totalsRow,
+  type AggregationMark,
+  type TotalsCell,
+} from '#/headless/footer/totalsRow.ts';
 export { cellSummary, rowCounts, selectedRows } from '#/headless/footer/statusBar.ts';
 export { useStatusBar } from '#/headless/footer/useStatusBar.ts';
 export { useRowCheckbox, useSelectAllCheckbox } from '#/headless/selection/useSelectionCheckboxes.ts';

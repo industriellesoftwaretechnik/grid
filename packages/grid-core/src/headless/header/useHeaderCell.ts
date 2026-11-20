@@ -60,6 +60,7 @@ export function useHeaderCell<TData extends object>({ header, region, style, sor
 
 /** The label and collapse toggle of a column group's header. */
 export function useColumnGroupHeader<TData extends object>({ header, collapsed }: HeaderSlot<TData>) {
+  'use no memo';
   const meta = gridMeta(header.getContext().table);
   return {
     /** Whether the group has a toggle: it has columns shown only while open or only while collapsed. */

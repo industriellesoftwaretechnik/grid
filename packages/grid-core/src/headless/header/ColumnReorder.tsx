@@ -52,6 +52,7 @@ export function ColumnReorder<TData extends object>({
   renderOverlay: (column: GridColumn<TData>, action: DropAction) => ReactNode;
   children: ReactNode;
 }) {
+  'use no memo';
   const [dragging, setDragging] = useState<string>();
   const [overPanel, setOverPanel] = useState(false);
   const leafHeaders = table.getCenterHeaderGroups().at(-1)?.headers ?? [];

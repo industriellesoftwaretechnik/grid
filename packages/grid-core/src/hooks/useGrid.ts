@@ -93,7 +93,7 @@ export function useGrid<TData extends object>({
   expandColumn,
   ...options
 }: UseGridOptions<TData>) {
-  const storageKey = persist ? `data-table:${id}` : undefined;
+  const storageKey = persist ? `istec-grid:${id}` : undefined;
   const [initial] = useState(() =>
     splitState({ ...initialState, ...(storageKey === undefined ? {} : readPersistedState(storageKey)) })
   );
