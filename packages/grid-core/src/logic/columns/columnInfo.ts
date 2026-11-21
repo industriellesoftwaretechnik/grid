@@ -2,12 +2,18 @@ import type { CellData, RowData } from '@tanstack/react-table';
 
 import type { GridColumn } from '#/core/types.ts';
 import { isExpandable } from '#/logic/columns/columnGroups.ts';
-import { resolveMeta, type ResolvedColumnMeta } from '#/logic/columns/columnMeta.ts';
+import { resolveMeta, type FilterKind, type ResolvedColumnMeta } from '#/logic/columns/columnMeta.ts';
 
 export function columnMeta<TData extends RowData, TValue extends CellData>(
   column: GridColumn<TData, TValue>
 ): ResolvedColumnMeta {
   return resolveMeta(column.columnDef.meta);
+}
+
+/** The kind of the column's filter editor; unset where the column cannot be filtered. */
+export function filterKindOf<TData extends RowData>(column: GridColumn<TData>): FilterKind | undefined {
+  const { filter } = columnMeta(column);
+  return filter !== false && column.getCanFilter() ? filter : undefined;
 }
 
 export function columnLabel<TData extends RowData>(column: GridColumn<TData>): string {

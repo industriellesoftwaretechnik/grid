@@ -2,13 +2,13 @@ import type { RowData } from '@tanstack/react-table';
 
 import type { CoreTable, GridColumn, GridRow } from '#/core/types.ts';
 import { columnLabel } from '#/logic/columns/columnInfo.ts';
+import { parseCellText } from '#/logic/editing/columnEditor.ts';
 import { formatDelimited, parseDelimited } from '#/logic/export/delimited.ts';
 import {
   displayedColumns,
   displayedRows,
   findCell,
   focusedPosition,
-  parseCellText,
   rowsAsText,
   selectedBlock,
   selectedLeafRows,

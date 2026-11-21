@@ -3,18 +3,7 @@ import { cn } from 'cn';
 
 import { RowToggle } from '#/grid/body/RowToggle.tsx';
 import { focusOutlineClassName } from '#/grid/styles.ts';
-import { groupingCell, useGroupRowCell, type GridRow } from '@istec/grid-core';
-
-/** The cell of the group column, which holds the groups of every level. */
-export function GroupColumnCell<TData extends RowData>({ row }: { row: GridRow<TData> }) {
-  const cell = groupingCell(row);
-  if (!cell) return null;
-  return (
-    <RowToggle row={row} level={row.depth} showCount>
-      <FlexRender cell={cell} />
-    </RowToggle>
-  );
-}
+import { useGroupRowCell, type GridRow } from '@istec/grid-core';
 
 /** The full-width cell of a group row. */
 export function GroupRowCell<TData extends RowData>({

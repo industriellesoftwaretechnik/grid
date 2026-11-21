@@ -34,9 +34,9 @@ export interface GridColumnMeta {
   cellClassName?: string | CellRule<string | undefined>;
   /** `true` shows the cell's text as a tooltip, which helps where it is cut off. */
   tooltip?: boolean | CellRule<string | undefined>;
-  /** The editor of an editable column. Defaults to one for its data type. */
+  /** The editor of an editable column, or a component of its own. Defaults to one for its data type. */
   editor?: EditorKind | ((props: CellEditorProps) => ReactNode);
-  /** The choices of a `select` editor. Defaults to the values in the column. */
+  /** The choices of a `select` editor, in this order. Defaults to the values in the column, sorted. */
   options?: readonly unknown[];
   /** The text of a value in cells, the search, set filter options and totals. */
   formatValue?: (value: unknown) => string;
@@ -59,11 +59,23 @@ export interface ResolvedColumnMeta extends GridColumnMeta {
   aggregations: readonly AggregationName[];
 }
 
-export const dataTypeDefaults: Record<DataType, Pick<ResolvedColumnMeta, 'align' | 'filter' | 'aggregations'>> = {
-  text: { align: 'start', filter: 'text', aggregations: ['count', 'uniqueCount'] },
-  number: { align: 'end', filter: 'number', aggregations: ['sum', 'mean', 'median', 'min', 'max', 'count'] },
-  date: { align: 'start', filter: 'date', aggregations: ['min', 'max', 'count'] },
-  enum: { align: 'start', filter: 'set', aggregations: ['count', 'uniqueCount'] },
+/**
+ * What a column gets from its data type for each setting its `meta` leaves unset. `editor` is also how a custom editor's
+ * column reads pasted text.
+ */
+export const dataTypeDefaults: Record<
+  DataType,
+  Pick<ResolvedColumnMeta, 'align' | 'filter' | 'aggregations'> & { editor: EditorKind }
+> = {
+  text: { align: 'start', filter: 'text', editor: 'text', aggregations: ['count', 'uniqueCount'] },
+  number: {
+    align: 'end',
+    filter: 'number',
+    editor: 'number',
+    aggregations: ['sum', 'mean', 'median', 'min', 'max', 'count'],
+  },
+  date: { align: 'start', filter: 'date', editor: 'date', aggregations: ['min', 'max', 'count'] },
+  enum: { align: 'start', filter: 'set', editor: 'select', aggregations: ['count', 'uniqueCount'] },
 };
 
 function inferDataType(value: unknown): DataType {

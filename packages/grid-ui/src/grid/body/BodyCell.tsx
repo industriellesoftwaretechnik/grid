@@ -11,7 +11,10 @@ export function BodyCell<TData extends RowData>({
   edge,
   ...options
 }: BodyCellOptions<TData> & { cell: GridCell<TData>; edge: boolean }) {
-  const { look, content, align, toggleLevel, className, cellProps, fillHandleProps } = useBodyCell(cell, options);
+  const { look, content, shownCell, align, toggleLevel, className, cellProps, fillHandleProps } = useBodyCell(
+    cell,
+    options
+  );
   const editing = content === 'editor';
   const { region } = options;
 
@@ -37,10 +40,10 @@ export function BodyCell<TData extends RowData>({
         <CellEditor cell={cell} />
       ) : content === 'group' || content === 'toggle' ? (
         <RowToggle row={cell.row} level={toggleLevel} showCount={content === 'group'}>
-          <FlexRender cell={cell} />
+          <FlexRender cell={shownCell} />
         </RowToggle>
       ) : content === 'empty' ? null : (
-        <FlexRender cell={cell} />
+        <FlexRender cell={shownCell} />
       )}
       {look.fillHandle && !editing && (
         <span

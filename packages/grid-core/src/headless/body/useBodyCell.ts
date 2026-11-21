@@ -2,8 +2,10 @@ import type { CSSProperties, MouseEvent, RefObject } from 'react';
 
 import type { RowData } from '@tanstack/react-table';
 
+import { groupColumnId } from '#/columns/groupColumn.tsx';
 import { gridMeta } from '#/core/gridMeta.ts';
 import type { GridCell } from '#/core/types.ts';
+import { groupingCell } from '#/headless/body/useGroupRowCell.ts';
 import { useGridSelector } from '#/headless/useGridSelector.ts';
 import { useFocusTarget } from '#/hooks/useFocusTarget.ts';
 import { columnMeta } from '#/logic/columns/columnInfo.ts';
@@ -34,9 +36,9 @@ export interface CellLook {
 }
 
 /**
- * What a body cell shows: `editor` while it is edited, `group` for the cell holding its group's toggle, `toggle` for
- * the cell holding a tree node's or master row's toggle, `empty` for data columns of a group row that neither group nor
- * aggregate, `value` otherwise.
+ * What a body cell shows: `editor` while it is edited, `group` for the cell holding its group's toggle and count,
+ * `toggle` for the cell holding a tree node's or master row's toggle, `empty` for data columns of a group row that
+ * neither group nor aggregate, `value` otherwise. Each but `editor` and `empty` renders `shownCell`.
  */
 export type BodyCellContent = 'editor' | 'group' | 'toggle' | 'empty' | 'value';
 
@@ -77,7 +79,9 @@ export function useBodyCell<TData extends RowData, TElement extends HTMLElement 
   const editing = useGridSelector(table.atoms.editingCell, () => cell.getIsEditing());
   const ref: RefObject<TElement | null> = useFocusTarget<TElement>(look.focused && !editing);
   const meta = columnMeta(cell.column);
-  const grouped = groupToggles && cell.getIsGrouped();
+  const inGroupColumn = cell.column.id === groupColumnId;
+  const groupCell = inGroupColumn && cell.row.getIsGrouped() ? groupingCell(cell.row) : undefined;
+  const grouped = (groupToggles && cell.getIsGrouped()) || groupCell !== undefined;
   const toggle = holdsRowToggle(cell);
   const empty = cell.row.getIsGrouped() && !grouped && !cell.getIsAggregated() && cell.column.accessorFn !== undefined;
   const value = empty ? undefined : cell.getValue();
@@ -114,9 +118,11 @@ export function useBodyCell<TData extends RowData, TElement extends HTMLElement 
   return {
     look,
     content,
+    /** The cell to render with `FlexRender`: in the group column, a group row shows the cell of its grouped column. */
+    shownCell: groupCell ?? cell,
     align,
     /** The indentation of the toggle, in levels. */
-    toggleLevel: grouped || gridMeta(table).treeData ? cell.row.depth : 0,
+    toggleLevel: grouped || inGroupColumn || gridMeta(table).treeData ? cell.row.depth : 0,
     /** The column's `cellClassName` for this cell. */
     className: typeof meta.cellClassName === 'function' ? meta.cellClassName(value, rowData) : meta.cellClassName,
     cellProps: {

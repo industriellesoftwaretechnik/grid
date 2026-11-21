@@ -1,12 +1,16 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 /**
  * A scrolling list of `count` items of `itemHeight` that renders only those in view, up to `maxHeight` tall, such as
- * the values of a set filter. Like `useVirtualRows`, a component calling it opts out of the React Compiler.
+ * the values of a set filter. `activeIndex` is scrolled into view whenever it changes. Like `useVirtualRows`, a
+ * component calling it opts out of the React Compiler.
  */
-export function useVirtualList(count: number, { itemHeight, maxHeight }: { itemHeight: number; maxHeight: number }) {
+export function useVirtualList(
+  count: number,
+  { itemHeight, maxHeight, activeIndex }: { itemHeight: number; maxHeight: number; activeIndex?: number }
+) {
   'use no memo';
   const scrollRef = useRef<HTMLDivElement>(null);
   const virtualizer = useVirtualizer({
@@ -15,6 +19,10 @@ export function useVirtualList(count: number, { itemHeight, maxHeight }: { itemH
     estimateSize: () => itemHeight,
     overscan: 8,
   });
+
+  useEffect(() => {
+    if (activeIndex !== undefined && activeIndex >= 0 && activeIndex < count) virtualizer.scrollToIndex(activeIndex);
+  }, [virtualizer, activeIndex, count]);
 
   return {
     /** For the scroll container. */

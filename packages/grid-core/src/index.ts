@@ -76,7 +76,7 @@ export {
 export { useRowToggle } from '#/headless/body/useRowToggle.ts';
 export { groupingCell, useGroupRowCell } from '#/headless/body/useGroupRowCell.ts';
 export { cellMenu, type CellMenuItem, type CellMenuItems } from '#/headless/body/cellMenu.ts';
-export { useCellEditor } from '#/headless/editing/useCellEditor.ts';
+export { useCellEditor, type EditorChoice } from '#/headless/editing/useCellEditor.ts';
 export { headerRows, type HeaderSlot } from '#/headless/header/headerRows.ts';
 export { useColumnGroupHeader, useHeaderCell } from '#/headless/header/useHeaderCell.ts';
 export { useColumnResizer } from '#/headless/header/useColumnResizer.ts';

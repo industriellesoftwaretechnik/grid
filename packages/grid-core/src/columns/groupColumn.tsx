@@ -3,7 +3,10 @@ import type { GridColumnDef } from '#/core/types.ts';
 
 export const groupColumnId = 'auto-group';
 
-/** The column that holds the groups of every level when `groupDisplay` is `groupColumn`. */
+/**
+ * The column that holds the groups of every level when `groupDisplay` is `groupColumn`, and the toggles of master rows
+ * while it is shown. `useBodyCell` gives a group row's cell the grouped column's cell to show.
+ */
 export function groupColumn<TData extends object>(label: string): GridColumnDef<TData> {
   return {
     id: groupColumnId,
@@ -15,9 +18,6 @@ export function groupColumn<TData extends object>(label: string): GridColumnDef<
     enableGlobalFilter: false,
     meta: { label },
     header: ({ table }) => gridMeta(table).t('group'),
-    cell: ({ row }) => {
-      const { GroupColumnCell } = gridMeta(row.table).components;
-      return <GroupColumnCell row={row} />;
-    },
+    cell: () => null,
   };
 }

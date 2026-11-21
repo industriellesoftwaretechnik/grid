@@ -7,6 +7,7 @@ import { clearCells, copyText, pasteText } from '#/logic/clipboard/clipboard.ts'
 import { displayedColumns, displayedRows, findCell, holdsRowToggle } from '#/logic/focus/gridCells.ts';
 import { keyToMove, moveFocus } from '#/logic/focus/navigation.ts';
 import { anchorOf, extendLatestRange, freeCornerOf } from '#/logic/selection/cellRanges.ts';
+import { rowSelectionState } from '#/logic/selection/rowSelectionState.ts';
 
 function isTextTarget(target: HTMLElement): boolean {
   return (
@@ -88,7 +89,7 @@ export function gridEvents<TData extends RowData>(table: CoreTable<TData>, pageS
       else cell?.startEditing();
     } else if (event.key === ' ') {
       event.preventDefault();
-      if (row.getCanSelect()) row.toggleSelected();
+      if (row.getCanSelect()) row.toggleSelected(!rowSelectionState(row).checked);
     } else if (event.key === 'Delete' || event.key === 'Backspace') {
       event.preventDefault();
       clearCells(table);

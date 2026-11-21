@@ -1,7 +1,8 @@
 import type { CellSelectionBounds, CellSelectionRange, RowData } from '@tanstack/react-table';
 
 import type { CoreTable } from '#/core/types.ts';
-import { displayedColumns, parseCellText } from '#/logic/focus/gridCells.ts';
+import { parseCellText } from '#/logic/editing/columnEditor.ts';
+import { displayedColumns } from '#/logic/focus/gridCells.ts';
 import { formatValue } from '#/logic/format.ts';
 import { repeatSource } from '#/logic/selection/cellRanges.ts';
 import type { CellValueInput } from '#/plugins/cellEditingFeature.ts';

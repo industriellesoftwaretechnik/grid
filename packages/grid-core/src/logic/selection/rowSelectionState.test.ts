@@ -1,9 +1,9 @@
-import { constructTable, createColumnHelper } from '@tanstack/react-table';
+import { constructTable, createColumnHelper, type RowSelectionState } from '@tanstack/react-table';
 import { describe, expect, it } from 'vite-plus/test';
 
 import { testFeatures } from '#/core/testFeatures.ts';
 import type { GridFeatures } from '#/core/types.ts';
-import { rowSelectionState } from '#/logic/selection/rowSelectionState.ts';
+import { rowSelectionState, withoutGroupRows } from '#/logic/selection/rowSelectionState.ts';
 
 type Item = { id: string; group: string; kind: string; children?: Item[] };
 
@@ -75,5 +75,23 @@ describe('rowSelectionState', () => {
 
     table.setRowSelection({ '1': true, '2': true });
     expect(rowSelectionState(topGroup())).toEqual({ checked: true, indeterminate: false });
+  });
+});
+
+describe('withoutGroupRows', () => {
+  it('drops the ids of group rows and keeps those of records', () => {
+    const { table, topGroup } = groupedTable(['group', 'kind']);
+    const group = topGroup();
+    const nested = group.subRows[0];
+    if (!nested) throw new Error('no nested group');
+
+    const selection: RowSelectionState = { [group.id]: true, [nested.id]: true, '1': true, '2': true };
+    expect(withoutGroupRows(table, selection)).toEqual({ '1': true, '2': true });
+  });
+
+  it('returns the selection itself when it holds no group rows', () => {
+    const { table } = groupedTable([]);
+    const selection: RowSelectionState = { '1': true };
+    expect(withoutGroupRows(table, selection)).toBe(selection);
   });
 });

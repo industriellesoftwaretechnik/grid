@@ -31,7 +31,10 @@ export interface GridMeta {
   groupDisplay: GroupDisplay;
   /** Whether the rows come as a tree through `getSubRows`. */
   treeData: boolean;
-  /** The column whose cells hold the toggles of tree nodes and master rows; unset without either. */
+  /**
+   * The column whose cells hold the toggles of tree nodes and master rows; unset without either. The group column takes
+   * them while it is shown, and the first shown data column while this one is hidden.
+   */
   expandColumn: string | undefined;
   /** The detail of an expanded master row, by row id. */
   renderDetail: ((rowId: string) => ReactNode) | undefined;

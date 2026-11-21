@@ -19,13 +19,13 @@ Peer dependencies: `react` and `react-dom` ^19, `@tanstack/react-table` ^9. ESM 
 
 A UI layer, such as one on MUI, has three parts. `@istec/grid-ui` is the worked example of each.
 
-1. **The components core renders in its own columns** (`GridComponents`): the aggregated value of a group row, the
-   cell of the group column, and the selection checkboxes. Pass them to `useGrid` from a hook of your own:
+1. **The components core renders in its own columns** (`GridComponents`): the aggregated value of a group row and the
+   selection checkboxes. Pass them to `useGrid` from a hook of your own:
 
    ```tsx
    import { useGrid, type GridComponents, type GridOptions } from '@istec/grid-core';
 
-   const components: GridComponents = { AggregatedCell, GroupColumnCell, SelectAllCheckbox, RowCheckbox };
+   const components: GridComponents = { AggregatedCell, SelectAllCheckbox, RowCheckbox };
 
    export function useMuiGrid<TData extends object>(options: GridOptions<TData>) {
      return useGrid({ ...options, components });

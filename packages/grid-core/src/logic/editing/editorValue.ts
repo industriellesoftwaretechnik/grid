@@ -1,13 +1,4 @@
-import type { DataType } from '#/logic/columns/columnMeta.ts';
-
 export type EditorKind = 'text' | 'number' | 'date' | 'select';
-
-export const editorKindByDataType: Record<DataType, EditorKind> = {
-  text: 'text',
-  number: 'number',
-  date: 'date',
-  enum: 'select',
-};
 
 export type ParseResult = { value: unknown } | { error: 'number' | 'date' | 'option' };
 
@@ -41,6 +32,20 @@ function parseDate(text: string): Date | undefined {
   if (year === undefined || month === undefined || day === undefined) return undefined;
   const date = new Date(Number(year), Number(month) - 1, Number(day));
   return date.getMonth() === Number(month) - 1 ? date : undefined;
+}
+
+/** The options whose text contains the query, ignoring case: those starting with it first, then in their order. */
+export function matchingOptions<T>(options: readonly T[], query: string, format: (option: T) => string): T[] {
+  const wanted = query.trim().toLowerCase();
+  if (wanted === '') return [...options];
+  const starting: T[] = [];
+  const containing: T[] = [];
+  for (const option of options) {
+    const text = format(option).toLowerCase();
+    if (text.startsWith(wanted)) starting.push(option);
+    else if (text.includes(wanted)) containing.push(option);
+  }
+  return [...starting, ...containing];
 }
 
 /**

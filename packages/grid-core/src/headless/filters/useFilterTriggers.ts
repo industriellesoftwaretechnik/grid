@@ -6,7 +6,7 @@ import { gridMeta } from '#/core/gridMeta.ts';
 import type { GridColumn } from '#/core/types.ts';
 import { useFilterValue } from '#/headless/filters/useFilterValue.ts';
 import { useFilterDraft } from '#/hooks/useFilterDraft.ts';
-import { columnLabel, columnMeta } from '#/logic/columns/columnInfo.ts';
+import { columnLabel, columnMeta, filterKindOf } from '#/logic/columns/columnInfo.ts';
 import { filterSummary } from '#/logic/filters/filterSummary.ts';
 import { filterSummaryText } from '#/logic/filters/filterSummaryText.ts';
 import { parseNumberRange, textFilterText, textFilterValue } from '#/logic/filters/filterText.ts';
@@ -18,10 +18,10 @@ import { parseNumberRange, textFilterText, textFilterValue } from '#/logic/filte
 export function useColumnFilterButton<TData extends RowData>(column: GridColumn<TData>) {
   'use no memo';
   const value = useFilterValue(column);
-  const { filter, align } = columnMeta(column);
+  const { align } = columnMeta(column);
 
   return {
-    filter: filter && column.getCanFilter() ? filter : undefined,
+    filter: filterKindOf(column),
     filtered: value !== undefined,
     /** The button sits on the side away from the label: left in right-aligned headers. */
     side: align === 'end' ? ('start' as const) : ('end' as const),
@@ -46,16 +46,16 @@ export function useFloatingFilter<TData extends RowData>(column: GridColumn<TDat
   'use no memo';
   const value = useFilterValue(column);
   const [open, setOpen] = useState(false);
-  const { filter } = columnMeta(column);
+  const filter = filterKindOf(column);
   const isNumber = filter === 'number';
   const toValue = isNumber ? parseNumberRange : textFilterValue;
   const { text, change } = useFilterDraft(column, value, isNumber ? numberText : textFilterText, toValue);
   const { t } = gridMeta(column.table);
-  const mode = !filter || !column.getCanFilter() ? 'none' : filter === 'text' || isNumber ? 'typed' : 'summary';
+  const mode = filter === undefined ? 'none' : filter === 'text' || isNumber ? 'typed' : 'summary';
 
   return {
     mode,
-    filter: filter || undefined,
+    filter,
     label: `${t('filter')}: ${columnLabel(column)}`,
     /** For `typed`: the text, and whether it cannot be read as a filter. */
     text,

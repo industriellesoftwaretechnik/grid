@@ -9,7 +9,6 @@ import { createTranslate } from '#/locale/messages.ts';
 
 const noComponents: GridComponents = {
   AggregatedCell: () => null,
-  GroupColumnCell: () => null,
   SelectAllCheckbox: () => null,
   RowCheckbox: () => null,
 };

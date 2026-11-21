@@ -11,8 +11,6 @@ import type { CoreTable, GridColumn, GridRow } from '#/core/types.ts';
 export interface GridComponents {
   /** An aggregated value in a group row; `aggregatedValue` gives its mark and text. */
   AggregatedCell: <TData extends RowData>(props: { column: GridColumn<TData>; getValue: () => unknown }) => ReactNode;
-  /** The cell of the group column (`groupDisplay: 'groupColumn'`); `groupingCell` gives the cell it shows. */
-  GroupColumnCell: <TData extends RowData>(props: { row: GridRow<TData> }) => ReactNode;
   /** The header checkbox of `selectionColumn`; `useSelectAllCheckbox` gives its state. */
   SelectAllCheckbox: <TData extends RowData>(props: { table: CoreTable<TData> }) => ReactNode;
   /** The row checkbox of `selectionColumn`; `useRowCheckbox` gives its state. */

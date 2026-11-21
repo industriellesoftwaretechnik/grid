@@ -1,8 +1,22 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { parseEditorText, toEditorText } from '#/logic/editing/editorValue.ts';
+import { matchingOptions, parseEditorText, toEditorText } from '#/logic/editing/editorValue.ts';
 
 const format = (value: unknown) => (value === 'active' ? 'Aktiv' : String(value));
+
+describe('matchingOptions', () => {
+  const options = ['inactive', 'active', 'retired'];
+
+  it('keeps every option for an empty query', () => {
+    expect(matchingOptions(options, ' ', format)).toEqual(options);
+  });
+
+  it('matches the shown text, ignoring case, with options that start with the query first', () => {
+    expect(matchingOptions(options, 'akt', format)).toEqual(['active']);
+    expect(matchingOptions(['inactive', 'active', 'actor'], 'act', String)).toEqual(['active', 'actor', 'inactive']);
+    expect(matchingOptions(options, 'xyz', format)).toEqual([]);
+  });
+});
 
 describe('parseEditorText', () => {
   it('reads numbers with a decimal point or a German decimal comma', () => {

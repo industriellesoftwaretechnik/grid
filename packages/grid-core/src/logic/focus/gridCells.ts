@@ -1,9 +1,9 @@
 import type { RowData } from '@tanstack/react-table';
 
+import { groupColumnId } from '#/columns/groupColumn.tsx';
 import { gridMeta } from '#/core/gridMeta.ts';
 import type { CoreTable, GridCell, GridColumn, GridRow } from '#/core/types.ts';
-import { columnLabel, columnMeta } from '#/logic/columns/columnInfo.ts';
-import { editorKindByDataType, parseEditorText, type EditorKind } from '#/logic/editing/editorValue.ts';
+import { columnLabel } from '#/logic/columns/columnInfo.ts';
 import { formatValue } from '#/logic/format.ts';
 import { anchorOf, singleBlock, type CellPosition } from '#/logic/selection/cellRanges.ts';
 
@@ -46,30 +46,22 @@ export function findCell<TData extends RowData>(
   return row?.getAllCells().find((cell) => cell.column.id === position.columnId);
 }
 
+/**
+ * The column whose cells hold the toggles of tree nodes and master rows: the group column while it is shown, otherwise
+ * `expandColumn`, or the first shown data column while that one is hidden, such as after grouping by it.
+ */
+export function rowToggleColumnId<TData extends RowData>(table: CoreTable<TData>): string | undefined {
+  const { expandColumn } = gridMeta(table);
+  if (expandColumn === undefined) return undefined;
+  const shown = displayedColumns(table);
+  if (shown.some((column) => column.id === groupColumnId)) return groupColumnId;
+  if (shown.some((column) => column.id === expandColumn)) return expandColumn;
+  return shown.find((column) => column.accessorFn !== undefined)?.id;
+}
+
 /** Whether the cell holds the toggle of its tree node or master row. */
 export function holdsRowToggle<TData extends RowData>(cell: GridCell<TData>): boolean {
-  return gridMeta(cell.table).expandColumn === cell.column.id && !cell.row.getIsGrouped();
-}
-
-export function editorKindOf<TData extends RowData>(column: GridColumn<TData>): EditorKind {
-  const meta = columnMeta(column);
-  return typeof meta.editor === 'string' ? meta.editor : editorKindByDataType[meta.dataType];
-}
-
-export function editorOptions<TData extends RowData>(column: GridColumn<TData>): readonly unknown[] {
-  const meta = column.columnDef.meta;
-  if (meta?.options) return meta.options;
-  return [...column.getFacetedUniqueValues().keys()]
-    .filter((value) => value !== null && value !== undefined)
-    .toSorted((a, b) => formatValue(a, column).localeCompare(formatValue(b, column)));
-}
-
-/** Reads typed or pasted text as a value of the column. */
-export function parseCellText<TData extends RowData>(column: GridColumn<TData>, text: string) {
-  const kind = editorKindOf(column);
-  return parseEditorText(text, kind, kind === 'select' ? editorOptions(column) : [], (value) =>
-    formatValue(value, column)
-  );
+  return !cell.row.getIsGrouped() && rowToggleColumnId(cell.table) === cell.column.id;
 }
 
 /** Columns with a value, which copy and export include; display columns such as the checkboxes are left out. */

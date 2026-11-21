@@ -1,6 +1,20 @@
-import type { RowData } from '@tanstack/react-table';
+import type { RowData, RowSelectionState } from '@tanstack/react-table';
 
-import type { GridRow } from '#/core/types.ts';
+import type { CoreTable, GridRow } from '#/core/types.ts';
+
+/**
+ * The selection without the ids of group rows. Selecting a group selects its records too, and TanStack would keep the
+ * group's id after ungrouping, where nothing can deselect it again. Group rows show the state of their records instead.
+ */
+export function withoutGroupRows<TData extends RowData>(
+  table: CoreTable<TData>,
+  selection: RowSelectionState
+): RowSelectionState {
+  const { rowsById } = table.getGroupedRowModel();
+  const ids = Object.keys(selection);
+  const kept = ids.filter((id) => rowsById[id]?.getIsGrouped() !== true);
+  return kept.length === ids.length ? selection : Object.fromEntries(kept.map((id) => [id, true as const]));
+}
 
 // A group row stands for its records, so its state comes from the leaf rows. TanStack also counts the ids of
 // nested group rows, which are only selected when their own checkbox is clicked.

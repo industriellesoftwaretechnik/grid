@@ -1,11 +1,13 @@
 import { useMemo, useState, type ReactNode } from 'react';
 
-import type {
-  ColumnFiltersState,
-  ColumnVisibilityState,
-  GroupingState,
-  SortingState,
-  TableState,
+import {
+  functionalUpdate,
+  makeStateUpdater,
+  type ColumnFiltersState,
+  type ColumnVisibilityState,
+  type GroupingState,
+  type SortingState,
+  type TableState,
 } from '@tanstack/react-table';
 
 import { groupColumn, groupColumnId } from '#/columns/groupColumn.tsx';
@@ -25,6 +27,7 @@ import {
 } from '#/logic/columns/columnDefs.ts';
 import { columnMeta } from '#/logic/columns/columnInfo.ts';
 import type { FilterKind } from '#/logic/columns/columnMeta.ts';
+import { withoutGroupRows } from '#/logic/selection/rowSelectionState.ts';
 import { serverFilters, type FetchRows, type ServerFilter } from '#/logic/server/serverRequest.ts';
 import { readPersistedState } from '#/logic/state/persistence.ts';
 import { updateOwnVisibility } from '#/logic/state/visibility.ts';
@@ -61,7 +64,10 @@ export type GridOptions<TData extends object> = Omit<GridTableOptions<TData>, 'm
      * some rows; rows with children expand to those instead.
      */
     renderDetail?: (row: GridRow<TData>) => ReactNode;
-    /** The column whose cells hold the toggles of tree nodes and master rows. Defaults to the first data column. */
+    /**
+     * The column whose cells hold the toggles of tree nodes and master rows. Defaults to the first data column. While the
+     * group column is shown it holds them, and while this column is hidden the first shown data column does.
+     */
     expandColumn?: string;
   };
 
@@ -176,6 +182,10 @@ export function useGrid<TData extends object>({
       onGlobalFilterChange: setGlobalFilter,
       onColumnVisibilityChange: (updater) =>
         setColumnVisibility((own) => updateOwnVisibility(own, updater, forcedVisibility)),
+      onRowSelectionChange: (updater) => {
+        const next = withoutGroupRows(table, functionalUpdate(updater, table.atoms.rowSelection.get()));
+        (options.onRowSelectionChange ?? makeStateUpdater('rowSelection', table))(next);
+      },
       onCellValueChange: (change) => {
         if (isServer) serverRows.replaceRow(change.row.index, change.updatedRow);
         options.onCellValueChange?.(change);

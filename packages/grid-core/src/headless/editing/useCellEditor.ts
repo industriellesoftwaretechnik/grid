@@ -1,62 +1,102 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { createElement, useEffect, useId, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
 
 import type { RowData } from '@tanstack/react-table';
 
 import { gridMeta } from '#/core/gridMeta.ts';
 import type { GridCell } from '#/core/types.ts';
-import { toEditorText, type EditorKind } from '#/logic/editing/editorValue.ts';
-import {
-  displayedColumns,
-  displayedRows,
-  editorKindOf,
-  editorOptions,
-  parseCellText,
-} from '#/logic/focus/gridCells.ts';
+import { columnLabel } from '#/logic/columns/columnInfo.ts';
+import { editorKindOf, editorOptions, parseCellText } from '#/logic/editing/columnEditor.ts';
+import { matchingOptions, toEditorText } from '#/logic/editing/editorValue.ts';
+import { displayedColumns, displayedRows } from '#/logic/focus/gridCells.ts';
 import { moveFocus } from '#/logic/focus/navigation.ts';
 import { formatValue } from '#/logic/format.ts';
 
+/** A choice of a `select` editor. */
+export interface EditorChoice {
+  value: unknown;
+  label: string;
+  /** Whether it is the cell's value. */
+  current: boolean;
+}
+
+const stop = (event: MouseEvent) => {
+  // Keeps the focus in the input and the cell's own handlers out of it; the list may sit in a portal.
+  event.preventDefault();
+  event.stopPropagation();
+};
+
 /**
- * The editor inside an edited cell: an input for `text`, `number` and `date`, a select for `select`, or the column's
- * own editor (`custom`). Enter and Tab commit, Escape cancels, leaving it commits a valid value.
+ * The editor inside an edited cell: an input for `text`, `number` and `date`, the column's own editor (`custom`), and
+ * for `select` an input that searches the choices listed under it. Enter and Tab commit, Escape cancels, leaving a
+ * typed value commits it if valid and leaving a select keeps the value. In a select, the arrow keys move through the
+ * choices and a click picks one.
  */
 export function useCellEditor<TData extends RowData>(cell: GridCell<TData>) {
   'use no memo';
   const { table, column } = cell;
   const { t } = gridMeta(table);
-  const kind: EditorKind = editorKindOf(column);
-  // A typed key replaces the value in text inputs; a select or a date input cannot start from it.
-  const [initialText] = useState(() =>
-    kind === 'text' || kind === 'number' ? table.getEditingCell()?.initialText : undefined
-  );
-  const pickedWithPointer = useRef(false);
-  const [text, setText] = useState(() => initialText ?? toEditorText(cell.getValue(), kind));
+  const kind = editorKindOf(column);
+  const isSelect = kind === 'select';
+  const value = cell.getValue();
+  // The key that started the edit replaces the text of an input and searches a select; a date input cannot take it.
+  const [initialText] = useState(() => (kind === 'date' ? undefined : table.getEditingCell()?.initialText));
+  const [text, setText] = useState(() => initialText ?? (isSelect ? '' : toEditorText(value, kind)));
   const [error, setError] = useState<string>();
+  const listId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
-  const selectRef = useRef<HTMLSelectElement>(null);
   const editor = column.columnDef.meta?.editor;
 
+  const format = (option: unknown) => formatValue(option, column);
+  const isCurrent = (option: unknown) =>
+    option === value || (option !== null && value !== null && value !== undefined && format(option) === format(value));
+  const choices: EditorChoice[] = isSelect
+    ? [
+        ...(text.trim() === '' ? [{ value: null, label: '–', current: value === null || value === undefined }] : []),
+        ...matchingOptions(editorOptions(column), text, format).map((option) => ({
+          value: option,
+          label: format(option),
+          current: isCurrent(option),
+        })),
+      ]
+    : [];
+  const [active, setActive] = useState(() =>
+    Math.max(
+      0,
+      choices.findIndex((choice) => choice.current)
+    )
+  );
+  const activeIndex = Math.min(active, choices.length - 1);
+
   useEffect(() => {
-    selectRef.current?.focus();
     const input = inputRef.current;
     if (!input) return;
     input.focus();
     if (initialText === undefined && input.type === 'text') input.select();
   }, [initialText]);
 
-  const commit = (value: unknown): string | undefined => {
-    const message = cell.setValue(value);
+  const commit = (next: unknown): string | undefined => {
+    const message = cell.setValue(next);
     if (message === undefined) table.stopEditing();
     else setError(message);
     return message;
   };
-  const commitText = (value: string): boolean => {
-    const parsed = parseCellText(column, value);
+  const commitText = (typed: string): boolean => {
+    const parsed = parseCellText(column, typed);
     if ('error' in parsed) {
       setError(t(`edit.invalid-${parsed.error}`));
       return false;
     }
     return commit(parsed.value) === undefined;
   };
+  const commitChoice = (index: number): boolean => {
+    const choice = choices[index];
+    if (!choice) {
+      setError(t('edit.invalid-option'));
+      return false;
+    }
+    return commit(choice.value) === undefined;
+  };
+  const commitEdit = () => (isSelect ? commitChoice(activeIndex) : commitText(text));
   const moveAfterTab = (backwards: boolean) => {
     const next = moveFocus(
       displayedRows(table).map((row) => row.id),
@@ -73,61 +113,82 @@ export function useCellEditor<TData extends RowData>(cell: GridCell<TData>) {
     if (event.key === 'Escape') {
       event.preventDefault();
       table.stopEditing();
-    } else if (event.key === 'Enter' && commitText(text)) event.preventDefault();
-    else if (event.key === 'Tab') {
+    } else if (event.key === 'Enter') {
       event.preventDefault();
-      if (commitText(text)) moveAfterTab(event.shiftKey);
+      commitEdit();
+    } else if (event.key === 'Tab') {
+      event.preventDefault();
+      if (commitEdit()) moveAfterTab(event.shiftKey);
+    } else if (isSelect && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+      event.preventDefault();
+      const step = event.key === 'ArrowDown' ? 1 : -1;
+      setActive(Math.min(Math.max(activeIndex + step, 0), choices.length - 1));
     }
   };
   const onBlur = () => {
-    if (table.getEditingCell() !== null && !commitText(text)) table.stopEditing();
+    if (table.getEditingCell() === null) return;
+    if (isSelect || !commitText(text)) table.stopEditing();
   };
-  const field = {
-    'aria-label': t('edit.value'),
-    'aria-invalid': error !== undefined,
-    value: text,
-    onKeyDown,
-    onBlur,
-  };
+  const activeId = activeIndex >= 0 ? `${listId}-${activeIndex}` : undefined;
 
   return {
     kind,
-    /** The column's own editor, rendered instead of the input or select. */
+    /** The column's own editor, rendered instead of the input. */
     custom:
       typeof editor === 'function'
-        ? (editor({
-            value: cell.getValue(),
+        ? createElement(editor, {
+            value,
             initialText,
             commit,
             cancel: () => table.stopEditing(),
             row: cell.row.original,
-          }) satisfies ReactNode)
+          })
         : undefined,
     /** The validation message, shown until the text changes. */
     error,
     inputProps: {
-      ...field,
       ref: inputRef,
       type: kind === 'date' ? 'date' : 'text',
       inputMode: kind === 'number' ? ('decimal' as const) : undefined,
+      'aria-label': t('edit.value'),
+      'aria-invalid': error !== undefined,
+      value: text,
+      onKeyDown,
+      onBlur,
       onChange: (event: { target: { value: string } }) => {
         setText(event.target.value);
         setError(undefined);
+        setActive(0);
       },
+      ...(isSelect && {
+        role: 'combobox' as const,
+        placeholder: value === null || value === undefined ? undefined : format(value),
+        autoComplete: 'off',
+        'aria-autocomplete': 'list' as const,
+        'aria-expanded': true,
+        'aria-controls': listId,
+        'aria-activedescendant': activeId,
+      }),
     },
-    selectProps: {
-      ...field,
-      ref: selectRef,
-      onPointerDown: () => {
-        pickedWithPointer.current = true;
+    /** For `select`: the choices that match the text, an empty one for no value first while there is none. */
+    choices,
+    /** For `select`: the choice Enter picks, to highlight and keep in view. */
+    activeIndex,
+    /** For `select`: the props of the list holding the choices. */
+    listProps: { id: listId, role: 'listbox' as const, 'aria-label': columnLabel(column), onMouseDown: stop },
+    /** For `select`: the props of a choice's element. */
+    choiceProps: (index: number) => ({
+      id: `${listId}-${index}`,
+      role: 'option' as const,
+      'aria-selected': index === activeIndex,
+      onMouseDown: stop,
+      onPointerMove: () => {
+        if (index !== activeIndex) setActive(index);
       },
-      // Arrow keys change a closed select on some systems, so only a pick with the pointer commits at once.
-      onChange: (event: { target: { value: string } }) => {
-        setText(event.target.value);
-        if (pickedWithPointer.current) commitText(event.target.value);
+      onClick: (event: MouseEvent) => {
+        event.stopPropagation();
+        commitChoice(index);
       },
-    },
-    /** The choices of a select, after an empty one for no value. */
-    options: editorOptions(column).map((option) => ({ value: String(option), label: formatValue(option, column) })),
+    }),
   };
 }
