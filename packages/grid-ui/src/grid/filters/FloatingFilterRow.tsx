@@ -5,7 +5,7 @@ import { ListFilter } from 'lucide-react';
 import { FilterEditor } from '#/grid/filters/FilterEditor.tsx';
 import { pinnedClassName } from '#/grid/styles.ts';
 import { Popover, PopoverContent, PopoverTrigger } from '#/internal/components/popover.tsx';
-import { headerRows, useFloatingFilter, type GridColumn, type GridInstance } from '@istec/grid-core';
+import { useFloatingFilter, useHeaderRows, type GridColumn, type GridInstance } from '@istec/grid-core';
 
 const fieldClassName =
   'h-6 w-full min-w-0 rounded-sm border bg-background px-1.5 font-normal outline-none focus-visible:ring-1 focus-visible:ring-primary aria-invalid:border-destructive';
@@ -18,7 +18,7 @@ export function FloatingFilterRow<TData extends object>({
   table: GridInstance<TData>;
   height: number;
 }) {
-  const leafRow = headerRows(table).at(-1);
+  const leafRow = useHeaderRows(table).at(-1);
   if (!leafRow) return null;
 
   return (

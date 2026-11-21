@@ -1,5 +1,5 @@
 import { HeaderCell } from '#/grid/header/HeaderCell.tsx';
-import { headerRows, type GridInstance } from '@istec/grid-core';
+import { useHeaderRows, type GridInstance } from '@istec/grid-core';
 
 export function HeaderRows<TData extends object>({
   table,
@@ -8,7 +8,7 @@ export function HeaderRows<TData extends object>({
   table: GridInstance<TData>;
   headerHeight: number;
 }) {
-  return headerRows(table).map((row) => (
+  return useHeaderRows(table).map((row) => (
     <tr key={row.id}>
       {row.slots.map((slot) =>
         slot === 'filler' ? (

@@ -1,9 +1,12 @@
+import { useState } from 'react';
+
 import { useDebouncedCallback } from '@tanstack/react-pacer/debouncer';
 
 import { gridMeta } from '#/core/gridMeta.ts';
 import { useTableContext } from '#/core/tableContext.ts';
 import { gridDefaults } from '#/defaults.ts';
 import { useGridSelector } from '#/headless/useGridSelector.ts';
+import { useTranslate } from '#/headless/useTranslate.ts';
 import { columnLabel } from '#/logic/columns/columnInfo.ts';
 import { expandParents } from '#/logic/expanding/expandParents.ts';
 import { downloadCsv } from '#/logic/export/csvExport.ts';
@@ -13,13 +16,15 @@ import { downloadCsv } from '#/logic/export/csvExport.ts';
 /** The search across all columns. The input is uncontrolled; typing writes the search, debounced. */
 export function useSearchInput() {
   const table = useTableContext();
+  const t = useTranslate(table);
+  const [defaultValue] = useState(() => String(table.atoms.globalFilter.get() ?? ''));
   const setGlobalFilter = useDebouncedCallback((value: string) => table.setGlobalFilter(value), {
     wait: gridDefaults.debounceMs,
   });
 
   return {
-    label: gridMeta(table).t('search'),
-    defaultValue: String(table.atoms.globalFilter.get() ?? ''),
+    label: t('search'),
+    defaultValue,
     change: setGlobalFilter,
   };
 }
@@ -27,10 +32,10 @@ export function useSearchInput() {
 /** Downloads the rows that pass the filters as CSV, named after the table unless `fileName` is given. */
 export function useExportButton(fileName?: string) {
   const table = useTableContext();
-  const meta = gridMeta(table);
+  const t = useTranslate(table);
   return {
-    label: meta.t('export'),
-    exportCsv: () => downloadCsv(table, { fileName: fileName ?? meta.tableId }),
+    label: t('export'),
+    exportCsv: () => downloadCsv(table, { fileName: fileName ?? gridMeta(table).tableId }),
   };
 }
 
@@ -39,18 +44,21 @@ export function useExportButton(fileName?: string) {
  * nothing to open or close.
  */
 export function useGroupingBar() {
-  'use no memo';
   const table = useTableContext();
-  const { t, treeData, toggleRowGrouping } = gridMeta(table);
-  const grouping = useGridSelector(table.atoms.grouping, (current) => current);
+  const t = useTranslate(table);
+  const { treeData, columns } = useGridSelector(table, () => ({
+    treeData: gridMeta(table).treeData,
+    columns: table.atoms.grouping.get().flatMap((columnId) => table.getColumn(columnId) ?? []),
+  }));
 
   return {
-    visible: grouping.length > 0 || treeData,
-    label: grouping.length > 0 ? t('grouped-by') : undefined,
-    groups: grouping.flatMap((columnId) => {
-      const column = table.getColumn(columnId);
-      return column ? [{ id: columnId, label: columnLabel(column), remove: () => toggleRowGrouping(columnId) }] : [];
-    }),
+    visible: columns.length > 0 || treeData,
+    label: columns.length > 0 ? t('grouped-by') : undefined,
+    groups: columns.map((column) => ({
+      id: column.id,
+      label: columnLabel(column),
+      remove: () => gridMeta(table).toggleRowGrouping(column.id),
+    })),
     removeLabel: t('group.remove'),
     expandAll: { label: t('rows.expand-all'), onClick: () => expandParents(table) },
     collapseAll: { label: t('rows.collapse-all'), onClick: () => table.toggleAllRowsExpanded(false) },

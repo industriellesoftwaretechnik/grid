@@ -34,15 +34,17 @@ A UI layer, such as one on MUI, has three parts. `@istec/grid-ui` is the worked 
 
 2. **The markup.** Every part of the grid has a hook that returns its state, its texts and props to spread on its
    element, so a component only renders: `useGridView` for the frame, `useVirtualRows`, `useDataRow` and `useBodyCell`
-   for the body, `headerRows` and `useHeaderCell` for the header, `useCellEditor`, the filter hooks, `useStatusBar`,
-   and so on. Menus come as data (`columnMenu`, `cellMenu`: sections of `MenuEntry`), so they render with any menu
-   component; `MenuIcon` names the icons to map to your icon set.
+   for the body, `useHeaderRows` and `useHeaderCell` for the header, `useColumnTable` for the column widths,
+   `useCellEditor`, the filter hooks, `useStatusBar`, and so on. Menus come as data (`useColumnMenu`, `useCellMenu`:
+   sections of `MenuEntry`), so they render with any menu component; `MenuIcon` names the icons to map to your icon
+   set.
 
 3. **Drag and drop** is headless too: wrap the header in `ColumnReorder`, and render `GroupChipList` and `ColumnTree`,
    passing what the dragged item looks like.
 
-The hooks subscribe to the table state they read, so the components re-render when it changes, also under the React
-Compiler. A component that calls `useVirtualRows` or `useVirtualList` opts out of the compiler with `'use no memo'`.
+The hooks subscribe through `useGridSelector` to what they read of the table, so a component re-renders when that
+changes and not when its parent does; the component holding the table renders only for its own state. They work with
+the React Compiler, and so does a component of yours that reads the table through `useGridSelector`.
 
 ## Texts
 

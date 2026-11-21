@@ -1,18 +1,20 @@
 import type { RowData } from '@tanstack/react-table';
 
-import { gridMeta } from '#/core/gridMeta.ts';
 import type { GridRow } from '#/core/types.ts';
 import { useGridSelector } from '#/headless/useGridSelector.ts';
+import { useTranslate } from '#/headless/useTranslate.ts';
 
 /** The chevron that expands a group, a tree node or a master row. */
 export function useRowToggle<TData extends RowData>(row: GridRow<TData>) {
-  'use no memo';
-  const expanded = useGridSelector(row.table.atoms.expanded, () => row.getIsExpanded());
-  const { t } = gridMeta(row.table);
+  const t = useTranslate(row.table);
+  const { canExpand, expanded } = useGridSelector(row.table, () => ({
+    canExpand: row.getCanExpand(),
+    expanded: row.getIsExpanded(),
+  }));
 
   return {
     /** Rows that cannot expand keep the toggle's space, so the content of a level lines up. */
-    canExpand: row.getCanExpand(),
+    canExpand,
     expanded,
     label: expanded ? t('rows.collapse') : t('rows.expand'),
     /** The number of records in a group. */

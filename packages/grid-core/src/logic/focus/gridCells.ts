@@ -28,6 +28,51 @@ export function displayedRows<TData extends RowData>(table: CoreTable<TData>): G
   return [...table.getTopRows(), ...table.getCenterRows(), ...table.getBottomRows()];
 }
 
+// The table builds new arrays when its rows change and never changes one, so an index stays true for its array.
+const idIndexes = new WeakMap<readonly { id: string }[], Map<string, number>>();
+
+/** The position of the item with `id`, or -1; looked up in an index built once per array. */
+export function indexOfId(items: readonly { id: string }[], id: string): number {
+  let index = idIndexes.get(items);
+  if (!index) {
+    index = new Map(items.map((item, position) => [item.id, position]));
+    idIndexes.set(items, index);
+  }
+  return index.get(id) ?? -1;
+}
+
+/** Ids in display order, read by position or looked up, as `moveFocus` takes them. */
+export interface IdList {
+  readonly length: number;
+  at: (index: number) => string | undefined;
+  indexOf: (id: string) => number;
+}
+
+/** The ids of `displayedRows`, without copying the rows, so a key press does not go through all of them. */
+export function displayedRowIds<TData extends RowData>(table: CoreTable<TData>): IdList {
+  const parts = [table.getTopRows(), table.getCenterRows(), table.getBottomRows()];
+  return {
+    length: parts.reduce((count, part) => count + part.length, 0),
+    at: (index) => {
+      let offset = index;
+      for (const part of parts) {
+        if (offset < part.length) return part[offset]?.id;
+        offset -= part.length;
+      }
+      return undefined;
+    },
+    indexOf: (id) => {
+      let offset = 0;
+      for (const part of parts) {
+        const found = indexOfId(part, id);
+        if (found !== -1) return offset + found;
+        offset += part.length;
+      }
+      return -1;
+    },
+  };
+}
+
 /** The visible columns in the order they are shown: pinned start, scrolling, pinned end. */
 export function displayedColumns<TData extends RowData>(table: CoreTable<TData>): GridColumn<TData>[] {
   return [

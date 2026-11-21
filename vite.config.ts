@@ -60,12 +60,9 @@ export default defineConfig({
         },
       },
       {
-        // The React Compiler cannot memoize around useVirtualizer; these hooks and their callers opt out with
-        // 'use no memo' and pass nothing from the virtualizer on to memoized children.
-        files: [
-          'packages/grid-core/src/headless/body/useVirtualRows.ts',
-          'packages/grid-core/src/headless/filters/useVirtualList.ts',
-        ],
+        // useVirtualizer returns the same object while its values change; this hook reads its position as a value,
+        // so what the compiler memoizes is recomputed when it moves.
+        files: ['packages/grid-core/src/hooks/useVirtualView.ts'],
         rules: {
           'react/incompatible-library': 'off',
         },

@@ -2,9 +2,12 @@ import { useState, type CSSProperties } from 'react';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import type { RowData } from '@tanstack/react-table';
 
 import { gridMeta } from '#/core/gridMeta.ts';
 import type { HeaderSlot } from '#/headless/header/headerRows.ts';
+import { useGridSelector } from '#/headless/useGridSelector.ts';
+import { useTranslate } from '#/headless/useTranslate.ts';
 import { columnMeta, isExpandableGroup } from '#/logic/columns/columnInfo.ts';
 
 const ariaSort = { asc: 'ascending', desc: 'descending' } as const;
@@ -14,8 +17,7 @@ const ariaSort = { asc: 'ascending', desc: 'descending' } as const;
  * that has no group. Columns in the scrolling region are dragged sideways to reorder them, and up into the group panel
  * to group by them; this needs the cell inside `ColumnReorder`.
  */
-export function useHeaderCell<TData extends object>({ header, region, style, sorted }: HeaderSlot<TData>) {
-  'use no memo';
+export function useHeaderCell<TData extends RowData>({ header, region, style, sorted }: HeaderSlot<TData>) {
   const { column } = header;
   const { align, lockPosition, headerClassName } = columnMeta(column);
   const kind = header.isPlaceholder ? 'placeholder' : header.subHeaders.length > 0 ? 'group' : 'column';
@@ -59,14 +61,17 @@ export function useHeaderCell<TData extends object>({ header, region, style, sor
 }
 
 /** The label and collapse toggle of a column group's header. */
-export function useColumnGroupHeader<TData extends object>({ header, collapsed }: HeaderSlot<TData>) {
-  'use no memo';
-  const meta = gridMeta(header.getContext().table);
+export function useColumnGroupHeader<TData extends RowData>({ header, collapsed }: HeaderSlot<TData>) {
+  const { table } = header.column;
+  const t = useTranslate(table);
+  const collapsible = useGridSelector(table, () =>
+    isExpandableGroup(header.column, gridMeta(table).ownColumnVisibility)
+  );
   return {
     /** Whether the group has a toggle: it has columns shown only while open or only while collapsed. */
-    collapsible: isExpandableGroup(header.column, meta.ownColumnVisibility),
+    collapsible,
     collapsed,
-    toggle: () => meta.toggleColumnGroup(header.column.id),
-    toggleLabel: collapsed ? meta.t('group.expand') : meta.t('group.collapse'),
+    toggle: () => gridMeta(table).toggleColumnGroup(header.column.id),
+    toggleLabel: collapsed ? t('group.expand') : t('group.collapse'),
   };
 }

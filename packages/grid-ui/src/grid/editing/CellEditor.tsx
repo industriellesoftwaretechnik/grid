@@ -50,7 +50,6 @@ function ChoiceList({
 }: Pick<ReturnType<typeof useCellEditor>, 'listProps' | 'choiceProps' | 'activeIndex'> & {
   choices: EditorChoice[];
 }) {
-  'use no memo';
   const list = useVirtualList(choices.length, { itemHeight: 28, maxHeight: 280, activeIndex });
 
   return (

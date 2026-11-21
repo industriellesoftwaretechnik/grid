@@ -63,6 +63,9 @@ export { copyText, pasteText } from '#/logic/clipboard/clipboard.ts';
 export { columnLayout, type LayoutSlot, type Placed, type Region } from '#/logic/layout.ts';
 export type { MenuChoice, MenuEntry, MenuIcon, MenuItem, MenuSection } from '#/headless/menu.ts';
 export { useGridSelector } from '#/headless/useGridSelector.ts';
+export { useTranslate } from '#/headless/useTranslate.ts';
+export type { GridSnapshot, GridStore } from '#/plugins/gridStoreFeature.ts';
+export { useColumnTable } from '#/headless/grid/useColumnTable.ts';
 export { useGridView, type GridViewOptions } from '#/headless/grid/useGridView.ts';
 export { useVirtualRows, type VirtualRow, type VirtualRowsOptions } from '#/headless/body/useVirtualRows.ts';
 export { useDataRow, type FullWidthGroup, type RowOptions } from '#/headless/body/useDataRow.ts';
@@ -75,9 +78,9 @@ export {
 } from '#/headless/body/useBodyCell.ts';
 export { useRowToggle } from '#/headless/body/useRowToggle.ts';
 export { groupingCell, useGroupRowCell } from '#/headless/body/useGroupRowCell.ts';
-export { cellMenu, type CellMenuItem, type CellMenuItems } from '#/headless/body/cellMenu.ts';
+export { cellMenu, useCellMenu, type CellMenuItem, type CellMenuItems } from '#/headless/body/cellMenu.ts';
 export { useCellEditor, type EditorChoice } from '#/headless/editing/useCellEditor.ts';
-export { headerRows, type HeaderSlot } from '#/headless/header/headerRows.ts';
+export { headerRows, useHeaderRows, type HeaderRow, type HeaderSlot } from '#/headless/header/headerRows.ts';
 export { useColumnGroupHeader, useHeaderCell } from '#/headless/header/useHeaderCell.ts';
 export { useColumnResizer } from '#/headless/header/useColumnResizer.ts';
 export { columnMenu, type ColumnMenuOptions } from '#/headless/header/columnMenu.ts';
@@ -85,7 +88,13 @@ export { useColumnMenu } from '#/headless/header/useColumnMenu.ts';
 export { ColumnReorder, type DropAction } from '#/headless/header/ColumnReorder.tsx';
 export { useFilterValue } from '#/headless/filters/useFilterValue.ts';
 export { useRangeFilter, useSetFilter, useTextFilter } from '#/headless/filters/useFilterEditors.ts';
-export { setFilter, type CheckState, type SetFilterOption } from '#/headless/filters/setFilter.ts';
+export {
+  setFilter,
+  setFilterModel,
+  setFilterOptions,
+  type CheckState,
+  type SetFilterOption,
+} from '#/headless/filters/setFilter.ts';
 export { useColumnFilterButton, useFloatingFilter } from '#/headless/filters/useFilterTriggers.ts';
 export { useVirtualList } from '#/headless/filters/useVirtualList.ts';
 export { useGroupPanel } from '#/headless/grouping/useGroupPanel.ts';
@@ -95,6 +104,7 @@ export {
   aggregatedValue,
   aggregationMark,
   totalsRow,
+  useTotalsRow,
   type AggregationMark,
   type TotalsCell,
 } from '#/headless/footer/totalsRow.ts';

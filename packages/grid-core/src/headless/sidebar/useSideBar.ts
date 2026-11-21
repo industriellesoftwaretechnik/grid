@@ -4,13 +4,14 @@ import type { RowData } from '@tanstack/react-table';
 
 import { gridMeta } from '#/core/gridMeta.ts';
 import type { CoreTable } from '#/core/types.ts';
+import { useTranslate } from '#/headless/useTranslate.ts';
 
 export type SideBarPanel = 'columns' | 'filters';
 
 /** AG Grid's side bar: tabs along the edge that open the columns or the filters beside the rows. */
 export function useSideBar<TData extends RowData>(table: CoreTable<TData>) {
   const [open, setOpen] = useState<SideBarPanel>();
-  const { t } = gridMeta(table);
+  const t = useTranslate(table);
   const labels: Record<SideBarPanel, string> = { columns: t('columns'), filters: t('filters') };
 
   return {
@@ -30,12 +31,12 @@ export function useSideBar<TData extends RowData>(table: CoreTable<TData>) {
 
 /** The columns tab of the side bar, above its `ColumnTree`. */
 export function useColumnsPanel<TData extends RowData>(table: CoreTable<TData>) {
-  const meta = gridMeta(table);
+  const t = useTranslate(table);
   return {
     showAll: {
-      label: meta.t('columns.show-all'),
+      label: t('columns.show-all'),
       onClick: () =>
-        meta.setColumnsVisible(
+        gridMeta(table).setColumnsVisible(
           table
             .getAllLeafColumns()
             .filter((column) => column.getCanHide())
@@ -43,6 +44,6 @@ export function useColumnsPanel<TData extends RowData>(table: CoreTable<TData>) 
           true
         ),
     },
-    reset: { label: meta.t('columns.reset'), onClick: () => meta.resetLayout() },
+    reset: { label: t('columns.reset'), onClick: () => gridMeta(table).resetLayout() },
   };
 }

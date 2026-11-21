@@ -1,13 +1,13 @@
 import type { CSSProperties } from 'react';
 
-import type { SortDirection } from '@tanstack/react-table';
+import type { RowData, SortDirection } from '@tanstack/react-table';
 
 import { gridMeta } from '#/core/gridMeta.ts';
-import type { GridInstance } from '#/core/tableHook.tsx';
-import type { GridHeader } from '#/core/types.ts';
+import type { CoreTable, GridColumn, GridHeader } from '#/core/types.ts';
+import { useGridSelector } from '#/headless/useGridSelector.ts';
 import { headerLayout, headerStickyStyle, type Region } from '#/logic/layout.ts';
 
-export interface HeaderSlot<TData extends object> {
+export interface HeaderSlot<TData extends RowData> {
   header: GridHeader<TData>;
   region: Region;
   /** The pinned header next to the scrolling ones, which draws the border between them. */
@@ -24,11 +24,27 @@ export interface HeaderSlot<TData extends object> {
   collapsed: boolean;
 }
 
-/** The header rows, column groups above the columns, each in display order; `'filler'` takes the spare width. */
-export function headerRows<TData extends object>(
-  table: GridInstance<TData>
-): { id: string; slots: (HeaderSlot<TData> | 'filler')[] }[] {
-  const multiSort = table.state.sorting.length > 1;
+export interface HeaderRow<TData extends RowData> {
+  id: string;
+  /** The headers in display order; `'filler'` takes the spare width. */
+  slots: (HeaderSlot<TData> | 'filler')[];
+}
+
+// One handler per column, so header rows built again compare equal while nothing changed.
+const sortHandlers = new WeakMap<object, (event: unknown) => void>();
+
+function sortHandler<TData extends RowData>(column: GridColumn<TData>) {
+  let handler = sortHandlers.get(column);
+  if (!handler) {
+    handler = (event: unknown) => column.getToggleSortingHandler()?.(event);
+    sortHandlers.set(column, handler);
+  }
+  return handler;
+}
+
+/** The header rows, column groups above the columns, each in display order. */
+export function headerRows<TData extends RowData>(table: CoreTable<TData>): HeaderRow<TData>[] {
+  const multiSort = table.atoms.sorting.get().length > 1;
   const { collapsedColumnGroups } = gridMeta(table).extraState;
 
   return headerLayout(table).map(({ id, slots }) => ({
@@ -41,7 +57,7 @@ export function headerRows<TData extends object>(
         region,
         edge,
         style: headerStickyStyle(header, region),
-        toggleSorting: header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined,
+        toggleSorting: header.column.getCanSort() ? sortHandler(header.column) : undefined,
         sorted: header.column.getIsSorted(),
         sortPosition: multiSort ? header.column.getSortIndex() + 1 : 0,
         filtered: header.column.getIsFiltered(),
@@ -49,4 +65,9 @@ export function headerRows<TData extends object>(
       };
     }),
   }));
+}
+
+/** The header rows, re-rendering when the columns, their order, sizes, sorting or filters change. */
+export function useHeaderRows<TData extends RowData>(table: CoreTable<TData>): HeaderRow<TData>[] {
+  return useGridSelector(table, () => headerRows(table));
 }

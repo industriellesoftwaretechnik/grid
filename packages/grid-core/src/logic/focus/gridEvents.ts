@@ -4,7 +4,7 @@ import type { RowData } from '@tanstack/react-table';
 
 import type { CoreTable } from '#/core/types.ts';
 import { clearCells, copyText, pasteText } from '#/logic/clipboard/clipboard.ts';
-import { displayedColumns, displayedRows, findCell, holdsRowToggle } from '#/logic/focus/gridCells.ts';
+import { displayedColumns, displayedRowIds, findCell, holdsRowToggle } from '#/logic/focus/gridCells.ts';
 import { keyToMove, moveFocus } from '#/logic/focus/navigation.ts';
 import { anchorOf, extendLatestRange, freeCornerOf } from '#/logic/selection/cellRanges.ts';
 import { rowSelectionState } from '#/logic/selection/rowSelectionState.ts';
@@ -47,7 +47,7 @@ export function gridEvents<TData extends RowData>(table: CoreTable<TData>, pageS
     if (move) {
       const extend = event.shiftKey && event.key !== 'Tab';
       const next = moveFocus(
-        displayedRows(table).map((row) => row.id),
+        displayedRowIds(table),
         displayedColumns(table).map((column) => column.id),
         extend ? freeCornerOf(ranges) : focused,
         move,

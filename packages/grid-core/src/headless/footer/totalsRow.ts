@@ -4,6 +4,7 @@ import type { RowData } from '@tanstack/react-table';
 
 import { gridMeta } from '#/core/gridMeta.ts';
 import type { CoreTable, GridColumn } from '#/core/types.ts';
+import { useGridSelector } from '#/headless/useGridSelector.ts';
 import { columnMeta, showsTotal } from '#/logic/columns/columnInfo.ts';
 import type { ColumnAlign } from '#/logic/columns/columnMeta.ts';
 import { formatAggregate } from '#/logic/format.ts';
@@ -41,6 +42,11 @@ export interface TotalsCell<TData extends RowData> {
   align: ColumnAlign;
   /** Set for columns with an aggregation. A mean or a count is no sum, so each value carries its mark. */
   total?: { mark?: AggregationMark; text: string };
+}
+
+/** The footer row with the totals of the aggregated columns, re-rendering when they change. */
+export function useTotalsRow<TData extends RowData>(table: CoreTable<TData>): (TotalsCell<TData> | 'filler')[] {
+  return useGridSelector(table, () => totalsRow(table));
 }
 
 /** The footer row with the totals of the aggregated columns; `'filler'` takes the spare width. */

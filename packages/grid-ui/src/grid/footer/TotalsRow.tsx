@@ -3,13 +3,15 @@ import { cn } from 'cn';
 
 import { AggregationSymbol } from '#/grid/grouping/AggregationSymbol.tsx';
 import { pinnedClassName, textAlign } from '#/grid/styles.ts';
-import { totalsRow, type CoreTable } from '@istec/grid-core';
+import { useTotalsRow, type CoreTable } from '@istec/grid-core';
 
 /** The footer row with the totals of the aggregated columns. */
 export function TotalsRow<TData extends RowData>({ table, rowHeight }: { table: CoreTable<TData>; rowHeight: number }) {
+  const slots = useTotalsRow(table);
+
   return (
     <tr className="font-medium" style={{ height: rowHeight }}>
-      {totalsRow(table).map((slot) =>
+      {slots.map((slot) =>
         slot === 'filler' ? (
           <td key="filler" aria-hidden />
         ) : (

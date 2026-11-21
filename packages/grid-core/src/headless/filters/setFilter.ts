@@ -22,9 +22,12 @@ export interface CheckState {
 
 const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
 
-// null, undefined and '' look the same in a cell, so they share one option. The column's meta.options are offered
-// even where no row has them; server rows offer only those and the loaded values, without counts.
-function allOptions<TData extends RowData>(column: GridColumn<TData>): SetFilterOption[] {
+/**
+ * The values of a column as set filter options, among the rows the other filters let through. null, undefined and ''
+ * look the same in a cell, so they share one option. The column's meta.options are offered even where no row has them;
+ * server rows offer only those and the loaded values, without counts.
+ */
+export function setFilterOptions<TData extends RowData>(column: GridColumn<TData>): SetFilterOption[] {
   const { t, server } = gridMeta(column.table);
   const withCounts = server === undefined;
   const counts = new Map<unknown, number>(column.columnDef.meta?.options?.map((value) => [value, 0]));
@@ -57,9 +60,17 @@ function allOptions<TData extends RowData>(column: GridColumn<TData>): SetFilter
  * narrows the options to those whose label contains it. Everything checked means no filter.
  */
 export function setFilter<TData extends RowData>(column: GridColumn<TData>, query: string) {
-  const options = allOptions(column);
+  return setFilterModel(column, setFilterOptions(column), column.getFilterValue(), query);
+}
+
+/** `setFilter` from the column's options and filter value as they were read. */
+export function setFilterModel<TData extends RowData>(
+  column: GridColumn<TData>,
+  options: SetFilterOption[],
+  filterValue: unknown,
+  query: string
+) {
   const allValues = options.flatMap((option) => option.values);
-  const filterValue = column.getFilterValue();
   const selected = Array.isArray(filterValue) ? new Set<unknown>(filterValue) : undefined;
   const isChecked = (option: SetFilterOption) => !selected || option.values.some((value) => selected.has(value));
 

@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react';
 
-import type { HeaderGroup, RowData, TableState } from '@tanstack/react-table';
+import type { HeaderGroup, RowData } from '@tanstack/react-table';
 
-import type { CoreTable, GridFeatures, GridHeader, GridRow } from '#/core/types.ts';
+import type { CoreTable, GridFeatures, GridHeader } from '#/core/types.ts';
 
 declare module 'react' {
   interface CSSProperties {
@@ -11,13 +11,6 @@ declare module 'react' {
 }
 
 export type Region = 'start' | 'center' | 'end';
-
-export const selectColumnLayout = (state: TableState<GridFeatures>) => ({
-  grouping: state.grouping,
-  columnOrder: state.columnOrder,
-  columnPinning: state.columnPinning,
-  columnVisibility: state.columnVisibility,
-});
 
 export interface Placed<T> {
   item: T;
@@ -29,7 +22,8 @@ export interface Placed<T> {
 // The filler sits between center and end, so end-pinned columns stay at the right edge.
 export type LayoutSlot<T> = Placed<T> | 'filler';
 
-function place<T>(start: T[], center: T[], end: T[]): LayoutSlot<T>[] {
+/** The items of the three regions in display order, with the filler between center and end. */
+export function placeSlots<T>(start: T[], center: T[], end: T[]): LayoutSlot<T>[] {
   return [
     ...start.map((item, index) => ({ item, region: 'start' as const, index, edge: index === start.length - 1 })),
     ...center.map((item, index) => ({ item, region: 'center' as const, index, edge: false })),
@@ -39,7 +33,7 @@ function place<T>(start: T[], center: T[], end: T[]): LayoutSlot<T>[] {
 }
 
 export function columnLayout<TData extends RowData>(table: CoreTable<TData>) {
-  return place(
+  return placeSlots(
     table.getStartVisibleLeafColumns(),
     table.getCenterVisibleLeafColumns(),
     table.getEndVisibleLeafColumns()
@@ -52,12 +46,8 @@ export function headerLayout<TData extends RowData>(table: CoreTable<TData>) {
   const end = table.getEndHeaderGroups();
   return center.map((group: HeaderGroup<GridFeatures, TData>, depth) => ({
     id: group.id,
-    slots: place(start[depth]?.headers ?? [], group.headers, end[depth]?.headers ?? []),
+    slots: placeSlots(start[depth]?.headers ?? [], group.headers, end[depth]?.headers ?? []),
   }));
-}
-
-export function cellLayout<TData extends RowData>(row: GridRow<TData>) {
-  return place(row.getStartVisibleCells(), row.getCenterVisibleCells(), row.getEndVisibleCells());
 }
 
 // Body cells read their sticky offsets from these variables, so a column resize does not re-render any row.

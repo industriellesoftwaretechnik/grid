@@ -31,26 +31,14 @@ export const { createAppColumnHelper: createGridColumnHelper, useAppTable } = cr
     cell: ({ getValue, column }) => formatValue(getValue(), column),
     aggregatedCell: ({ table, column, getValue }) => {
       const { AggregatedCell } = gridMeta(table).components;
-      return <AggregatedCell column={column} getValue={getValue} />;
+      return <AggregatedCell column={column} value={getValue()} />;
     },
   },
 });
 
-export type OwnerState = Omit<
-  TableState<GridFeatures>,
-  'rowSelection' | 'columnResizing' | 'cellSelection' | 'editingCell'
->;
+// The component holding the table selects no state, so it renders only for its own: each grid component subscribes
+// to what it shows through `useGridSelector`.
+export const selectNoState = (_state: TableState<GridFeatures>): null => null;
 
-// The component holding the table re-renders on every slice it selects. Selection, the per-pixel resize state and
-// the focused cell, cell ranges and edited cell change often and concern few components, so those subscribe to them
-// on their own.
-export const selectOwnerState = ({
-  rowSelection: _rowSelection,
-  columnResizing: _columnResizing,
-  cellSelection: _cellSelection,
-  editingCell: _editingCell,
-  ...state
-}: TableState<GridFeatures>): OwnerState => state;
-
-export type GridInstance<TData extends object> = ReturnType<typeof useAppTable<TData, OwnerState>>;
+export type GridInstance<TData extends object> = ReturnType<typeof useAppTable<TData, null>>;
 export type GridTableOptions<TData extends object> = Parameters<typeof useAppTable<TData>>[0];

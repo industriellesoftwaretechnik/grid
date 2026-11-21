@@ -2,21 +2,25 @@ import { useState } from 'react';
 
 import type { RowData } from '@tanstack/react-table';
 
-import { gridMeta } from '#/core/gridMeta.ts';
 import type { CoreTable } from '#/core/types.ts';
 import { useGridSelector } from '#/headless/useGridSelector.ts';
+import { useTranslate } from '#/headless/useTranslate.ts';
 import { columnLabel, filterKindOf } from '#/logic/columns/columnInfo.ts';
 import { filterSummaryText } from '#/logic/filters/filterSummaryText.ts';
 
 /** The filters tab of the side bar: every filterable column with its filter as text, each opening its editor. */
 export function useFiltersPanel<TData extends RowData>(table: CoreTable<TData>) {
-  'use no memo';
   const [opened, setOpened] = useState<ReadonlySet<string>>(new Set());
-  const filters = useGridSelector(table.atoms.columnFilters, (current) => current);
-  const columns = table.getAllLeafColumns().flatMap((column) => {
-    const filter = filterKindOf(column);
-    return filter === undefined ? [] : [{ column, filter }];
-  });
+  const t = useTranslate(table);
+  const { columns, filtered } = useGridSelector(table, () => ({
+    columns: table.getAllLeafColumns().flatMap((column) => {
+      const filter = filterKindOf(column);
+      return filter === undefined
+        ? []
+        : [{ column, filter, summary: filterSummaryText(column, column.getFilterValue()) }];
+    }),
+    filtered: table.atoms.columnFilters.get().length > 0,
+  }));
   const toggle = (columnId: string) =>
     setOpened((current) => {
       const next = new Set(current);
@@ -25,17 +29,17 @@ export function useFiltersPanel<TData extends RowData>(table: CoreTable<TData>) 
     });
 
   return {
-    items: columns.map(({ column, filter }) => ({
+    items: columns.map(({ column, filter, summary }) => ({
       column,
       filter,
       label: columnLabel(column),
       /** The filter as text; empty while the column is not filtered. */
-      summary: filterSummaryText(column, filters.find((entry) => entry.id === column.id)?.value),
+      summary,
       open: opened.has(column.id),
       toggle: () => toggle(column.id),
     })),
-    filtered: filters.length > 0,
+    filtered,
     clearAll: () => table.resetColumnFilters(true),
-    clearAllLabel: gridMeta(table).t('filter.clear-all'),
+    clearAllLabel: t('filter.clear-all'),
   };
 }

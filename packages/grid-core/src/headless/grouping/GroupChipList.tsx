@@ -8,6 +8,7 @@ import type { SortDirection } from '@tanstack/react-table';
 import type { GridInstance } from '#/core/tableHook.tsx';
 import type { GridColumn } from '#/core/types.ts';
 import { ReorderingContext } from '#/headless/grouping/useGroupChip.ts';
+import { useGridSelector } from '#/headless/useGridSelector.ts';
 import { useColumnDragAndDrop } from '#/hooks/useColumnDragAndDrop.ts';
 
 export interface GroupChip<TData extends object> {
@@ -37,15 +38,35 @@ export function GroupChipList<TData extends object>({
   renderPending: (column: GridColumn<TData>, first: boolean) => ReactNode;
   renderOverlay: (column: GridColumn<TData>) => ReactNode;
 }) {
-  'use no memo';
-  const { grouping, sorting } = table.state;
+  const { grouping, chips } = useGridSelector(table, () => {
+    const levels = table.atoms.grouping.get();
+    const sorting = table.atoms.sorting.get();
+    return {
+      grouping: levels,
+      chips: levels.flatMap((columnId, index): GroupChip<TData>[] => {
+        const column = table.getColumn(columnId);
+        if (!column) return [];
+        const sortIndex = sorting.findIndex((sort) => sort.id === columnId);
+        const sort = sorting[sortIndex];
+        return [
+          {
+            column,
+            first: index === 0,
+            sorted: sort ? (sort.desc ? 'desc' : 'asc') : false,
+            sortPosition: sorting.length > 1 ? sortIndex + 1 : 0,
+          },
+        ];
+      }),
+    };
+  });
   const [dragging, setDragging] = useState<string>();
   const dragAndDrop = useColumnDragAndDrop(({ active, over }) => {
-    const from = grouping.indexOf(String(active.id));
-    const to = over ? grouping.indexOf(String(over.id)) : -1;
-    if (from !== -1 && to !== -1 && from !== to) table.setGrouping(arrayMove(grouping, from, to));
+    const current = table.atoms.grouping.get();
+    const from = current.indexOf(String(active.id));
+    const to = over ? current.indexOf(String(over.id)) : -1;
+    if (from !== -1 && to !== -1 && from !== to) table.setGrouping(arrayMove(current, from, to));
   });
-  const draggedColumn = dragging === undefined ? undefined : table.getColumn(dragging);
+  const draggedColumn = dragging === undefined ? undefined : chips.find((chip) => chip.column.id === dragging)?.column;
 
   return (
     <DndContext
@@ -67,18 +88,7 @@ export function GroupChipList<TData extends object>({
     >
       <ReorderingContext value={dragging !== undefined}>
         <SortableContext items={grouping} strategy={horizontalListSortingStrategy}>
-          {grouping.map((columnId, index) => {
-            const column = table.getColumn(columnId);
-            if (!column) return null;
-            const sortIndex = sorting.findIndex((sort) => sort.id === columnId);
-            const sort = sorting[sortIndex];
-            return renderChip({
-              column,
-              first: index === 0,
-              sorted: sort ? (sort.desc ? 'desc' : 'asc') : false,
-              sortPosition: sorting.length > 1 ? sortIndex + 1 : 0,
-            });
-          })}
+          {chips.map((chip) => renderChip(chip))}
           {pending && renderPending(pending, grouping.length === 0)}
         </SortableContext>
       </ReorderingContext>

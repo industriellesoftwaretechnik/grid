@@ -9,7 +9,6 @@ import type { CoreTable } from '#/core/types.ts';
 import { useGridSelector } from '#/headless/useGridSelector.ts';
 import { useColumnDragAndDrop } from '#/hooks/useColumnDragAndDrop.ts';
 import { columnOrderIds, columnTree, moveColumns, type ColumnNode } from '#/logic/columns/columnOrder.ts';
-import { selectColumnLayout } from '#/logic/layout.ts';
 
 export type { ColumnNode };
 
@@ -25,9 +24,7 @@ export function ColumnTree<TData extends RowData>({
   table: CoreTable<TData>;
   children: (nodes: ColumnNode<TData>[]) => ReactNode;
 }) {
-  'use no memo';
-  useGridSelector(table.store, selectColumnLayout);
-  const tree = columnTree(table);
+  const tree = useGridSelector(table, () => columnTree(table));
   const nodes = new Map<string, ColumnNode<TData>>();
   const parents = new Map<string, string | undefined>();
   const index = (siblings: ColumnNode<TData>[], parent?: string) => {

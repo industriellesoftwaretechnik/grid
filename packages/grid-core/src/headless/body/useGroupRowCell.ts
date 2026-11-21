@@ -18,8 +18,7 @@ export function groupingCell<TData extends RowData>(row: GridRow<TData>): GridCe
 export function useGroupRowCell<TData extends RowData, TElement extends HTMLElement = HTMLTableCellElement>(
   row: GridRow<TData>
 ) {
-  'use no memo';
-  const focused = useGridSelector(row.table.atoms.cellSelection, (ranges) => anchorOf(ranges)?.rowId === row.id);
+  const focused = useGridSelector(row.table, () => anchorOf(row.table.atoms.cellSelection.get())?.rowId === row.id);
   const ref = useFocusTarget<TElement>(focused);
   const cell = groupingCell(row);
 

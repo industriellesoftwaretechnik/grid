@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
 
 import {
   functionalUpdate,
@@ -13,7 +13,7 @@ import {
 import { groupColumn, groupColumnId } from '#/columns/groupColumn.tsx';
 import type { GridComponents } from '#/core/components.ts';
 import type { GridExtraState, GroupDisplay } from '#/core/gridMeta.ts';
-import { selectOwnerState, useAppTable, type GridTableOptions } from '#/core/tableHook.tsx';
+import { selectNoState, useAppTable, type GridTableOptions } from '#/core/tableHook.tsx';
 import type { GridFeatures, GridRow, GridState } from '#/core/types.ts';
 import { gridDefaults } from '#/defaults.ts';
 import { usePersistState } from '#/hooks/usePersistState.ts';
@@ -31,6 +31,7 @@ import { withoutGroupRows } from '#/logic/selection/rowSelectionState.ts';
 import { serverFilters, type FetchRows, type ServerFilter } from '#/logic/server/serverRequest.ts';
 import { readPersistedState } from '#/logic/state/persistence.ts';
 import { updateOwnVisibility } from '#/logic/state/visibility.ts';
+import { publishGridInputs } from '#/plugins/gridStoreFeature.ts';
 
 /** The rows come either all at once in `data`, or block by block from the server through `fetchRows`. */
 type RowSource<TData> =
@@ -241,19 +242,12 @@ export function useGrid<TData extends object>({
         },
       },
     },
-    selectOwnerState
+    selectNoState
   );
 
-  const { columnOrder, columnSizing, columnPinning } = table.state;
-  usePersistState(storageKey, {
-    columnOrder,
-    columnSizing,
-    columnPinning,
-    columnVisibility,
-    sorting,
-    grouping,
-    ...extraState,
-  });
+  // After the render that read them, like the controlled state React's adapter publishes.
+  useLayoutEffect(() => publishGridInputs(table));
+  usePersistState(storageKey, table.gridStore);
 
   return table;
 }

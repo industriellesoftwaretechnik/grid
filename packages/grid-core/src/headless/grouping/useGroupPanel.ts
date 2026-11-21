@@ -1,7 +1,8 @@
 import { useDndContext, useDroppable } from '@dnd-kit/core';
 
-import { gridMeta } from '#/core/gridMeta.ts';
 import type { GridInstance } from '#/core/tableHook.tsx';
+import { useGridSelector } from '#/headless/useGridSelector.ts';
+import { useTranslate } from '#/headless/useTranslate.ts';
 import { expandParents } from '#/logic/expanding/expandParents.ts';
 import { canGroupBy, groupPanelId } from '#/logic/grouping/groupPanelIds.ts';
 
@@ -11,18 +12,14 @@ import { canGroupBy, groupPanelId } from '#/logic/grouping/groupPanelIds.ts';
  * that cannot be grouped is over it.
  */
 export function useGroupPanel<TData extends object>(table: GridInstance<TData>) {
-  'use no memo';
   const { setNodeRef, isOver } = useDroppable({ id: groupPanelId });
   const { active } = useDndContext();
-  const { t } = gridMeta(table);
-  const { grouping } = table.state;
-  const draggedColumn =
-    active === null
-      ? undefined
-      : table
-          .getCenterHeaderGroups()
-          .at(-1)
-          ?.headers.find((header) => header.id === active.id)?.column;
+  const t = useTranslate(table);
+  const { grouped, headers } = useGridSelector(table, () => ({
+    grouped: table.atoms.grouping.get().length > 0,
+    headers: table.getCenterHeaderGroups().at(-1)?.headers ?? [],
+  }));
+  const draggedColumn = active === null ? undefined : headers.find((header) => header.id === active.id)?.column;
   const accepts = draggedColumn !== undefined && canGroupBy(draggedColumn);
 
   return {
@@ -31,7 +28,7 @@ export function useGroupPanel<TData extends object>(table: GridInstance<TData>) 
     accepting: isOver && accepts,
     rejecting: isOver && draggedColumn !== undefined && !accepts,
     pending: isOver && accepts ? draggedColumn : undefined,
-    grouped: grouping.length > 0,
+    grouped,
     label: t('group-panel.label'),
     placeholder: t('group-panel.placeholder'),
     expandAll: { label: t('rows.expand-all'), onClick: () => expandParents(table) },

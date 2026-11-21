@@ -11,7 +11,5 @@ export function useColumnMenu<TData extends RowData>(
   column: GridColumn<TData>,
   options: ColumnMenuOptions
 ): MenuSection[] {
-  'use no memo';
-  useGridSelector(table.store, (state) => state);
-  return columnMenu(table, column, options);
+  return useGridSelector(table, () => columnMenu(table, column, options));
 }

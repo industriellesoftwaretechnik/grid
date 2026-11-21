@@ -21,7 +21,6 @@ export function VirtualRows<TData extends object>({
   overscan: number;
   noRows?: ReactNode;
 }) {
-  'use no memo';
   const { t } = gridMeta(table);
   const { rows, paddingTop, paddingBottom, sticky, colSpan, viewportWidth, measureElement, status, retry } =
     useVirtualRows(table, { scrollElement, rowHeight: rowOptions.rowHeight, overscan });

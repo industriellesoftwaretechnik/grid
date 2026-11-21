@@ -10,7 +10,6 @@ export function SetFilterList({
   isChecked: (option: SetFilterOption) => boolean;
   onToggle: (option: SetFilterOption, checked: boolean) => void;
 }) {
-  'use no memo';
   const list = useVirtualList(options.length, { itemHeight: 30, maxHeight: 320 });
 
   return (

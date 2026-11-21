@@ -73,18 +73,26 @@ export function useBodyCell<TData extends RowData, TElement extends HTMLElement 
   cell: GridCell<TData>,
   { region, index, groupToggles, onCellClick, onCellDoubleClick }: BodyCellOptions<TData>
 ) {
-  'use no memo';
   const { table } = cell;
-  const look = useGridSelector(table.atoms.cellSelection, () => cellLook(cell));
-  const editing = useGridSelector(table.atoms.editingCell, () => cell.getIsEditing());
+  const inGroupColumn = cell.column.id === groupColumnId;
+  const { look, editing, groupCell, grouped, toggle, empty, value, treeData } = useGridSelector(table, () => {
+    const groupRow = cell.row.getIsGrouped();
+    const ofGroup = inGroupColumn && groupRow ? groupingCell(cell.row) : undefined;
+    const holdsGroup = (groupToggles && cell.getIsGrouped()) || ofGroup !== undefined;
+    const blank = groupRow && !holdsGroup && !cell.getIsAggregated() && cell.column.accessorFn !== undefined;
+    return {
+      look: cellLook(cell),
+      editing: cell.getIsEditing(),
+      groupCell: ofGroup,
+      grouped: holdsGroup,
+      toggle: holdsRowToggle(cell),
+      empty: blank,
+      value: blank ? undefined : cell.getValue(),
+      treeData: gridMeta(table).treeData,
+    };
+  });
   const ref: RefObject<TElement | null> = useFocusTarget<TElement>(look.focused && !editing);
   const meta = columnMeta(cell.column);
-  const inGroupColumn = cell.column.id === groupColumnId;
-  const groupCell = inGroupColumn && cell.row.getIsGrouped() ? groupingCell(cell.row) : undefined;
-  const grouped = (groupToggles && cell.getIsGrouped()) || groupCell !== undefined;
-  const toggle = holdsRowToggle(cell);
-  const empty = cell.row.getIsGrouped() && !grouped && !cell.getIsAggregated() && cell.column.accessorFn !== undefined;
-  const value = empty ? undefined : cell.getValue();
   const rowData = cell.row.original;
   const content: BodyCellContent = editing
     ? 'editor'
@@ -104,13 +112,13 @@ export function useBodyCell<TData extends RowData, TElement extends HTMLElement 
         : meta.tooltip(value, rowData);
 
   const onMouseDown = (event: MouseEvent<TElement>) => {
-    if (editing) return;
+    if (cell.getIsEditing()) return;
     if (event.button === 0 && !isControl(event.target) && cell.getCanSelect()) {
       // Keeps the browser from selecting text while a range is dragged; the cell takes focus itself.
       event.preventDefault();
       cell.getSelectionStartHandler()(event);
       event.currentTarget.focus({ preventScroll: true });
-    } else if (event.button === 0 || !look.inRange) {
+    } else if (event.button === 0 || !cellLook(cell).inRange) {
       table.setFocusedCell(cell.row.id, cell.column.id);
     }
   };
@@ -122,7 +130,7 @@ export function useBodyCell<TData extends RowData, TElement extends HTMLElement 
     shownCell: groupCell ?? cell,
     align,
     /** The indentation of the toggle, in levels. */
-    toggleLevel: grouped || inGroupColumn || gridMeta(table).treeData ? cell.row.depth : 0,
+    toggleLevel: grouped || inGroupColumn || treeData ? cell.row.depth : 0,
     /** The column's `cellClassName` for this cell. */
     className: typeof meta.cellClassName === 'function' ? meta.cellClassName(value, rowData) : meta.cellClassName,
     cellProps: {

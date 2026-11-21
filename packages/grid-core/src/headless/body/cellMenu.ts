@@ -5,6 +5,7 @@ import type { RowData } from '@tanstack/react-table';
 import { gridMeta } from '#/core/gridMeta.ts';
 import type { CoreTable, GridCell } from '#/core/types.ts';
 import type { MenuEntry, MenuSection } from '#/headless/menu.ts';
+import { useGridSelector } from '#/headless/useGridSelector.ts';
 import { copyText, pasteText } from '#/logic/clipboard/clipboard.ts';
 import { findCell, focusedPosition, selectedBlock, selectedLeafRows } from '#/logic/focus/gridCells.ts';
 
@@ -24,10 +25,12 @@ const writeClipboard = (text: string | undefined) => {
   if (text !== undefined) void navigator.clipboard.writeText(text);
 };
 
-/**
- * The context menu of the body; it acts on the range or the focused cell, which a right click focuses first. Build it
- * when the menu opens, so it reads the focus and the selection of that moment.
- */
+/** The context menu of the body; it acts on the range or the focused cell, which a right click focuses first. */
+export function useCellMenu<TData extends RowData>(table: CoreTable<TData>, items?: CellMenuItems<TData>) {
+  return useGridSelector(table, () => cellMenu(table, items));
+}
+
+/** The context menu of the body, as `useCellMenu` keeps it. */
 export function cellMenu<TData extends RowData>(table: CoreTable<TData>, items?: CellMenuItems<TData>): MenuSection[] {
   const { t } = gridMeta(table);
   const cell = findCell(table, focusedPosition(table));

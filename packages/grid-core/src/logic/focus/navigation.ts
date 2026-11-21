@@ -1,3 +1,4 @@
+import type { IdList } from '#/logic/focus/gridCells.ts';
 import type { CellPosition } from '#/logic/selection/cellRanges.ts';
 
 export type FocusMove =
@@ -23,7 +24,7 @@ const clamp = (value: number, max: number) => Math.max(0, Math.min(value, max));
  * `null` past the last or first cell, so Tab can leave the grid.
  */
 export function moveFocus(
-  rowIds: readonly string[],
+  rowIds: IdList,
   columnIds: readonly string[],
   from: CellPosition | null,
   move: FocusMove,
@@ -75,8 +76,8 @@ export function moveFocus(
   }
 }
 
-function at(rowIds: readonly string[], columnIds: readonly string[], row: number, column: number) {
-  const rowId = rowIds[row];
+function at(rowIds: IdList, columnIds: readonly string[], row: number, column: number) {
+  const rowId = rowIds.at(row);
   const columnId = columnIds[column];
   return rowId === undefined || columnId === undefined ? null : { rowId, columnId };
 }

@@ -32,6 +32,7 @@ import type { GridColumnMeta } from '#/logic/columns/columnMeta.ts';
 import { filterFns } from '#/logic/filters/filterFns.ts';
 import { aggregationFns } from '#/logic/grouping/aggregations.ts';
 import { cellEditingFeature } from '#/plugins/cellEditingFeature.ts';
+import { gridStoreFeature } from '#/plugins/gridStoreFeature.ts';
 
 const columnMeta: GridColumnMeta = {};
 const tableMeta = {} as GridMeta;
@@ -53,6 +54,7 @@ export const features = tableFeatures({
   rowSelectionFeature,
   cellSelectionFeature,
   cellEditingFeature,
+  gridStoreFeature,
   filteredRowModel: createFilteredRowModel(),
   facetedRowModel: createFacetedRowModel(),
   facetedUniqueValues: createFacetedUniqueValues(),

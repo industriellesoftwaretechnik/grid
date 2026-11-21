@@ -2,9 +2,10 @@ import { useState } from 'react';
 
 import type { RowData } from '@tanstack/react-table';
 
-import { gridMeta } from '#/core/gridMeta.ts';
 import type { GridColumn } from '#/core/types.ts';
 import { useFilterValue } from '#/headless/filters/useFilterValue.ts';
+import { useGridSelector } from '#/headless/useGridSelector.ts';
+import { useTranslate } from '#/headless/useTranslate.ts';
 import { useFilterDraft } from '#/hooks/useFilterDraft.ts';
 import { columnLabel, columnMeta, filterKindOf } from '#/logic/columns/columnInfo.ts';
 import { filterSummary } from '#/logic/filters/filterSummary.ts';
@@ -16,7 +17,7 @@ import { parseNumberRange, textFilterText, textFilterValue } from '#/logic/filte
  * column cannot be filtered.
  */
 export function useColumnFilterButton<TData extends RowData>(column: GridColumn<TData>) {
-  'use no memo';
+  const t = useTranslate(column.table);
   const value = useFilterValue(column);
   const { align } = columnMeta(column);
 
@@ -25,7 +26,7 @@ export function useColumnFilterButton<TData extends RowData>(column: GridColumn<
     filtered: value !== undefined,
     /** The button sits on the side away from the label: left in right-aligned headers. */
     side: align === 'end' ? ('start' as const) : ('end' as const),
-    label: gridMeta(column.table).t('filter'),
+    label: t('filter'),
   };
 }
 
@@ -43,14 +44,14 @@ const numberText = (value: unknown) =>
  * `none` where the column cannot be filtered.
  */
 export function useFloatingFilter<TData extends RowData>(column: GridColumn<TData>) {
-  'use no memo';
+  const t = useTranslate(column.table);
   const value = useFilterValue(column);
+  const summary = useGridSelector(column.table, () => filterSummaryText(column, column.getFilterValue()));
   const [open, setOpen] = useState(false);
   const filter = filterKindOf(column);
   const isNumber = filter === 'number';
   const toValue = isNumber ? parseNumberRange : textFilterValue;
   const { text, change } = useFilterDraft(column, value, isNumber ? numberText : textFilterText, toValue);
-  const { t } = gridMeta(column.table);
   const mode = filter === undefined ? 'none' : filter === 'text' || isNumber ? 'typed' : 'summary';
 
   return {
@@ -63,7 +64,7 @@ export function useFloatingFilter<TData extends RowData>(column: GridColumn<TDat
     invalid: mode === 'typed' && toValue(text) === null,
     hint: isNumber ? t('filter.number-hint') : undefined,
     /** For `summary`: the filter as text, and whether its editor is open. */
-    summary: filterSummaryText(column, value),
+    summary,
     open,
     setOpen,
   };

@@ -13,6 +13,7 @@ import { horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortabl
 import { gridMeta } from '#/core/gridMeta.ts';
 import type { GridInstance } from '#/core/tableHook.tsx';
 import type { GridColumn } from '#/core/types.ts';
+import { useGridSelector } from '#/headless/useGridSelector.ts';
 import { useColumnDragAndDrop } from '#/hooks/useColumnDragAndDrop.ts';
 import { columnOrderIds, moveColumns } from '#/logic/columns/columnOrder.ts';
 import { canGroupBy, groupPanelId } from '#/logic/grouping/groupPanelIds.ts';
@@ -52,10 +53,9 @@ export function ColumnReorder<TData extends object>({
   renderOverlay: (column: GridColumn<TData>, action: DropAction) => ReactNode;
   children: ReactNode;
 }) {
-  'use no memo';
   const [dragging, setDragging] = useState<string>();
   const [overPanel, setOverPanel] = useState(false);
-  const leafHeaders = table.getCenterHeaderGroups().at(-1)?.headers ?? [];
+  const leafHeaders = useGridSelector(table, () => table.getCenterHeaderGroups().at(-1)?.headers ?? []);
   const columnOf = (id: string) => leafHeaders.find((header) => header.id === id)?.column;
 
   const dragAndDrop = useColumnDragAndDrop(({ active, over }) => {

@@ -2,12 +2,13 @@ import { createElement, useEffect, useId, useRef, useState, type KeyboardEvent, 
 
 import type { RowData } from '@tanstack/react-table';
 
-import { gridMeta } from '#/core/gridMeta.ts';
 import type { GridCell } from '#/core/types.ts';
+import { useGridSelector } from '#/headless/useGridSelector.ts';
+import { useTranslate } from '#/headless/useTranslate.ts';
 import { columnLabel } from '#/logic/columns/columnInfo.ts';
 import { editorKindOf, editorOptions, parseCellText } from '#/logic/editing/columnEditor.ts';
 import { matchingOptions, toEditorText } from '#/logic/editing/editorValue.ts';
-import { displayedColumns, displayedRows } from '#/logic/focus/gridCells.ts';
+import { displayedColumns, displayedRowIds } from '#/logic/focus/gridCells.ts';
 import { moveFocus } from '#/logic/focus/navigation.ts';
 import { formatValue } from '#/logic/format.ts';
 
@@ -32,12 +33,14 @@ const stop = (event: MouseEvent) => {
  * choices and a click picks one.
  */
 export function useCellEditor<TData extends RowData>(cell: GridCell<TData>) {
-  'use no memo';
   const { table, column } = cell;
-  const { t } = gridMeta(table);
+  const t = useTranslate(table);
   const kind = editorKindOf(column);
   const isSelect = kind === 'select';
-  const value = cell.getValue();
+  const { value, options } = useGridSelector(table, () => ({
+    value: cell.getValue(),
+    options: isSelect ? editorOptions(column) : [],
+  }));
   // The key that started the edit replaces the text of an input and searches a select; a date input cannot take it.
   const [initialText] = useState(() => (kind === 'date' ? undefined : table.getEditingCell()?.initialText));
   const [text, setText] = useState(() => initialText ?? (isSelect ? '' : toEditorText(value, kind)));
@@ -52,7 +55,7 @@ export function useCellEditor<TData extends RowData>(cell: GridCell<TData>) {
   const choices: EditorChoice[] = isSelect
     ? [
         ...(text.trim() === '' ? [{ value: null, label: '–', current: value === null || value === undefined }] : []),
-        ...matchingOptions(editorOptions(column), text, format).map((option) => ({
+        ...matchingOptions(options, text, format).map((option) => ({
           value: option,
           label: format(option),
           current: isCurrent(option),
@@ -99,7 +102,7 @@ export function useCellEditor<TData extends RowData>(cell: GridCell<TData>) {
   const commitEdit = () => (isSelect ? commitChoice(activeIndex) : commitText(text));
   const moveAfterTab = (backwards: boolean) => {
     const next = moveFocus(
-      displayedRows(table).map((row) => row.id),
+      displayedRowIds(table),
       displayedColumns(table).map((candidate) => candidate.id),
       { rowId: cell.row.id, columnId: column.id },
       backwards ? 'previous' : 'next',
