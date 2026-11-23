@@ -23,6 +23,5 @@ if (tarballs.length === 0) throw new Error('pnpm pack produced no tarballs');
 for (const tarball of tarballs) {
   const file = path.join('.pack', tarball);
   run('publint', ['run', file, '--strict']);
-  // The stylesheets are exports without types.
-  run('attw', [file, '--profile', 'esm-only', '--exclude-entrypoints', './styles.css']);
+  run('attw', [file, '--profile', 'esm-only']);
 }

@@ -1,27 +1,17 @@
 # ISTEC Grid
 
-A data grid for React, built on [TanStack Table](https://tanstack.com/table) v9: an open alternative to AG Grid.
+A headless React data grid on TanStack Table v9 with the features otherwise found only in AG Grid Enterprise: row
+grouping, aggregation, range selection, fill handle, clipboard, set filter, master/detail, tree data and status bar.
+Free and MIT licensed.
 
-> Early days: the package is at `0.x`. Expect breaking changes until the API settles.
-
-## Package
-
-[`@istec/grid`](packages/grid#readme) is the whole grid: the table hook, its features and the UI, built on Base UI
-and shipped with a compiled stylesheet, so an app needs no component library or Tailwind of its own.
-
-## Install
+- [`@istec/grid`](packages/grid#readme): the grid's logic as hooks. Features, limits and usage are documented there.
+- [`registry/`](registry/data-grid.json): a complete shadcn/ui grid built on the hooks, installed with the shadcn CLI.
 
 ```sh
 pnpm add @istec/grid @tanstack/react-table
+npx shadcn add https://raw.githubusercontent.com/industriellesoftwaretechnik/grid/main/registry/data-grid.json
 ```
 
-Then import `@istec/grid/styles.css` before your own stylesheet (see the [package README](packages/grid#readme)). It
-needs React 19 and is ESM-only.
-
-## Development
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## License
+Development: `pnpm dev` runs the demo; see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 [MIT](LICENSE) © ISTEC Industrielle Software-Technik GmbH

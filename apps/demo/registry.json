@@ -1,0 +1,110 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "istec-grid",
+  "homepage": "https://github.com/industriellesoftwaretechnik/grid",
+  "items": [
+    {
+      "name": "data-grid",
+      "type": "registry:block",
+      "title": "Data Grid",
+      "description": "The shadcn/ui implementation of @istec/grid: a data grid with grouping, aggregation, range selection, editing and filters, built from your shadcn components on the headless hooks of @istec/grid.",
+      "dependencies": [
+        "@dnd-kit/core",
+        "@dnd-kit/modifiers",
+        "@dnd-kit/sortable",
+        "@dnd-kit/utilities",
+        "@istec/grid@^0.1.1",
+        "@tanstack/react-table",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "button",
+        "button-group",
+        "checkbox",
+        "context-menu",
+        "dropdown-menu",
+        "input",
+        "input-group",
+        "label",
+        "popover"
+      ],
+      "files": [
+        {
+          "path": "src/components/data-grid/body.tsx",
+          "type": "registry:component",
+          "target": "components/data-grid/body.tsx"
+        },
+        {
+          "path": "src/components/data-grid/cell-editor.tsx",
+          "type": "registry:component",
+          "target": "components/data-grid/cell-editor.tsx"
+        },
+        {
+          "path": "src/components/data-grid/column-reorder.tsx",
+          "type": "registry:component",
+          "target": "components/data-grid/column-reorder.tsx"
+        },
+        {
+          "path": "src/components/data-grid/column-table.tsx",
+          "type": "registry:component",
+          "target": "components/data-grid/column-table.tsx"
+        },
+        {
+          "path": "src/components/data-grid/data-grid.tsx",
+          "type": "registry:component",
+          "target": "components/data-grid/data-grid.tsx"
+        },
+        {
+          "path": "src/components/data-grid/filters.tsx",
+          "type": "registry:component",
+          "target": "components/data-grid/filters.tsx"
+        },
+        {
+          "path": "src/components/data-grid/footer.tsx",
+          "type": "registry:component",
+          "target": "components/data-grid/footer.tsx"
+        },
+        {
+          "path": "src/components/data-grid/group-panel.tsx",
+          "type": "registry:component",
+          "target": "components/data-grid/group-panel.tsx"
+        },
+        {
+          "path": "src/components/data-grid/header.tsx",
+          "type": "registry:component",
+          "target": "components/data-grid/header.tsx"
+        },
+        {
+          "path": "src/components/data-grid/menu-entries.tsx",
+          "type": "registry:component",
+          "target": "components/data-grid/menu-entries.tsx"
+        },
+        {
+          "path": "src/components/data-grid/selection-checkboxes.tsx",
+          "type": "registry:component",
+          "target": "components/data-grid/selection-checkboxes.tsx"
+        },
+        {
+          "path": "src/components/data-grid/selection-column.tsx",
+          "type": "registry:component",
+          "target": "components/data-grid/selection-column.tsx"
+        },
+        {
+          "path": "src/components/data-grid/styles.ts",
+          "type": "registry:component",
+          "target": "components/data-grid/styles.ts"
+        },
+        {
+          "path": "src/components/data-grid/toolbar.tsx",
+          "type": "registry:component",
+          "target": "components/data-grid/toolbar.tsx"
+        },
+        {
+          "path": "src/components/data-grid/use-column-drag-and-drop.ts",
+          "type": "registry:component",
+          "target": "components/data-grid/use-column-drag-and-drop.ts"
+        }
+      ]
+    }
+  ]
+}

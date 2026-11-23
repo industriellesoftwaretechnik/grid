@@ -37,7 +37,11 @@ export function libraryConfig() {
           extends: true,
           // Found up front, the tests' dependencies are bundled before they run; found while they run, Vite reloads the
           // page and the tests fail.
-          optimizeDeps: { entries: ['src/**/*.browser.test.{ts,tsx}'] },
+          optimizeDeps: {
+            entries: ['src/**/*.browser.test.{ts,tsx}'],
+            // The scan misses it, as it resolves only inside the browser runner.
+            include: ['vite-plus/test/browser/context'],
+          },
           test: {
             name: 'browser',
             include: ['src/**/*.browser.test.{ts,tsx}'],

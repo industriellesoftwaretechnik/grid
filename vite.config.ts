@@ -32,7 +32,7 @@ export default defineConfig({
       '.pack',
       '**/*.gen.ts',
       // shadcn output, copied in: formatted but not linted
-      'packages/*/src/internal/components/**',
+      'apps/*/src/components/ui/**',
     ],
     rules: {
       'no-console': ['error', { allow: ['warn', 'error'] }],
@@ -60,16 +60,26 @@ export default defineConfig({
         },
       },
       {
+        // The grid's core is what every part builds on; the parts depend on it, never the other way round.
+        files: ['packages/grid/src/core/**'],
+        rules: {
+          'no-restricted-imports': [
+            'error',
+            { patterns: [{ regex: '^#/parts/', message: 'core/ must not depend on parts/.' }] },
+          ],
+        },
+      },
+      {
         // useVirtualizer returns the same object while its values change; this hook reads its position as a value,
         // so what the compiler memoizes is recomputed when it moves.
-        files: ['packages/grid/src/hooks/useVirtualView.ts'],
+        files: ['packages/grid/src/parts/view/useVirtualView.ts'],
         rules: {
           'react/incompatible-library': 'off',
         },
       },
       {
         // TanStack's type-only feature slots take a phantom value (`tableMeta: {} as T`) that is never read.
-        files: ['packages/grid/src/core/features.ts'],
+        files: ['packages/grid/src/core/table/features.ts'],
         rules: {
           'typescript/no-unsafe-type-assertion': 'off',
         },
@@ -98,7 +108,7 @@ export default defineConfig({
     trailingComma: 'es5',
     arrowParens: 'always',
     // Generated files are rewritten by their generators on every run; formatting them only creates churn.
-    ignorePatterns: ['**/*.gen.ts', 'pnpm-lock.yaml', '**/CHANGELOG.md', '.pack'],
+    ignorePatterns: ['**/*.gen.ts', 'pnpm-lock.yaml', '**/CHANGELOG.md', '.pack', 'registry'],
     // Import order is a formatter concern (oxlint's sort-imports cannot group).
     sortImports: {
       internalPattern: ['@/', '#/', '@istec/'],

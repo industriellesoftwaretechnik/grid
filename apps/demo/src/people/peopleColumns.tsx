@@ -1,5 +1,6 @@
+import { selectionColumn } from '@/components/data-grid/selection-column';
 import { departments, statuses, type Person } from '@/people/samplePeople';
-import { createGridColumnHelper, selectionColumn } from '@istec/grid';
+import { createGridColumnHelper } from '@istec/grid';
 
 const helper = createGridColumnHelper<Person>();
 
@@ -24,7 +25,6 @@ export const peopleColumns = helper.columns([
         validateCellValue: (age) =>
           Number.isInteger(age) && age >= 16 && age <= 99 ? undefined : 'An age between 16 and 99',
         meta: {
-          groupShow: 'open',
           cellClassName: (age) => (typeof age === 'number' && age >= 60 ? 'text-amber-600' : undefined),
         },
       }),
@@ -39,7 +39,7 @@ export const peopleColumns = helper.columns([
         enableSorting: false,
         enableEditing: true,
         validateCellValue: (email) => (/^\S+@\S+\.\S+$/.test(email) ? undefined : 'Not a valid email address'),
-        meta: { groupShow: 'open', tooltip: true },
+        meta: { tooltip: true },
       }),
     ]),
   }),

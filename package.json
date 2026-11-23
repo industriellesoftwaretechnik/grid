@@ -12,7 +12,9 @@
     "check": "vp check",
     "check:fix": "vp check --fix",
     "check:packages": "node scripts/checkPackages.ts",
-    "verify": "pnpm check && pnpm typecheck && pnpm test && pnpm build && pnpm check:packages",
+    "registry": "node scripts/buildRegistry.ts",
+    "check:registry": "node scripts/buildRegistry.ts --check",
+    "verify": "pnpm check && pnpm typecheck && pnpm test && pnpm build && pnpm check:packages && pnpm check:registry",
     "changeset": "changeset",
     "version-packages": "changeset version"
   },

@@ -1,67 +1,62 @@
 # @istec/grid
 
-The data grid of [ISTEC Grid](https://github.com/industriellesoftwaretechnik/grid), a React data grid on TanStack
-Table v9: the table hook, its features and the complete UI, built on Base UI.
+A headless React data grid on TanStack Table v9 with the features otherwise found only in AG Grid Enterprise.
+Bring your own UI components, or use the shadcn/ui implementation.
 
-> `0.x`: the API may still change between minor versions.
+> `0.x`: the API may change between minor versions.
+
+## Enterprise features
+
+AG Grid has these only in its paid Enterprise edition:
+
+- Row grouping
+- Aggregation per column (e.g. sum, average, median, min, max, count)
+- Cell range selection, with cell count, sum and average in the status bar
+- Fill handle
+- Copy and paste of ranges, with headers if wanted
+- Master/detail rows
+- Tree data
+- Column menu and cell context menu
+- Status bar
+- And many more ...
+
+## Not included
+
+Server-side rows, pivoting, charts, Excel (`.xlsx`) export, tool panels / side bar, row dragging, styles of its own.
+React 19 and ESM only.
 
 ## Install
 
 ```sh
 pnpm add @istec/grid @tanstack/react-table
+npx shadcn add https://raw.githubusercontent.com/industriellesoftwaretechnik/grid/main/registry/data-grid.json
 ```
 
-Peer dependencies: `react` and `react-dom` ^19, `@tanstack/react-table` ^9. ESM only.
-
-## Styling
-
-The package ships its stylesheet, compiled; your app needs no Tailwind of its own. Import it once, before your own
-stylesheet:
+The second line adds the shadcn/ui grid to `components/data-grid/`. Skip it to build your own UI.
 
 ```tsx
-import '@istec/grid/styles.css';
-import './index.css';
+const table = useGrid({ id: 'people', columns, data: people, getRowId: (person) => person.id });
+return <DataGrid table={table} showFloatingFilters />;
 ```
 
-Its classes carry an `ig:` prefix, so they never clash with your app's Tailwind classes, and they sit in a cascade
-layer between Tailwind's: your base styles leave the grid alone, while your utilities and unlayered CSS still win.
+## Hooks
 
-The colors and radius come from the standard shadcn CSS variables (`--background`, `--foreground`, `--popover`,
-`--primary`, `--secondary`, `--muted`, `--accent`, `--destructive`, `--border`, `--input`, `--ring`, `--radius`, and
-their `-foreground` pairs), so an app set up with `shadcn init` gives the grid its theme; an app without shadcn defines them.
+`useGrid` returns the TanStack table with the grid's features; every state slice is controllable as in TanStack. Each
+part of the grid has a hook that returns its values, actions, element props and texts:
 
-## Usage
+| Part      | Hooks                                                                                                            |
+| --------- | ---------------------------------------------------------------------------------------------------------------- |
+| Frame     | `useGridView`, `useColumnWidths`, `useVirtualList`                                                               |
+| Header    | `useHeaderRows`, `useHeaderCell`, `useColumnResizer`, `useColumnReorder`, `useColumnMenu`                        |
+| Body      | `useVirtualRows`, `useDataRow`, `useBodyCell`, `useGroupRowCell`, `useRowToggle`, `useCellEditor`, `useCellMenu` |
+| Selection | `useSelectAll`, `useRowSelect`                                                                                   |
+| Filters   | `useFloatingFilter`, `useTextFilter`, `useRangeFilter`, `useSetFilter`                                           |
+| Grouping  | `useGroupPanel`                                                                                                  |
+| Footer    | `useTotalsRow`, `useStatusBar`                                                                                   |
+| Toolbar   | `useSearch`, `useExport`, `useExpandAll`, `useClearFilters`, `useColumnsMenu`                                    |
 
-```tsx
-import { createGridColumnHelper, DataGrid, selectionColumn, useGrid } from '@istec/grid';
-
-type Person = { id: string; name: string; age: number };
-const helper = createGridColumnHelper<Person>();
-const columns = helper.columns([
-  selectionColumn<Person>(),
-  helper.accessor('name', { header: 'Name' }),
-  helper.accessor('age', { header: 'Age', aggregationFn: 'mean' }),
-]);
-
-export function People({ people }: { people: Person[] }) {
-  const table = useGrid({ id: 'people', columns, data: people, getRowId: (person) => person.id });
-  return <DataGrid table={table} showFloatingFilters />;
-}
-```
-
-`apps/demo` in the repository shows the rest: editing, grouping, tree and detail rows, server rows, and German texts.
-
-## State
-
-`useGrid` returns the TanStack table, which is the grid's API: `table.resetLayout()`, `column.toggleGroupBy()`,
-`column.setAggregation()`, `column.toggleCollapsed()` and all of TanStack's own. Every state slice is controlled
-(`state.sorting` with `onSortingChange`) or kept by the grid (`initialState.sorting`, with `onSortingChange` only
-listening).
-
-## Texts
-
-The grid's texts are English. `messages` on `useGrid` replaces some or all of them; `gridMessagesDe` has German. The
-placeholders are i18next's `{{name}}`, so an app's i18next bundle can supply them.
+Menus come as data with icon names; dragging is left to your drag-and-drop library. The shadcn implementation
+(`apps/demo/src/components/data-grid`) shows how each hook is used.
 
 ## License
 

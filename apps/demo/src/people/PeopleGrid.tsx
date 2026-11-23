@@ -1,9 +1,11 @@
 import { useState } from 'react';
 
+import { DataGrid } from '@/components/data-grid/data-grid';
+import { ClearFiltersButton, ColumnsButton, ExportButton, SearchInput } from '@/components/data-grid/toolbar';
+import { ButtonGroup } from '@/components/ui/button-group';
 import { peopleColumns } from '@/people/peopleColumns';
-import { fetchPeople, savePerson } from '@/people/peopleServer';
 import { samplePeople, type Person } from '@/people/samplePeople';
-import { DataGrid, gridMessagesDe, useGrid, type CellMenuItem, type GridCell } from '@istec/grid';
+import { gridMessagesDe, useGrid, type CellMenuItem, type CoreTable, type GridCell } from '@istec/grid';
 
 const getRowId = (person: Person) => person.id;
 const initialState = {
@@ -19,6 +21,20 @@ const cellMenuItems = (cell: GridCell<Person>): CellMenuItem[] => [
   },
 ];
 
+/** The demo's toolbar: the grid renders none, the app places the parts it wants. */
+function Toolbar({ table }: { table: CoreTable<Person> }) {
+  return (
+    <div className="flex flex-wrap items-center justify-end gap-2">
+      <ButtonGroup>
+        <ClearFiltersButton table={table} />
+        <ColumnsButton table={table} />
+        <ExportButton table={table} />
+      </ButtonGroup>
+      <SearchInput table={table} />
+    </div>
+  );
+}
+
 function PersonDetail({ person }: { person: Person }) {
   return (
     <div className="flex flex-col gap-1">
@@ -32,7 +48,7 @@ function PersonDetail({ person }: { person: Person }) {
   );
 }
 
-export function ClientPeopleGrid({ german }: { german: boolean }) {
+export function PeopleGrid({ german }: { german: boolean }) {
   const [data, setData] = useState(() => samplePeople(10_000, 7));
   const table = useGrid({
     id: 'people',
@@ -48,20 +64,10 @@ export function ClientPeopleGrid({ german }: { german: boolean }) {
       setData((people) => people.map((person) => (person.id === updatedRow.id ? updatedRow : person))),
   });
 
-  return <DataGrid table={table} showTotals showFloatingFilters cellMenuItems={cellMenuItems} />;
-}
-
-export function ServerPeopleGrid({ german }: { german: boolean }) {
-  const table = useGrid({
-    id: 'people-server',
-    columns: peopleColumns,
-    fetchRows: fetchPeople,
-    getRowId,
-    persist: true,
-    initialState,
-    messages: german ? gridMessagesDe : undefined,
-    onCellValueChange: ({ updatedRow }) => void savePerson(updatedRow),
-  });
-
-  return <DataGrid table={table} showFloatingFilters />;
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <Toolbar table={table} />
+      <DataGrid table={table} showTotals showFloatingFilters cellMenuItems={cellMenuItems} />
+    </div>
+  );
 }
