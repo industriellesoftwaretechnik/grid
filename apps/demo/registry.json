@@ -13,7 +13,7 @@
         "@dnd-kit/modifiers",
         "@dnd-kit/sortable",
         "@dnd-kit/utilities",
-        "@istec/grid@^0.1.1",
+        "@istec/grid@^0.2.0",
         "@tanstack/react-table",
         "lucide-react"
       ],
