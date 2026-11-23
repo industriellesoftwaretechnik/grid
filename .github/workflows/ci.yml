@@ -27,4 +27,7 @@ jobs:
           node-version-file: .node-version
           cache: true
 
+      # The browser tests (`*.browser.test.tsx`) run in the Chromium of the lockfile's Playwright.
+      - run: vp exec playwright install --with-deps chromium
+
       - run: pnpm verify

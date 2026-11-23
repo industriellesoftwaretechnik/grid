@@ -1,6 +1,7 @@
 import babel from '@rolldown/plugin-babel';
 import { reactCompilerPreset } from '@vitejs/plugin-react';
 import { defineConfig } from 'vite-plus';
+import { playwright } from 'vite-plus/test/browser-playwright';
 
 // Shared Vite+ config of the packages under `packages/*`: `vp pack` builds `src/index.ts` to an ESM `dist` with
 // declarations, `vp test` runs the colocated tests. Dependencies and peer dependencies stay external.
@@ -23,7 +24,32 @@ export function libraryConfig() {
       ],
     },
     test: {
-      include: ['src/**/*.test.{ts,tsx}'],
+      projects: [
+        {
+          extends: true,
+          test: {
+            name: 'unit',
+            include: ['src/**/*.test.{ts,tsx}'],
+            exclude: ['src/**/*.browser.test.{ts,tsx}'],
+          },
+        },
+        {
+          extends: true,
+          // Found up front, the tests' dependencies are bundled before they run; found while they run, Vite reloads the
+          // page and the tests fail.
+          optimizeDeps: { entries: ['src/**/*.browser.test.{ts,tsx}'] },
+          test: {
+            name: 'browser',
+            include: ['src/**/*.browser.test.{ts,tsx}'],
+            browser: {
+              enabled: true,
+              headless: true,
+              provider: playwright(),
+              instances: [{ browser: 'chromium' }],
+            },
+          },
+        },
+      ],
     },
   });
 }

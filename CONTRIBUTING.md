@@ -7,7 +7,7 @@ Requirements: [Vite+](https://viteplus.dev/guide/) (`vp`) installed globally. It
 
 ```sh
 vp install      # install dependencies
-pnpm dev        # start apps/demo, which uses both packages from source with hot reload
+pnpm dev        # start apps/demo, which uses the package from source with hot reload
 ```
 
 | Script                | What                                                                                   |
@@ -15,7 +15,7 @@ pnpm dev        # start apps/demo, which uses both packages from source with hot
 | `pnpm check`          | Format check and lint (`vp check`); `pnpm check:fix` fixes what it can                 |
 | `pnpm typecheck`      | `tsc -b --noEmit` (TypeScript 7) for the root configs and every package                |
 | `pnpm test`           | All tests (`vp test`)                                                                  |
-| `pnpm build`          | `vp pack` for the packages, `vp build` for the apps                                    |
+| `pnpm build`          | `vp pack` for the package, `vp build` for the apps                                     |
 | `pnpm check:packages` | Packs the packages with pnpm and runs publint and attw on the tarballs (needs a build) |
 | `pnpm verify`         | All of the above, the gate CI runs on every PR                                         |
 
@@ -24,15 +24,14 @@ built before `dev`, `test` or `typecheck`. See [AGENTS.md](AGENTS.md) for layout
 
 ## Changesets
 
-Every PR that changes what `@istec/grid-core` or `@istec/grid-ui` ships needs a changeset:
+Every PR that changes what `@istec/grid` ships needs a changeset:
 
 ```sh
 pnpm changeset
 ```
 
-Pick the packages, the bump and write a line for the changelog, then commit the generated `.changeset/*.md`. Both
-packages are `fixed`, so they always get the same version. While we are on `0.x`, use `minor` for breaking changes
-and `patch` for everything else. Changes to apps, tooling or tests need no changeset.
+Pick the bump and write a line for the changelog, then commit the generated `.changeset/*.md`. While we are on
+`0.x`, use `minor` for breaking changes and `patch` for everything else. Changes to apps, tooling or tests need no changeset.
 
 ## Release flow
 
@@ -69,11 +68,11 @@ packages PR by itself. Close and reopen it to run CI, or switch the version job 
    [`setup-npm-trusted-publish`](https://github.com/azu/setup-npm-trusted-publish)) and let CI publish the first
    real version.
 
-3. **Trusted publishers:** for both `@istec/grid-core` and `@istec/grid-ui`, open the package settings on
+3. **Trusted publishers:** for `@istec/grid`, open the package settings on
    npmjs.com → _Trusted publishing_ → GitHub Actions, and enter organization `industriellesoftwaretechnik`,
    repository `grid`, workflow filename `release.yml`, no environment. A new configuration must see a
    successful publish within 2 days or it expires, so release soon after setting it up.
-4. **Lock it down:** in each package's settings, set publishing access to _Require two-factor authentication and
+4. **Lock it down:** in the package's settings, set publishing access to _Require two-factor authentication and
    disallow tokens_, so only the workflow can publish.
 5. **GitHub:** in the repository settings, _Actions → General_, enable _Allow GitHub Actions to create and approve
    pull requests_ (needed for the Version packages PR).

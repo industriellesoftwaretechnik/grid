@@ -6,8 +6,7 @@
     // The workspace packages resolve to their sources, so the demo hot-reloads grid changes without a build.
     "paths": {
       "@/*": ["./src/*"],
-      "@istec/grid-core": ["../../packages/grid-core/src/index.ts"],
-      "@istec/grid-ui": ["../../packages/grid-ui/src/index.ts"]
+      "@istec/grid": ["../../packages/grid/src/index.ts"]
     }
   },
   "include": ["src"]

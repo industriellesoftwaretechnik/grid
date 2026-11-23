@@ -60,6 +60,21 @@ export default defineConfig({
         },
       },
       {
+        // useVirtualizer returns the same object while its values change; this hook reads its position as a value,
+        // so what the compiler memoizes is recomputed when it moves.
+        files: ['packages/grid/src/hooks/useVirtualView.ts'],
+        rules: {
+          'react/incompatible-library': 'off',
+        },
+      },
+      {
+        // TanStack's type-only feature slots take a phantom value (`tableMeta: {} as T`) that is never read.
+        files: ['packages/grid/src/core/features.ts'],
+        rules: {
+          'typescript/no-unsafe-type-assertion': 'off',
+        },
+      },
+      {
         files: ['**/scripts/**', '**/*.config.ts'],
         env: {
           node: true,

@@ -70,6 +70,7 @@ jobs:
       - uses: voidzero-dev/setup-vp@v1.22.0
         with:
           node-version-file: .node-version
+      - run: vp exec playwright install --with-deps chromium
       # The full gate, so nothing is published that `pnpm verify` would reject; it also builds `dist`.
       - run: pnpm verify
       - id: pack

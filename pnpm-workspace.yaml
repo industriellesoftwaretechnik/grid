@@ -5,13 +5,14 @@ packages:
   - packages/*
 
 allowBuilds:
+  # Only the Tailwind CLI's watch mode needs its native build.
+  '@parcel/watcher': false
   esbuild: true
 
 # Every version used by more than one workspace package is defined here once; a package.json refers to it with
 # `catalog:`. A dependency of a single package keeps its literal range there. `peerDependencies` stay literal and
 # wider than the catalog pin: what we develop against and what a host may supply are different questions.
 catalog:
-  '@base-ui/react': ^1.9.0
   '@rolldown/plugin-babel': ^0.3.0
   '@tanstack/react-table': ^9.3.1
   '@types/react': ^19.3.0
@@ -21,16 +22,17 @@ catalog:
   '@typescript/native': npm:typescript@7.0.2
   '@vitejs/plugin-react': ^6.2.1
   babel-plugin-react-compiler: ^1.0.0
-  lucide-react: ^1.69.0
   react: ^19.3.1
   react-dom: ^19.3.1
-  tailwindcss: ^4.3.4
+  tailwindcss: ^4.3.5
+  tw-animate-css: ^1.4.0
   typescript: npm:@typescript/typescript6@6.0.2
-  # Vite+: bump these three together by hand. `vite` is the Vite+ core at the `vite-plus` version,
-  # `vitest` is what `vp toolchain vitest` reports.
+  # Vite+: bump these four together by hand. `vite` is the Vite+ core at the `vite-plus` version,
+  # `vitest` is what `vp toolchain vitest` reports, and the browser tests' Playwright provider matches it.
   vite: npm:@voidzero-dev/vite-plus-core@1.5.0
   vite-plus: 1.5.0
   vitest: 5.1.0
+  '@vitest/browser-playwright': 5.1.0
 
 # Every `vite`/`vitest` in the tree resolves to the Vite+ core, never a second upstream copy.
 # Import test APIs from `vite-plus/test`, never declare `vitest` directly.

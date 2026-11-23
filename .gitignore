@@ -15,8 +15,9 @@ dist
 .vite
 .tanstack
 
-# Test coverage
+# Test coverage, and browser-test failure screenshots
 coverage
+.vitest
 
 # Editors and IDEs (shared VS Code settings may be committed explicitly)
 .idea

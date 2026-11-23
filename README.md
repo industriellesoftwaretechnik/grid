@@ -1,37 +1,22 @@
 # ISTEC Grid
 
-A data grid for React, built on [TanStack Table](https://tanstack.com/table) v9: an open alternative to AG Grid
-for apps that use Tailwind CSS and shadcn/ui.
+A data grid for React, built on [TanStack Table](https://tanstack.com/table) v9: an open alternative to AG Grid.
 
-> Early days: the packages are at `0.x` and contain placeholders while the grid moves in. Expect breaking changes
-> until the API settles.
+> Early days: the package is at `0.x`. Expect breaking changes until the API settles.
 
-## Packages
+## Package
 
-| Package                                         | What                                                                           |
-| ----------------------------------------------- | ------------------------------------------------------------------------------ |
-| [`@istec/grid-core`](packages/grid-core#readme) | Headless: React hooks, TanStack Table features and pure logic. No styling.     |
-| [`@istec/grid-ui`](packages/grid-ui#readme)     | The styled grid on top of grid-core: Tailwind CSS v4, shadcn-style components. |
-
-Both packages always share one version.
+[`@istec/grid`](packages/grid#readme) is the whole grid: the table hook, its features and the UI, built on Base UI
+and shipped with a compiled stylesheet, so an app needs no component library or Tailwind of its own.
 
 ## Install
 
-The styled grid (brings `@istec/grid-core` along):
-
 ```sh
-pnpm add @istec/grid-ui @tanstack/react-table
+pnpm add @istec/grid @tanstack/react-table
 ```
 
-Then let your Tailwind build see the grid's classes (see the [grid-ui README](packages/grid-ui#readme)).
-
-Headless only:
-
-```sh
-pnpm add @istec/grid-core @tanstack/react-table
-```
-
-Both need React 19. They are ESM-only.
+Then import `@istec/grid/styles.css` before your own stylesheet (see the [package README](packages/grid#readme)). It
+needs React 19 and is ESM-only.
 
 ## Development
 
