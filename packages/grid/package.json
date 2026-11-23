@@ -1,6 +1,6 @@
 {
   "name": "@istec/grid",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "React data grid on TanStack Table: a complete grid with its UI, built on Base UI and styled with a prebuilt, prefixed Tailwind CSS stylesheet.",
   "keywords": [
     "data-grid",
