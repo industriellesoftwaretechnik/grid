@@ -10,7 +10,6 @@ import {
 
 import { firstDataColumnId, insertAfterLockedColumns, resolveColumns } from '#/core/columns/columnDefs.ts';
 import { groupColumn, groupColumnId } from '#/core/columns/groupColumn.ts';
-import { createTranslate, type GridMessages } from '#/core/locale/messages.ts';
 import type { ColumnAggregationState } from '#/core/plugins/columnAggregationFeature.ts';
 import { publishGridInputs } from '#/core/plugins/gridStoreFeature.ts';
 import { withoutGroupRows } from '#/core/selection/rowSelectionState.ts';
@@ -28,8 +27,11 @@ export type GridOptions<TData extends object> = Omit<
 > & {
   /** Names the table; a persisted layout is stored under it. */
   id: string;
-  /** The texts; keys left out stay English. A new object rebuilds the columns, so keep it stable. */
-  messages?: Partial<GridMessages>;
+  /**
+   * The locale numbers and dates are shown in and values sorted by, as a BCP 47 tag such as `de-DE`; the browser's by
+   * default. The grid has no texts of its own: its UI brings them.
+   */
+  locale?: string;
   /** Keeps the layout across visits, in localStorage. `persistedSlices` lists what it keeps. */
   persist?: boolean;
   /**
@@ -71,7 +73,7 @@ function keepAndReport<TData extends object, K extends keyof GridState>(
 /** Creates the grid's table: TanStack's, with the grid's features. Pass it to the hooks of each part. */
 export function useGrid<TData extends object>({
   id,
-  messages,
+  locale,
   persist = gridDefaults.persist,
   groupDisplay = gridDefaults.groupDisplay,
   initialState = {},
@@ -104,8 +106,6 @@ export function useGrid<TData extends object>({
     () => startState.grouping ?? []
   );
 
-  const t = useMemo(() => createTranslate(messages), [messages]);
-  const groupLabel = t('group');
   const firstRow = options.data[0];
   // A tree is not grouped: grouping would regroup only its top-level rows.
   const treeData = options.getSubRows !== undefined;
@@ -114,8 +114,8 @@ export function useGrid<TData extends object>({
   const activeGrouping = treeData ? noGrouping : grouping;
   const columns = useMemo(() => {
     const resolved = resolveColumns(options.columns, firstRow, columnAggregation);
-    return showGroupColumn ? insertAfterLockedColumns(resolved, groupColumn<TData>(groupLabel)) : resolved;
-  }, [options.columns, firstRow, columnAggregation, showGroupColumn, groupLabel]);
+    return showGroupColumn ? insertAfterLockedColumns(resolved, groupColumn<TData>()) : resolved;
+  }, [options.columns, firstRow, columnAggregation, showGroupColumn]);
   // The group column shows only while something is grouped. A new object is a visibility change to every subscriber,
   // so it is only rebuilt when an input changes.
   const grouped = activeGrouping.length > 0;
@@ -169,7 +169,7 @@ export function useGrid<TData extends object>({
       },
       meta: {
         tableId: id,
-        t,
+        locale,
         treeData,
         expandColumn:
           treeData || renderDetail !== undefined ? (expandColumn ?? firstDataColumnId(options.columns)) : undefined,

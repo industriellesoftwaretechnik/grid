@@ -6,11 +6,16 @@ import { editorKindOf, editorOptions, parseCellText } from '#/core/columns/colum
 import { columnLabel } from '#/core/columns/columnInfo.ts';
 import { matchingOptions, toEditorText } from '#/core/columns/editorValue.ts';
 import { formatValue } from '#/core/columns/format.ts';
-import { useTranslate } from '#/core/locale/useTranslate.ts';
 import { displayedColumns, displayedRowIds } from '#/core/selection/gridCells.ts';
 import { moveFocus } from '#/core/selection/navigation.ts';
 import type { GridCell } from '#/core/table/types.ts';
 import { useGridSelector } from '#/core/table/useGridSelector.ts';
+
+/**
+ * Why the editor did not take its value: text it cannot read as a `number`, `date` or `option` of a select, which the
+ * UI words, or the `message` of the column's own validation.
+ */
+export type CellEditorError = { type: 'number' | 'date' | 'option' } | { type: 'rule'; message: string };
 
 /** A choice of a `select` editor. */
 export interface EditorChoice {
@@ -34,7 +39,6 @@ const stop = (event: MouseEvent) => {
  */
 export function useCellEditor<TData extends RowData>(cell: GridCell<TData>) {
   const { table, column } = cell;
-  const t = useTranslate(table);
   const kind = editorKindOf(column);
   const isSelect = kind === 'select';
   const { value, options } = useGridSelector(table, () => ({
@@ -44,7 +48,7 @@ export function useCellEditor<TData extends RowData>(cell: GridCell<TData>) {
   // The key that started the edit replaces the text of an input and searches a select; a date input cannot take it.
   const [initialText] = useState(() => (kind === 'date' ? undefined : table.getEditingCell()?.initialText));
   const [text, setText] = useState(() => initialText ?? (isSelect ? '' : toEditorText(value, kind)));
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<CellEditorError>();
   const listId = useId();
   const [input, setInput] = useState<HTMLInputElement | null>(null);
   const editor = column.columnDef.meta?.editor;
@@ -79,13 +83,13 @@ export function useCellEditor<TData extends RowData>(cell: GridCell<TData>) {
   const commit = (next: unknown): string | undefined => {
     const message = cell.setValue(next);
     if (message === undefined) table.stopEditing();
-    else setError(message);
+    else setError({ type: 'rule', message });
     return message;
   };
   const commitText = (typed: string): boolean => {
     const parsed = parseCellText(column, typed);
     if ('error' in parsed) {
-      setError(t(`edit.invalid-${parsed.error}`));
+      setError({ type: parsed.error });
       return false;
     }
     return commit(parsed.value) === undefined;
@@ -93,7 +97,7 @@ export function useCellEditor<TData extends RowData>(cell: GridCell<TData>) {
   const commitChoice = (index: number): boolean => {
     const choice = choices[index];
     if (!choice) {
-      setError(t('edit.invalid-option'));
+      setError({ type: 'option' });
       return false;
     }
     return commit(choice.value) === undefined;
@@ -148,13 +152,12 @@ export function useCellEditor<TData extends RowData>(cell: GridCell<TData>) {
             row: cell.row.original,
           })
         : undefined,
-    /** The validation message, shown until the text changes. */
+    /** Why the value was not taken, shown until the text changes. */
     error,
     inputProps: {
       ref: setInput,
       type: kind === 'date' ? 'date' : 'text',
       inputMode: kind === 'number' ? ('decimal' as const) : undefined,
-      'aria-label': t('edit.value'),
       'aria-invalid': error !== undefined,
       value: text,
       onKeyDown,

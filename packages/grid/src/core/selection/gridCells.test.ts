@@ -44,7 +44,7 @@ describe('rowToggleColumnId', () => {
 
   it('is the group column while it is shown', () => {
     const table = testTable({
-      columns: [groupColumn<Person>('Group'), ...columns],
+      columns: [groupColumn<Person>(), ...columns],
       data,
       meta: { expandColumn: 'name' },
       groupDisplay: 'groupColumn',

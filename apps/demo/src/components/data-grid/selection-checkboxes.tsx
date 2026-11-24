@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 
+import { messages } from '@/components/data-grid/messages';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useRowSelect, useSelectAll, type CoreTable, type GridRow } from '@istec/grid';
 
@@ -9,7 +10,7 @@ export function SelectAllCheckbox<TData extends object>({ table }: { table: Core
   return (
     <span className="flex justify-center">
       <Checkbox
-        aria-label={select.label}
+        aria-label={messages.selectAll}
         checked={select.checked}
         indeterminate={select.indeterminate}
         onCheckedChange={(next) => select.toggle(next)}
@@ -26,7 +27,7 @@ export function RowCheckbox<TData extends object>({ row }: { row: GridRow<TData>
   return (
     <span className="flex justify-center">
       <Checkbox
-        aria-label={select.label}
+        aria-label={messages.selectRow}
         checked={select.checked}
         indeterminate={select.indeterminate}
         disabled={select.disabled}

@@ -12,6 +12,7 @@ import {
   type Updater,
 } from '@tanstack/react-table';
 
+import { columnOrderIds, moveColumns, type OrderedTable } from '#/core/columns/columnOrder.ts';
 import type { ColumnAggregationState } from '#/core/plugins/columnAggregationFeature.ts';
 
 /**
@@ -39,6 +40,13 @@ interface GridLayoutOptions {
 interface GridLayoutTable {
   /** Returns column order, sizes, pinning, visibility, grouping and aggregation to `defaultLayout`. */
   resetLayout: () => void;
+  /** Moves the grouping level at `from` to `to`, as dragging a group panel chip does; out of range does nothing. */
+  moveGrouping: (from: number, to: number) => void;
+  /**
+   * Moves a column to where another one is: after it when moving forward, before it when moving back, as dragging a
+   * header does.
+   */
+  moveColumn: (columnId: string, targetId: string) => void;
 }
 
 interface GridLayoutColumn {
@@ -65,8 +73,9 @@ declare module '@tanstack/table-core' {
 }
 
 // The feature's runtime view of the table; the public types come from the feature maps.
-interface LayoutTable {
+interface LayoutTable extends OrderedTable {
   options: GridLayoutOptions;
+  atoms: OrderedTable['atoms'] & { grouping: { get: () => GroupingState } };
   setColumnOrder: (updater: Updater<ColumnOrderState>) => void;
   setColumnSizing: (updater: Updater<ColumnSizingState>) => void;
   setColumnPinning: (updater: Updater<ColumnPinningState>) => void;
@@ -104,11 +113,25 @@ function resetLayout(table: LayoutTable) {
   table.setColumnAggregation(layout.columnAggregation ?? {});
 }
 
-/** The layout actions of the grid's UI: grouping from the UI and "Reset columns". */
+function moveGrouping(table: LayoutTable, from: number, to: number) {
+  const grouping = table.atoms.grouping.get();
+  if (from === to || from < 0 || to < 0 || from >= grouping.length || to >= grouping.length) return;
+  table.setGrouping(grouping.toSpliced(from, 1).toSpliced(to, 0, ...grouping.slice(from, from + 1)));
+}
+
+function moveColumn(table: LayoutTable, columnId: string, targetId: string) {
+  if (columnId !== targetId) table.setColumnOrder(moveColumns(columnOrderIds(table), [columnId], [targetId]));
+}
+
+/** The layout actions of the grid's UI: grouping from the UI, moving columns and grouping levels, "Reset columns". */
 export const gridLayoutFeature: TableFeature = {
   constructTableAPIs: (table) => {
     assignTableAPIs('gridLayoutFeature', table, {
       table_resetLayout: { fn: () => resetLayout(asLayoutTable(table)) },
+      table_moveGrouping: { fn: (from: number, to: number) => moveGrouping(asLayoutTable(table), from, to) },
+      table_moveColumn: {
+        fn: (columnId: string, targetId: string) => moveColumn(asLayoutTable(table), columnId, targetId),
+      },
     });
   },
   assignColumnPrototype: (prototype, table) => {

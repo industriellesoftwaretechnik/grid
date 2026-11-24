@@ -1,13 +1,15 @@
 import type { RowData } from '@tanstack/react-table';
 
-import { formatValue } from '#/core/columns/format.ts';
-import { gridMeta } from '#/core/table/gridMeta.ts';
+import { formatValue, localeFormats } from '#/core/columns/format.ts';
 import type { GridColumn } from '#/core/table/types.ts';
 
 export interface SetFilterOption {
   /** Unique in the list; usable as key. */
   key: number;
+  /** The value as the column shows it; empty for the blank option, which the UI names. */
   label: string;
+  /** Whether it is the option for blank values, which comes first. */
+  blank: boolean;
   /** The values the option stands for: one, or every blank value for the blank option. */
   values: unknown[];
   /** The rows the other filters let through that have one of `values`. */
@@ -20,24 +22,23 @@ export interface CheckState {
   disabled: boolean;
 }
 
-const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
-
 /**
- * The values of a column as set filter options, among the rows the other filters let through. null, undefined and ''
- * look the same in a cell, so they share one option. The column's meta.options are offered even where no row has them.
+ * The values of a column as set filter options, among the rows the other filters let through, sorted in the grid's
+ * locale. null, undefined and '' look the same in a cell, so they share one option. The column's meta.options are
+ * offered even where no row has them.
  */
 export function setFilterOptions<TData extends RowData>(column: GridColumn<TData>): SetFilterOption[] {
-  const { t } = gridMeta(column.table);
+  const { collator } = localeFormats(column.table.options.meta?.locale);
   const counts = new Map<unknown, number>(column.columnDef.meta?.options?.map((value) => [value, 0]));
   for (const [value, count] of column.getFacetedUniqueValues()) counts.set(value, (counts.get(value) ?? 0) + count);
-  const empty: SetFilterOption = { key: 0, label: t('filter.empty'), values: [], count: 0 };
+  const empty: SetFilterOption = { key: 0, label: '', blank: true, values: [], count: 0 };
   const options: SetFilterOption[] = [];
   for (const [value, count] of counts) {
     if (value === null || value === undefined || value === '') {
       empty.values.push(value);
       empty.count += count;
     } else {
-      options.push({ key: 0, label: formatValue(value, column), values: [value], count });
+      options.push({ key: 0, label: formatValue(value, column), blank: false, values: [value], count });
     }
   }
   options.sort((a, b) => collator.compare(a.label, b.label));

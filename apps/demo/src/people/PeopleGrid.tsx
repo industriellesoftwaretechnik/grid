@@ -1,25 +1,40 @@
 import { useState } from 'react';
 
-import { DataGrid } from '@/components/data-grid/data-grid';
+import { Mail } from 'lucide-react';
+
+import { DataGrid, type CellMenuSections } from '@/components/data-grid/data-grid';
 import { ClearFiltersButton, ColumnsButton, ExportButton, SearchInput } from '@/components/data-grid/toolbar';
 import { ButtonGroup } from '@/components/ui/button-group';
 import { peopleColumns } from '@/people/peopleColumns';
 import { samplePeople, type Person } from '@/people/samplePeople';
-import { gridMessagesDe, useGrid, type CellMenuItem, type CoreTable, type GridCell } from '@istec/grid';
+import { useGrid, type CoreTable } from '@istec/grid';
 
 const getRowId = (person: Person) => person.id;
 const initialState = {
   sorting: [{ id: 'lastName', desc: false }],
   columnPinning: { start: ['select'], end: [] },
 };
-const cellMenuItems = (cell: GridCell<Person>): CellMenuItem[] => [
-  {
-    label: 'Write email',
-    onSelect: () => {
-      window.open(`mailto:${cell.row.original.email}`);
-    },
-  },
-];
+// The cell menu is data: the demo adds a section of its own below copy and paste.
+const cellMenu: CellMenuSections<Person> = (sections, cell) =>
+  cell
+    ? [
+        ...sections,
+        {
+          id: 'person',
+          entries: [
+            {
+              type: 'item',
+              id: 'email',
+              label: 'Write email',
+              icon: <Mail />,
+              onSelect: () => {
+                window.open(`mailto:${cell.row.original.email}`);
+              },
+            },
+          ],
+        },
+      ]
+    : sections;
 
 /** The demo's toolbar: the grid renders none, the app places the parts it wants. */
 function Toolbar({ table }: { table: CoreTable<Person> }) {
@@ -48,7 +63,7 @@ function PersonDetail({ person }: { person: Person }) {
   );
 }
 
-export function PeopleGrid({ german }: { german: boolean }) {
+export function PeopleGrid({ locale }: { locale: string }) {
   const [data, setData] = useState(() => samplePeople(10_000, 7));
   const table = useGrid({
     id: 'people',
@@ -57,7 +72,7 @@ export function PeopleGrid({ german }: { german: boolean }) {
     getRowId,
     persist: true,
     initialState,
-    messages: german ? gridMessagesDe : undefined,
+    locale,
     groupDisplay: 'groupColumn',
     renderDetail: (row) => <PersonDetail person={row.original} />,
     onCellValueChange: ({ updatedRow }) =>
@@ -67,7 +82,7 @@ export function PeopleGrid({ german }: { german: boolean }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
       <Toolbar table={table} />
-      <DataGrid table={table} showTotals showFloatingFilters cellMenuItems={cellMenuItems} />
+      <DataGrid table={table} aria-label="People" showTotals showFloatingFilters cellMenu={cellMenu} />
     </div>
   );
 }

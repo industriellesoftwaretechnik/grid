@@ -3,46 +3,42 @@ import type { RowData } from '@tanstack/react-table';
 import { columnMeta } from '#/core/columns/columnInfo.ts';
 import type { FilterKind } from '#/core/columns/columnMeta.ts';
 import { formatValue } from '#/core/columns/format.ts';
-import { gridMeta } from '#/core/table/gridMeta.ts';
 import type { GridColumn } from '#/core/table/types.ts';
 
-export interface SummaryText {
-  format: (value: unknown) => string;
-  empty: string;
-  noneSelected: string;
-}
+/**
+ * A filter as the UI summarizes it, such as on a floating filter's button: the typed text, the bounds of a range, or
+ * the chosen values of a set with `blank` for the blank one. The values are text, as the column shows them.
+ */
+export type FilterSummary =
+  | { kind: 'text'; text: string }
+  | { kind: 'range'; from: string | undefined; to: string | undefined }
+  | { kind: 'set'; values: string[]; blank: boolean };
 
 const isBlank = (value: unknown) => value === null || value === undefined || value === '';
 
-/**
- * A filter value as text, as AG Grid's floating filters show it: the typed text, a range as `a – b`, `≥ a` or `≤ b`,
- * and the chosen set values, counted first when there are more than two. Empty when nothing is filtered.
- */
-export function filterSummary(kind: FilterKind, value: unknown, text: SummaryText): string {
-  if (value === undefined) return '';
+/** A filter value as its summary; unset when nothing is filtered. */
+export function filterSummary(
+  kind: FilterKind,
+  value: unknown,
+  format: (value: unknown) => string
+): FilterSummary | undefined {
+  if (value === undefined) return undefined;
+  if (kind === 'text') return typeof value === 'string' ? { kind, text: value } : undefined;
+  if (!Array.isArray(value)) return undefined;
   if (kind === 'set') {
-    if (!Array.isArray(value)) return '';
-    const labels = [...new Set(value.map((item) => (isBlank(item) ? text.empty : text.format(item))))];
-    if (labels.length === 0) return text.noneSelected;
-    return labels.length <= 2 ? labels.join(', ') : `(${labels.length}) ${labels.join(', ')}`;
+    return {
+      kind,
+      values: [...new Set(value.filter((item) => !isBlank(item)).map(format))],
+      blank: value.some(isBlank),
+    };
   }
-  if (kind === 'text') return typeof value === 'string' ? value : '';
-  if (!Array.isArray(value)) return '';
-  const [min, max] = value.map((bound) => (bound === undefined ? '' : text.format(bound)));
-  if (min && max) return min === max ? min : `${min} – ${max}`;
-  if (min) return `≥ ${min}`;
-  if (max) return `≤ ${max}`;
-  return '';
+  const [from, to] = [value[0], value[1]].map((bound) => (bound === undefined ? undefined : format(bound)));
+  return from === undefined && to === undefined ? undefined : { kind: 'range', from, to };
 }
 
-/** A column's filter value as text, such as `≥ 5` or `(3) a, b, c`; empty when nothing is filtered. */
-export function filterSummaryText<TData extends RowData>(column: GridColumn<TData>, value: unknown): string {
+/** A column's filter as its summary, its values formatted as the column shows them. */
+export function columnFilterSummary<TData extends RowData>(column: GridColumn<TData>): FilterSummary | undefined {
   const { filter } = columnMeta(column);
-  if (!filter) return '';
-  const { t } = gridMeta(column.table);
-  return filterSummary(filter, value, {
-    format: (item) => formatValue(item, column),
-    empty: t('filter.empty'),
-    noneSelected: t('filter.none-selected'),
-  });
+  if (!filter) return undefined;
+  return filterSummary(filter, column.getFilterValue(), (item) => formatValue(item, column));
 }

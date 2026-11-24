@@ -7,6 +7,7 @@ import { ArrowDown, ArrowUp, EllipsisVertical, ListFilter } from 'lucide-react';
 
 import { FilterEditor } from '@/components/data-grid/filters';
 import { ContextMenuEntries, DropdownMenuEntries } from '@/components/data-grid/menu-entries';
+import { messages } from '@/components/data-grid/messages';
 import { flexAlign, pinnedClassName } from '@/components/data-grid/styles';
 import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -109,19 +110,17 @@ function HeaderCell<TData extends object>({ slot, height }: { slot: HeaderSlot<T
             onFilter={() => setFilterOpen(true)}
             className={cn('flex h-full items-center gap-1 px-2', flexAlign[model.align])}
           >
-            <HeaderLabel slot={slot} reverse={model.align === 'end'} />
+            <HeaderLabel slot={slot} reverse={model.align === 'end'} groupColumn={model.groupColumn} />
             {model.filter && model.filtered && (
               <PopoverTrigger
                 {...stopDrag}
-                aria-label={model.labels.filter}
+                aria-label={messages.filter}
                 className={cn(iconButtonClassName, 'bg-primary/15 text-primary hover:bg-primary/25 hover:text-primary')}
               >
                 <ListFilter />
               </PopoverTrigger>
             )}
-            {model.showMenuButton && (
-              <ColumnMenuButton column={header.column} label={model.labels.menu} onFilter={() => setFilterOpen(true)} />
-            )}
+            {model.showMenuButton && <ColumnMenuButton column={header.column} onFilter={() => setFilterOpen(true)} />}
           </ColumnContent>
           {model.filter && (
             <PopoverContent anchor={cell} align="start" className="w-64 gap-2 p-2" {...stopDrag}>
@@ -135,19 +134,20 @@ function HeaderCell<TData extends object>({ slot, height }: { slot: HeaderSlot<T
   );
 }
 
-/** The header's label; a button that sorts where the column can be sorted. End-aligned labels sit at the right. */
+/**
+ * The header's label; a button that sorts where the column can be sorted. End-aligned labels sit at the right. The
+ * group column's header has no text of its own.
+ */
 function HeaderLabel<TData extends object>({
   slot: { header, toggleSorting, sorted, sortPosition },
   reverse,
+  groupColumn,
 }: {
   slot: HeaderSlot<TData>;
   reverse: boolean;
+  groupColumn: boolean;
 }) {
-  const label = (
-    <span className="truncate">
-      <FlexRender header={header} />
-    </span>
-  );
+  const label = <span className="truncate">{groupColumn ? messages.groupColumn : <FlexRender header={header} />}</span>;
 
   const className = cn(
     'flex min-w-0 flex-1 items-center gap-1 text-left [&_svg]:size-3.5 [&_svg]:shrink-0',
@@ -203,16 +203,14 @@ function ColumnContent<TData extends object>({
 
 function ColumnMenuButton<TData extends object>({
   column,
-  label,
   onFilter,
 }: {
   column: GridColumn<TData>;
-  label: string;
   onFilter: () => void;
 }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger {...stopDrag} aria-label={label} className={iconButtonClassName}>
+      <DropdownMenuTrigger {...stopDrag} aria-label={messages.columnMenu} className={iconButtonClassName}>
         <EllipsisVertical />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52" {...stopDrag}>

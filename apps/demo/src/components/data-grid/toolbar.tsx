@@ -1,18 +1,17 @@
 import { ChevronsDownUp, ChevronsUpDown, Columns3, Download, FilterX, Search } from 'lucide-react';
 
 import { DropdownMenuEntries } from '@/components/data-grid/menu-entries';
+import { messages } from '@/components/data-grid/messages';
 import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { cn } from '@/lib/utils';
 import {
-  useClearFilters,
+  downloadCsv,
   useColumnsMenu,
-  useExpandAll,
-  useExport,
+  useGridSelector,
   useSearch,
-  useTranslate,
   type CoreTable,
   type CsvExportOptions,
 } from '@istec/grid';
@@ -20,7 +19,8 @@ import {
 /*
  * Parts to place around a grid, anywhere on the page: each takes the table from `useGrid`. The grid renders none of
  * them itself; lay them out as you like, next to your own buttons. The buttons are outline buttons, so that they join
- * in a `ButtonGroup`.
+ * in a `ButtonGroup`. Each reads the table with `useGridSelector` and calls its actions; a control of your own does
+ * the same.
  */
 
 /** The search across all columns. */
@@ -40,8 +40,8 @@ export function SearchInput<TData extends object>({
       </InputGroupAddon>
       <InputGroupInput
         type="search"
-        aria-label={search.label}
-        placeholder={search.label}
+        aria-label={messages.search}
+        placeholder={messages.search}
         value={search.text}
         onChange={(event) => search.change(event.target.value)}
       />
@@ -54,12 +54,10 @@ export function ExportButton<TData extends object>({
   table,
   ...options
 }: { table: CoreTable<TData> } & CsvExportOptions) {
-  const csv = useExport(table, options);
-
   return (
-    <Button variant="outline" onClick={csv.download}>
+    <Button variant="outline" onClick={() => downloadCsv(table, options)}>
       <Download />
-      {csv.label}
+      {messages.export}
     </Button>
   );
 }
@@ -74,18 +72,18 @@ export function ExpandCollapseButtons<TData extends object>({
   size?: 'sm';
   className?: string;
 }) {
-  const rows = useExpandAll(table);
-  if (!rows.available) return null;
+  const available = useGridSelector(table, () => table.getCanExpandParentRows());
+  if (!available) return null;
 
   return (
     <ButtonGroup className={className}>
-      <Button variant="outline" size={size} onClick={rows.expandAll}>
+      <Button variant="outline" size={size} onClick={() => table.expandParentRows()}>
         <ChevronsUpDown />
-        {rows.labels.expandAll}
+        {messages.expandAll}
       </Button>
-      <Button variant="outline" size={size} onClick={rows.collapseAll}>
+      <Button variant="outline" size={size} onClick={() => table.toggleAllRowsExpanded(false)}>
         <ChevronsDownUp />
-        {rows.labels.collapseAll}
+        {messages.collapseAll}
       </Button>
     </ButtonGroup>
   );
@@ -93,25 +91,23 @@ export function ExpandCollapseButtons<TData extends object>({
 
 /** Removes every column filter and the search; disabled while there is none. */
 export function ClearFiltersButton<TData extends object>({ table }: { table: CoreTable<TData> }) {
-  const filters = useClearFilters(table);
+  const count = useGridSelector(table, () => table.getActiveFilterCount());
 
   return (
-    <Button variant="outline" disabled={filters.count === 0} onClick={filters.clear}>
+    <Button variant="outline" disabled={count === 0} onClick={() => table.clearFilters()}>
       <FilterX />
-      {filters.label}
+      {messages.clearFilters}
     </Button>
   );
 }
 
 /** A menu that shows and hides columns, with "Reset columns". */
 export function ColumnsButton<TData extends object>({ table }: { table: CoreTable<TData> }) {
-  const t = useTranslate(table);
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger render={<Button variant="outline" />}>
         <Columns3 />
-        {t('columns')}
+        {messages.columns}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
         <ColumnsMenuEntries table={table} />

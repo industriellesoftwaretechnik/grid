@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type FocusEvent, type UIEvent } from 'react';
 
 import { hasAggregations } from '#/core/columns/columnInfo.ts';
-import { useTranslate } from '#/core/locale/useTranslate.ts';
 import { displayedColumns, displayedRowIds } from '#/core/selection/gridCells.ts';
 import { gridEvents, keepNativeContextMenu, listenToClipboard } from '#/core/selection/gridEvents.ts';
 import { gridMeta } from '#/core/table/gridMeta.ts';
@@ -31,7 +30,6 @@ export function useGridView<TData extends object>(
   const footerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const { tableId } = gridMeta(table);
-  const t = useTranslate(table);
   const view = useGridSelector(table, () => ({
     noFocus: table.atoms.cellSelection.get().length === 0,
     topRows: table.getTopRows(),
@@ -56,7 +54,6 @@ export function useGridView<TData extends object>(
   return {
     /** Whether to cover the rows, as `loading` asks. */
     busy: loading,
-    labels: { loading: t('loading') },
     topRows: view.topRows,
     bottomRows: view.bottomRows,
     /** Whether to show the totals row: asked for, and some visible column aggregates. */
@@ -65,12 +62,14 @@ export function useGridView<TData extends object>(
     groupPanel: showGroupPanel && view.groupable,
     /** The scrolling element, for `useVirtualRows`. */
     scrollElement,
-    /** For the element around header, body and footer. AG Grid's root has the grid role too. */
+    /**
+     * For the element around header, body and footer. AG Grid's root has the grid role too; the UI gives it its
+     * accessible name.
+     */
     gridProps: {
       ref: gridRef,
       role: 'grid',
       tabIndex: -1,
-      'aria-label': tableId,
       'aria-busy': loading,
       'data-table-id': tableId,
       'data-grid-body': '',

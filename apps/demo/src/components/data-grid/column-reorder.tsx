@@ -52,7 +52,7 @@ export function ColumnReorder<TData extends object>({
   const dragAndDrop = useColumnDragAndDrop(({ active, over }) => {
     if (!over) return;
     if (over.id === groupPanelId) reorder.groupBy(String(active.id));
-    else reorder.move(String(active.id), String(over.id));
+    else table.moveColumn(String(active.id), String(over.id));
   });
   const action: DropAction =
     !overPanel || dragging === undefined ? 'move' : reorder.canGroupBy(dragging) ? 'group' : 'reject';

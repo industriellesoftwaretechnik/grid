@@ -3,6 +3,7 @@ import type { RowData } from '@tanstack/react-table';
 import { filteredLeafRows, rowsAsText, selectedLeafRows, valueColumns } from '#/core/selection/gridCells.ts';
 import { formatDelimited } from '#/core/shared/delimited.ts';
 import { gridDefaults } from '#/core/table/defaults.ts';
+import { gridMeta } from '#/core/table/gridMeta.ts';
 import type { CoreTable } from '#/core/table/types.ts';
 
 export interface CsvExportOptions {
@@ -18,13 +19,14 @@ export function tableCsv<TData extends RowData>(table: CoreTable<TData>, options
   return formatDelimited(rowsAsText(rows, valueColumns(table), true), options.separator ?? gridDefaults.csvSeparator);
 }
 
+/** Downloads `tableCsv`, named after the table's `id` unless `fileName` is given. */
 export function downloadCsv<TData extends RowData>(table: CoreTable<TData>, options: CsvExportOptions = {}) {
   // The byte order mark makes Excel read the file as UTF-8.
   const blob = new Blob(['﻿', tableCsv(table, options)], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `${options.fileName ?? 'export'}.csv`;
+  link.download = `${options.fileName ?? gridMeta(table).tableId}.csv`;
   link.click();
   URL.revokeObjectURL(url);
 }

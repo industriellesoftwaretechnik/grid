@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
-import { useTranslate } from '#/core/locale/useTranslate.ts';
 import { anchorOf } from '#/core/selection/cellRanges.ts';
 import { indexOfId } from '#/core/selection/gridCells.ts';
 import { gridMeta } from '#/core/table/gridMeta.ts';
@@ -30,7 +29,6 @@ export function useVirtualRows<TData extends object>(
   table: CoreTable<TData>,
   { scrollElement, rowHeight, overscan }: VirtualRowsOptions
 ) {
-  const t = useTranslate(table);
   const [cachedEntries] = useState(() => createBodyEntriesCache<GridRow<TData>>());
   const { entries, focusedRowId, colSpan } = useGridSelector(table, () => {
     const meta = gridMeta(table);
@@ -98,7 +96,6 @@ export function useVirtualRows<TData extends object>(
     measureElement: virtualizer.measureElement,
     /** Whether no row passes the filters. */
     empty: entries.length === 0,
-    labels: { noRows: t('no-results') },
   };
 }
 

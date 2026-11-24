@@ -1,15 +1,12 @@
 import type { RowData } from '@tanstack/react-table';
 
 import { canGroupBy, columnLabel } from '#/core/columns/columnInfo.ts';
-import { columnOrderIds, moveColumns } from '#/core/columns/columnOrder.ts';
 import type { CoreTable } from '#/core/table/types.ts';
 import { useGridSelector } from '#/core/table/useGridSelector.ts';
 
 export interface ColumnReorderModel {
   /** The ids of the headers that can be dragged, in display order: the scrolling columns. */
   headerIds: string[];
-  /** Moves a column to where another one is: after it when moving forward, before it when moving back. */
-  move: (columnId: string, targetId: string) => void;
   /** Whether dropping the column into the group panel would group by it. */
   canGroupBy: (columnId: string) => boolean;
   /** Groups by the column, as dropping it into the group panel does. */
@@ -19,8 +16,8 @@ export interface ColumnReorderModel {
 }
 
 /**
- * What a drag and drop of headers does: reorder the scrolling columns, or group by a column dropped into the group
- * panel. Pinned columns keep the order they were pinned in. The dragging itself is the UI's.
+ * What a drag and drop of headers does: reorder the scrolling columns (`table.moveColumn`), or group by a column
+ * dropped into the group panel. Pinned columns keep the order they were pinned in. The dragging itself is the UI's.
  */
 export function useColumnReorder<TData extends RowData>(table: CoreTable<TData>): ColumnReorderModel {
   const headerIds = useGridSelector(table, () =>
@@ -31,9 +28,6 @@ export function useColumnReorder<TData extends RowData>(table: CoreTable<TData>)
 
   return {
     headerIds,
-    move: (columnId, targetId) => {
-      if (columnId !== targetId) table.setColumnOrder(moveColumns(columnOrderIds(table), [columnId], [targetId]));
-    },
     canGroupBy: (columnId) => {
       const column = table.getColumn(columnId);
       return column !== undefined && canGroupBy(column);

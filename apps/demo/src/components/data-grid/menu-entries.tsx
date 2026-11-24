@@ -4,7 +4,6 @@ import {
   ArrowDown,
   ArrowUp,
   ClipboardPaste,
-  Columns3,
   Copy,
   EyeOff,
   Group as GroupIcon,
@@ -16,6 +15,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+import { aggregationSymbols, menuLabels, menuShortcuts } from '@/components/data-grid/messages';
 import {
   ContextMenuCheckboxItem,
   ContextMenuGroup,
@@ -36,28 +36,42 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { GridMenuEntry, GridMenuIcon, GridMenuSection } from '@istec/grid';
+import type { GridMenuEntry, GridMenuId, GridMenuSection } from '@istec/grid';
 
-const icons: Record<GridMenuIcon, LucideIcon> = {
-  'sort-asc': ArrowUp,
-  'sort-desc': ArrowDown,
-  clear: X,
+const icons: Partial<Record<GridMenuId, LucideIcon>> = {
+  'sort.asc': ArrowUp,
+  'sort.desc': ArrowDown,
+  'sort.clear': X,
   filter: ListFilter,
+  'filter.clear': X,
   pin: Pin,
-  group: GroupIcon,
+  'group.by': GroupIcon,
+  'group.remove': GroupIcon,
   aggregation: Sigma,
-  hide: EyeOff,
-  columns: Columns3,
-  reset: RotateCcw,
+  'column.hide': EyeOff,
+  'columns.reset': RotateCcw,
   copy: Copy,
+  'copy.with-headers': Copy,
   paste: ClipboardPaste,
 };
 
+const isGridMenuId = (id: string): id is GridMenuId => Object.hasOwn(menuLabels, id);
+
+/** An entry's text: its own label, else the grid's text for its id. */
+const entryLabel = (entry: GridMenuEntry) => entry.label ?? (isGridMenuId(entry.id) ? menuLabels[entry.id] : entry.id);
+
+// An aggregation's item ends with its mark, as the cells show it.
+const aggregationHints: Record<string, string> = Object.fromEntries(
+  Object.entries(aggregationSymbols).map(([name, symbol]) => [`aggregation.${name}`, symbol])
+);
+
+const entryHint = (entry: GridMenuEntry) =>
+  (entry.type === 'item' ? entry.hint : undefined) ?? aggregationHints[entry.id];
+
 function EntryIcon({ entry }: { entry: GridMenuEntry }): ReactNode {
-  if (entry.type === 'item' && entry.iconNode !== undefined) return entry.iconNode;
-  if (!entry.icon) return null;
-  const Icon = icons[entry.icon];
-  return <Icon />;
+  if (entry.icon !== undefined) return entry.icon;
+  const Icon = isGridMenuId(entry.id) ? icons[entry.id] : undefined;
+  return Icon ? <Icon /> : null;
 }
 
 /** The parts of a shadcn menu, which the context menu and the dropdown menu both have. */
@@ -90,19 +104,21 @@ function menuEntries(sections: GridMenuSection[], parts: MenuParts): ReactNode {
               <Sub key={entry.id}>
                 <SubTrigger>
                   <EntryIcon entry={entry} />
-                  {entry.label}
+                  {entryLabel(entry)}
                 </SubTrigger>
                 <SubContent className="min-w-40">{menuEntries(entry.sections, parts)}</SubContent>
               </Sub>
             );
           }
+          const hint = entryHint(entry);
+          const shortcut = entry.shortcut ?? (isGridMenuId(entry.id) ? menuShortcuts[entry.id] : undefined);
           const content = (
             <>
               {entry.checked === undefined && <EntryIcon entry={entry} />}
-              {entry.label}
+              {entryLabel(entry)}
               {/* A hint, such as an aggregation's mark, looks as it does in the cells; a shortcut as shortcuts do. */}
-              {entry.hint !== undefined && <span className="ml-auto pl-4 text-muted-foreground">{entry.hint}</span>}
-              {entry.hint === undefined && entry.shortcut !== undefined && <Shortcut>{entry.shortcut}</Shortcut>}
+              {hint !== undefined && <span className="ml-auto pl-4 text-muted-foreground">{hint}</span>}
+              {hint === undefined && shortcut !== undefined && <Shortcut>{shortcut}</Shortcut>}
             </>
           );
           return entry.checked === undefined ? (

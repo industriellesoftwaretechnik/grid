@@ -4,7 +4,7 @@ import type { RowData } from '@tanstack/react-table';
 
 import { columnMeta, filterKindOf } from '#/core/columns/columnInfo.ts';
 import type { ColumnAlign, FilterKind } from '#/core/columns/columnMeta.ts';
-import { useTranslate } from '#/core/locale/useTranslate.ts';
+import { groupColumnId } from '#/core/columns/groupColumn.ts';
 import { useGridSelector } from '#/core/table/useGridSelector.ts';
 import type { HeaderSlot } from '#/parts/header/headerRows.ts';
 
@@ -29,7 +29,8 @@ export interface HeaderCellModel {
   filter: FilterKind | undefined;
   /** Whether a filter is set, which a header shows. */
   filtered: boolean;
-  labels: { menu: string; filter: string };
+  /** Whether it is the header of the group column (`groupDisplay: 'groupColumn'`), which has no text: the UI names it. */
+  groupColumn: boolean;
   /** For the `<th>`: keeps a pinned header in place and tells the sorting. */
   cellProps: {
     colSpan: number;
@@ -47,7 +48,6 @@ export function useHeaderCell<TData extends RowData>({
   filtered,
 }: HeaderSlot<TData>): HeaderCellModel {
   const { column } = header;
-  const t = useTranslate(column.table);
   const { align, lockPosition, headerClassName } = columnMeta(column);
   const kind = header.isPlaceholder ? 'placeholder' : header.subHeaders.length > 0 ? 'group' : 'column';
   const width = useGridSelector(column.table, () => header.getSize());
@@ -62,7 +62,7 @@ export function useHeaderCell<TData extends RowData>({
     showMenuButton: hasMenu && width >= menuButtonMinWidth,
     filter: kind === 'column' ? filterKindOf(column) : undefined,
     filtered,
-    labels: { menu: t('column.menu'), filter: t('filter') },
+    groupColumn: kind === 'column' && column.id === groupColumnId,
     cellProps: { colSpan: header.colSpan, 'aria-sort': sorted ? ariaSort[sorted] : undefined, style },
   };
 }

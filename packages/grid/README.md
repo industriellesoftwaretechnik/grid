@@ -42,7 +42,7 @@ return <DataGrid table={table} showFloatingFilters />;
 ## Hooks
 
 `useGrid` returns the TanStack table with the grid's features; every state slice is controllable as in TanStack. Each
-part of the grid has a hook that returns its values, actions, element props and texts:
+part of the grid has a hook that returns its values, actions and element props:
 
 | Part      | Hooks                                                                                                            |
 | --------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -50,13 +50,19 @@ part of the grid has a hook that returns its values, actions, element props and 
 | Header    | `useHeaderRows`, `useHeaderCell`, `useColumnResizer`, `useColumnReorder`, `useColumnMenu`                        |
 | Body      | `useVirtualRows`, `useDataRow`, `useBodyCell`, `useGroupRowCell`, `useRowToggle`, `useCellEditor`, `useCellMenu` |
 | Selection | `useSelectAll`, `useRowSelect`                                                                                   |
-| Filters   | `useFloatingFilter`, `useTextFilter`, `useRangeFilter`, `useSetFilter`                                           |
+| Filters   | `useFilterInput`, `useFloatingFilter`, `useRangeFilter`, `useSetFilter`                                          |
 | Grouping  | `useGroupPanel`                                                                                                  |
-| Footer    | `useTotalsRow`, `useStatusBar`                                                                                   |
-| Toolbar   | `useSearch`, `useExport`, `useExpandAll`, `useClearFilters`, `useColumnsMenu`                                    |
+| Footer    | `useTotalsRow`, `useStatusBar`, `useFormatNumber`                                                                |
+| Toolbar   | `useSearch`, `useColumnsMenu`                                                                                    |
 
-Menus come as data with icon names; dragging is left to your drag-and-drop library. The shadcn implementation
-(`apps/demo/src/components/data-grid`) shows how each hook is used.
+Controls of your own need no hook of the grid: read the table with `useGridSelector` and call its actions, such as
+`table.clearFilters()`, `table.expandParentRows()`, `table.moveColumn()`, `table.moveGrouping()` or
+`column.setAggregation()`.
+
+The grid has no texts. Models hold values and ids, such as a status bar's row counts or a menu entry's `GridMenuId`,
+and your UI words them; `useGrid`'s `locale` sets how numbers and dates are shown. Menus are plain data to map, filter
+or extend before rendering; dragging is left to your drag-and-drop library. The shadcn implementation
+(`apps/demo/src/components/data-grid`, its texts in `messages.ts`) shows how each hook is used.
 
 ## License
 

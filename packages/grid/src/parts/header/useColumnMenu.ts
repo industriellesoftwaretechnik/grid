@@ -6,12 +6,12 @@ import { useGridSelector } from '#/core/table/useGridSelector.ts';
 import { columnMenu, type ColumnMenuOptions } from '#/parts/header/columnMenu.ts';
 
 /**
- * The header menu of a column, as data: sorting, filtering, pinning, grouping and aggregation, hiding, the columns
- * shown and "Reset columns". It stays current while rendered; empty for `meta.menu: false`.
+ * The header menu of a column, as data: sorting, filtering, pinning, grouping and aggregation, hiding and "Reset
+ * columns". It stays current while rendered; empty for `meta.menu: false`.
  */
 export function useColumnMenu<TData extends RowData>(
   column: GridColumn<TData>,
-  options: ColumnMenuOptions
+  options: ColumnMenuOptions = {}
 ): GridMenuSection[] {
   return useGridSelector(column.table, () => columnMenu(column.table, column, options));
 }

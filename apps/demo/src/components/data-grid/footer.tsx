@@ -2,20 +2,28 @@ import type { ReactNode } from 'react';
 
 import { X } from 'lucide-react';
 
+import { aggregationName, aggregationSymbols, messages, statusTexts } from '@/components/data-grid/messages';
 import { barClassName, pinnedClassName, textAlign } from '@/components/data-grid/styles';
 import { cn } from '@/lib/utils';
-import { useStatusBar, useTotalsRow, type AggregationMark, type CoreTable } from '@istec/grid';
+import { useFormatNumber, useStatusBar, useTotalsRow, type AggregationName, type CoreTable } from '@istec/grid';
 
 /** The mark of an aggregation, such as Σ, with its name as tooltip. */
-export function AggregationMarkView({ mark, className }: { mark: AggregationMark | undefined; className?: string }) {
-  if (!mark) return null;
+export function AggregationMark({
+  aggregation,
+  className,
+}: {
+  aggregation: AggregationName | undefined;
+  className?: string;
+}) {
+  if (!aggregation) return null;
+  const name = aggregationName(aggregation);
   return (
     <abbr
-      title={mark.name}
-      aria-label={mark.name}
+      title={name}
+      aria-label={name}
       className={cn('mr-1.5 font-normal text-muted-foreground no-underline', className)}
     >
-      {mark.symbol}
+      {aggregationSymbols[aggregation]}
     </abbr>
   );
 }
@@ -41,7 +49,7 @@ export function TotalsRow<TData extends object>({ table, rowHeight }: { table: C
           >
             {slot.total && (
               <>
-                <AggregationMarkView mark={slot.total.mark} />
+                <AggregationMark aggregation={slot.total.aggregation} />
                 {slot.total.text}
               </>
             )}
@@ -64,41 +72,44 @@ export function StatusBar<TData extends object>({
   children?: ReactNode;
 }) {
   const status = useStatusBar(table);
+  const format = useFormatNumber(table);
+  const texts = statusTexts(status, format);
+  const { cells } = status;
 
   return (
     <div
       aria-live="polite"
       className={cn(barClassName, 'min-h-6 flex-wrap gap-x-4 gap-y-1 border-t text-muted-foreground tabular-nums')}
     >
-      <span>{status.rows}</span>
-      {status.groups && <span>{status.groups}</span>}
-      {status.selected && (
+      <span>{texts.rows}</span>
+      {texts.groups && <span>{texts.groups}</span>}
+      {texts.selected && (
         <span className="flex items-center gap-1 text-foreground">
-          {status.selected}
+          {texts.selected}
           <button
             type="button"
-            aria-label={status.clearSelection.label}
-            title={status.clearSelection.label}
-            onClick={status.clearSelection.onClick}
+            aria-label={messages.clearSelection}
+            title={messages.clearSelection}
+            onClick={() => table.resetRowSelection(true)}
             className="rounded-sm p-0.5 text-muted-foreground hover:bg-muted-foreground/20 hover:text-foreground"
           >
             <X className="size-3" />
           </button>
         </span>
       )}
-      {status.cells && (
+      {cells && (
         <span className="flex gap-3 text-foreground">
-          <span>{status.cells.count}</span>
-          {status.cells.sum && (
+          <span>{texts.cells}</span>
+          {cells.sum !== undefined && (
             <span>
-              <AggregationMarkView mark={status.cells.sum.mark} className="mr-1" />
-              {status.cells.sum.text}
+              <AggregationMark aggregation="sum" className="mr-1" />
+              {format(cells.sum)}
             </span>
           )}
-          {status.cells.average && (
+          {cells.mean !== undefined && (
             <span>
-              <AggregationMarkView mark={status.cells.average.mark} className="mr-1" />
-              {status.cells.average.text}
+              <AggregationMark aggregation="mean" className="mr-1" />
+              {format(cells.mean)}
             </span>
           )}
         </span>

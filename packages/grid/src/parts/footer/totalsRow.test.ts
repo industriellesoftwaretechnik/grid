@@ -9,7 +9,7 @@ type Item = { team: string; points: number };
 const helper = createColumnHelper<GridFeatures, Item>();
 
 describe('totalsRow', () => {
-  it('gives aggregated columns their total with its mark, and other columns none', () => {
+  it('gives aggregated columns their total with its aggregation, and other columns none', () => {
     const table = testTable({
       columns: helper.columns([
         helper.accessor('team', { aggregationFn: 'count' }),
@@ -24,8 +24,8 @@ describe('totalsRow', () => {
 
     const cells = totalsRow(table).map((slot) => (slot === 'filler' ? slot : [slot.column.id, slot.total]));
     expect(cells).toEqual([
-      ['team', { mark: { symbol: '#', name: 'Count' }, text: '2' }],
-      ['points', { mark: { symbol: 'Σ', name: 'Sum' }, text: '12 pts' }],
+      ['team', { aggregation: 'count', text: '2' }],
+      ['points', { aggregation: 'sum', text: '12 pts' }],
       ['actions', undefined],
       'filler',
     ]);

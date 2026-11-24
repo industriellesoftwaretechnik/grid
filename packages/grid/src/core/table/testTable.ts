@@ -1,12 +1,11 @@
 import { constructTable, type RowData } from '@tanstack/react-table';
 
-import { createTranslate } from '#/core/locale/messages.ts';
 import type { GroupDisplay } from '#/core/plugins/gridLayoutFeature.ts';
 import type { GridMeta } from '#/core/table/gridMeta.ts';
 import { testFeatures } from '#/core/table/testFeatures.ts';
 import type { GridColumnDef } from '#/core/table/types.ts';
 
-/** A table without React, with the meta `useGrid` would give it. */
+/** A table without React, with the meta `useGrid` would give it; English unless `meta.locale` says otherwise. */
 export function testTable<TData extends RowData>({
   columns,
   data,
@@ -22,7 +21,7 @@ export function testTable<TData extends RowData>({
 }) {
   const fullMeta: GridMeta = {
     tableId: 'test',
-    t: createTranslate(),
+    locale: 'en-US',
     treeData: false,
     expandColumn: undefined,
     renderDetail: undefined,

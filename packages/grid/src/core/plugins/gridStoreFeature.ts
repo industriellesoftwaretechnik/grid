@@ -4,7 +4,7 @@ import type { RowData, TableFeature, TableFeatures } from '@tanstack/react-table
 import { sameShallow } from '#/core/shared/sameValue.ts';
 import type { GridMeta } from '#/core/table/gridMeta.ts';
 
-type MetaValues = Pick<GridMeta, 't' | 'treeData' | 'expandColumn' | 'ownColumnVisibility'>;
+type MetaValues = Pick<GridMeta, 'locale' | 'treeData' | 'expandColumn' | 'ownColumnVisibility'>;
 
 /** The options and meta values the table's owner passes in, which are no state of the table. */
 export interface GridInputs extends Partial<MetaValues> {
@@ -52,7 +52,7 @@ function inputsOf({ options }: InputsTable): GridInputs {
     data,
     columns,
     groupDisplay,
-    t: meta.t,
+    locale: meta.locale,
     treeData: meta.treeData,
     expandColumn: meta.expandColumn,
     ownColumnVisibility: meta.ownColumnVisibility,

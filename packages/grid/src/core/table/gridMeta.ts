@@ -2,14 +2,12 @@ import type { ReactNode } from 'react';
 
 import type { ColumnVisibilityState } from '@tanstack/react-table';
 
-import type { Translate } from '#/core/locale/messages.ts';
-
 /** The values `useGrid` gives the components through `table.options.meta`; the grid's actions are table APIs. */
 export interface GridMeta {
   /** The table's `id`; its DOM elements carry it as `data-table-id`. */
   tableId: string;
-  /** The texts, from `useGrid`'s `messages`. */
-  t: Translate;
+  /** The locale values are formatted and sorted in, from `useGrid`'s `locale`; unset for the browser's. */
+  locale: string | undefined;
   /** Whether the rows come as a tree through `getSubRows`. */
   treeData: boolean;
   /**

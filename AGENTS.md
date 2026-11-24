@@ -12,5 +12,7 @@ docs are in `node_modules/vite-plus/docs`.
 - Hooks and components read table state and meta only through `useGridSelector` or a hook's model, never in the render
   body (see `useGridSelector`'s doc comment).
 - Grid state and actions are TanStack features in `src/core/plugins/`; every state slice is controllable as in
-  TanStack. `meta` carries only values.
+  TanStack. `meta` carries only values. A control needs no hook when `useGridSelector` and a table action do.
+- The package has no texts, only a `locale` (`docs/adr/0001-package-has-no-texts.md`); the shadcn texts are in
+  `messages.ts`.
 - Release flow: `CONTRIBUTING.md`.

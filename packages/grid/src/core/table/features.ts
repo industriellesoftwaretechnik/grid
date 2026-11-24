@@ -30,6 +30,7 @@ import {
 import type { GridColumnMeta } from '#/core/columns/columnMeta.ts';
 import { cellEditingFeature } from '#/core/plugins/cellEditingFeature.ts';
 import { columnAggregationFeature } from '#/core/plugins/columnAggregationFeature.ts';
+import { gridActionsFeature } from '#/core/plugins/gridActionsFeature.ts';
 import { gridLayoutFeature } from '#/core/plugins/gridLayoutFeature.ts';
 import { gridStoreFeature } from '#/core/plugins/gridStoreFeature.ts';
 import { aggregationFns } from '#/core/table/aggregations.ts';
@@ -58,6 +59,7 @@ export const features = tableFeatures({
   cellEditingFeature,
   columnAggregationFeature,
   gridLayoutFeature,
+  gridActionsFeature,
   gridStoreFeature,
   filteredRowModel: createFilteredRowModel(),
   facetedRowModel: createFacetedRowModel(),

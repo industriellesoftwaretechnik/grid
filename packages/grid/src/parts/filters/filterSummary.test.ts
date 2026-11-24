@@ -1,34 +1,30 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { filterSummary, type SummaryText } from '#/parts/filters/filterSummary.ts';
+import { filterSummary } from '#/parts/filters/filterSummary.ts';
 
-const text: SummaryText = {
-  format: (value) => `<${String(value)}>`,
-  empty: '(empty)',
-  noneSelected: 'none',
-};
+const format = (value: unknown) => `<${String(value)}>`;
 
 describe('filterSummary', () => {
-  it('is empty without a filter', () => {
-    expect(filterSummary('text', undefined, text)).toBe('');
-    expect(filterSummary('number', [undefined, undefined], text)).toBe('');
+  it('is unset without a filter', () => {
+    expect(filterSummary('text', undefined, format)).toBeUndefined();
+    expect(filterSummary('number', [undefined, undefined], format)).toBeUndefined();
   });
 
-  it('shows the text of a text filter', () => {
-    expect(filterSummary('text', 'ann', text)).toBe('ann');
+  it('gives the text of a text filter', () => {
+    expect(filterSummary('text', 'ann', format)).toEqual({ kind: 'text', text: 'ann' });
   });
 
-  it('shows a range by its bounds', () => {
-    expect(filterSummary('number', [1, 5], text)).toBe('<1> – <5>');
-    expect(filterSummary('number', [1, undefined], text)).toBe('≥ <1>');
-    expect(filterSummary('date', [undefined, 5], text)).toBe('≤ <5>');
-    expect(filterSummary('number', [3, 3], text)).toBe('<3>');
+  it('gives the bounds of a range as text', () => {
+    expect(filterSummary('number', [1, 5], format)).toEqual({ kind: 'range', from: '<1>', to: '<5>' });
+    expect(filterSummary('date', [undefined, 5], format)).toEqual({ kind: 'range', from: undefined, to: '<5>' });
   });
 
-  it('names the set values and counts them when there are more than two', () => {
-    expect(filterSummary('set', [], text)).toBe('none');
-    expect(filterSummary('set', ['a', null], text)).toBe('<a>, (empty)');
-    expect(filterSummary('set', [null, undefined, ''], text)).toBe('(empty)');
-    expect(filterSummary('set', ['a', 'b', 'c'], text)).toBe('(3) <a>, <b>, <c>');
+  it('gives the chosen set values as text, blanks as one flag', () => {
+    expect(filterSummary('set', [], format)).toEqual({ kind: 'set', values: [], blank: false });
+    expect(filterSummary('set', ['a', null, 'a', undefined, ''], format)).toEqual({
+      kind: 'set',
+      values: ['<a>'],
+      blank: true,
+    });
   });
 });

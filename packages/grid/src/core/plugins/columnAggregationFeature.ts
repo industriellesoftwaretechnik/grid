@@ -10,7 +10,8 @@ import {
   type Updater,
 } from '@tanstack/react-table';
 
-import type { AggregationName } from '#/core/table/aggregations.ts';
+import { resolveMeta, type GridColumnMeta } from '#/core/columns/columnMeta.ts';
+import { isAggregationName, type AggregationName } from '#/core/table/aggregations.ts';
 
 /** The aggregation chosen for a column, by column id; `null` removes the one its definition sets. */
 export type ColumnAggregationState = Record<string, AggregationName | null>;
@@ -26,6 +27,10 @@ interface ColumnAggregationTable {
 interface ColumnAggregationColumn {
   /** Chooses the column's aggregation; `null` turns it off. */
   setAggregation: (aggregation: AggregationName | null) => void;
+  /** The column's aggregation, chosen or from its definition; unset for none or a custom aggregation function. */
+  getAggregation: () => AggregationName | undefined;
+  /** The aggregations the user can choose from: `meta.aggregations`, or its data type's. None for display columns. */
+  getAggregationOptions: () => readonly AggregationName[];
 }
 
 declare module '@tanstack/table-core' {
@@ -48,7 +53,15 @@ declare module '@tanstack/table-core' {
 
 interface AnyColumn {
   id: string;
-  table: ColumnAggregationTable;
+  accessorFn?: unknown;
+  columnDef: { aggregationFn?: unknown; meta?: GridColumnMeta };
+  table: ColumnAggregationTable & { atoms: { columnAggregation: { get: () => ColumnAggregationState } } };
+}
+
+function aggregationOf(column: AnyColumn): AggregationName | undefined {
+  const chosen = column.table.atoms.columnAggregation.get()[column.id];
+  const aggregation = chosen === undefined ? column.columnDef.aggregationFn : chosen;
+  return isAggregationName(aggregation) ? aggregation : undefined;
 }
 
 /** The aggregation chosen for each column, as state the host may control. */
@@ -69,6 +82,10 @@ export const columnAggregationFeature: TableFeature = {
       column_setAggregation: {
         fn: (column: AnyColumn, aggregation: AggregationName | null) =>
           column.table.setColumnAggregation((current) => ({ ...current, [column.id]: aggregation })),
+      },
+      column_getAggregation: { fn: aggregationOf },
+      column_getAggregationOptions: {
+        fn: (column: AnyColumn) => (column.accessorFn ? resolveMeta(column.columnDef.meta).aggregations : []),
       },
     });
   },

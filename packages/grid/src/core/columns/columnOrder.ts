@@ -1,9 +1,11 @@
-import type { RowData } from '@tanstack/react-table';
-
-import type { CoreTable } from '#/core/table/types.ts';
+/** What `columnOrderIds` reads of a table. */
+export interface OrderedTable {
+  getAllColumns: () => readonly { getLeafColumns: () => readonly { id: string }[] }[];
+  atoms: { columnOrder: { get: () => readonly string[] } };
+}
 
 // Built from state, not from getAllLeafColumns(), which also moves grouped columns to the front.
-export function columnOrderIds<TData extends RowData>(table: CoreTable<TData>): string[] {
+export function columnOrderIds(table: OrderedTable): string[] {
   const defined = table.getAllColumns().flatMap((column) => column.getLeafColumns().map((leaf) => leaf.id));
   const ordered = table.atoms.columnOrder.get().filter((id) => defined.includes(id));
   return [...ordered, ...defined.filter((id) => !ordered.includes(id))];

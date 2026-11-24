@@ -13,7 +13,6 @@ import { gridMeta } from '#/core/table/gridMeta.ts';
 import type { GridCell } from '#/core/table/types.ts';
 import { useGridSelector } from '#/core/table/useGridSelector.ts';
 import { groupingCell } from '#/parts/body/useGroupRowCell.ts';
-import { aggregationMark } from '#/parts/footer/totalsRow.ts';
 import { cellStickyStyle, type Region } from '#/parts/view/layout.ts';
 import { useFocusTarget } from '#/parts/view/useFocusTarget.ts';
 
@@ -77,7 +76,7 @@ export function useBodyCell<TData extends RowData, TElement extends HTMLElement 
 ) {
   const { table } = cell;
   const inGroupColumn = cell.column.id === groupColumnId;
-  const { look, editing, groupCell, grouped, toggle, empty, value, treeData, aggregated } = useGridSelector(
+  const { look, editing, groupCell, grouped, toggle, empty, value, treeData, aggregation, valueText } = useGridSelector(
     table,
     () => {
       const groupRow = cell.row.getIsGrouped();
@@ -93,7 +92,10 @@ export function useBodyCell<TData extends RowData, TElement extends HTMLElement 
         empty: blank,
         value: blank ? undefined : cell.getValue(),
         treeData: gridMeta(table).treeData,
-        aggregated: cell.getIsAggregated(),
+        aggregation: cell.getIsAggregated() ? cell.column.getAggregation() : undefined,
+        // Read here, so a change of `useGrid`'s locale reaches the tooltip.
+        valueText:
+          blank || cell.column.columnDef.meta?.tooltip !== true ? undefined : formatValue(cell.getValue(), cell.column),
       };
     }
   );
@@ -114,7 +116,7 @@ export function useBodyCell<TData extends RowData, TElement extends HTMLElement 
     empty || meta.tooltip === undefined || meta.tooltip === false
       ? undefined
       : meta.tooltip === true
-        ? formatValue(value, cell.column)
+        ? valueText
         : meta.tooltip(value, rowData);
 
   const onMouseDown = (event: MouseEvent<TElement>) => {
@@ -135,8 +137,8 @@ export function useBodyCell<TData extends RowData, TElement extends HTMLElement 
     /** The cell to render with `FlexRender`: in the group column, a group row shows the cell of its grouped column. */
     shownCell: groupCell ?? cell,
     align,
-    /** For an aggregated value in a group row: the mark of its aggregation, such as Σ, to show before it. */
-    aggregation: aggregated ? aggregationMark(table, cell.column.columnDef.aggregationFn) : undefined,
+    /** For an aggregated value in a group row: its aggregation, for the UI to mark it by, such as Σ for a sum. */
+    aggregation,
     /** The indentation of the toggle, in levels. */
     toggleLevel: grouped || inGroupColumn || treeData ? cell.row.depth : 0,
     /** The column's `cellClassName` for this cell. */

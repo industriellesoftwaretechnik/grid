@@ -5,7 +5,8 @@ import { ChevronRight } from 'lucide-react';
 
 import { CellEditor } from '@/components/data-grid/cell-editor';
 import { ColumnTable } from '@/components/data-grid/column-table';
-import { AggregationMarkView } from '@/components/data-grid/footer';
+import { AggregationMark } from '@/components/data-grid/footer';
+import { messages } from '@/components/data-grid/messages';
 import { focusOutlineClassName, pinnedClassName, rangeShadow, textAlign } from '@/components/data-grid/styles';
 import { cn } from '@/lib/utils';
 import {
@@ -37,8 +38,10 @@ export function VirtualRows<TData extends object>({
   overscan: number;
   noRows?: ReactNode;
 }) {
-  const { rows, paddingTop, paddingBottom, sticky, colSpan, viewportWidth, measureElement, empty, labels } =
-    useVirtualRows(table, { scrollElement, rowHeight: rowOptions.rowHeight, overscan });
+  const { rows, paddingTop, paddingBottom, sticky, colSpan, viewportWidth, measureElement, empty } = useVirtualRows(
+    table,
+    { scrollElement, rowHeight: rowOptions.rowHeight, overscan }
+  );
 
   if (empty) {
     return (
@@ -46,7 +49,7 @@ export function VirtualRows<TData extends object>({
         <tbody>
           <tr>
             <td colSpan={colSpan} className="h-24 text-center text-muted-foreground">
-              {noRows ?? labels.noRows}
+              {noRows ?? messages.noRows}
             </td>
           </tr>
         </tbody>
@@ -196,7 +199,7 @@ function BodyCell<TData extends object>({
         </RowToggle>
       ) : content === 'empty' ? null : (
         <>
-          <AggregationMarkView mark={aggregation} />
+          <AggregationMark aggregation={aggregation} />
           <FlexRender cell={shownCell} />
         </>
       )}
@@ -230,6 +233,7 @@ function RowToggle<TData extends object>({
         <button
           type="button"
           {...toggle.buttonProps}
+          aria-label={toggle.expanded ? messages.collapse : messages.expand}
           className="-m-0.5 shrink-0 cursor-pointer rounded-sm p-0.5 hover:bg-muted-foreground/20"
         >
           <ChevronRight className={cn('size-3.5 transition-transform', toggle.expanded && 'rotate-90')} />

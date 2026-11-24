@@ -80,6 +80,11 @@
           "target": "components/data-grid/menu-entries.tsx"
         },
         {
+          "path": "src/components/data-grid/messages.ts",
+          "type": "registry:component",
+          "target": "components/data-grid/messages.ts"
+        },
+        {
           "path": "src/components/data-grid/selection-checkboxes.tsx",
           "type": "registry:component",
           "target": "components/data-grid/selection-checkboxes.tsx"

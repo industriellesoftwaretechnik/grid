@@ -20,14 +20,14 @@ function setup(statuses: (string | null)[]) {
 }
 
 describe('setFilter', () => {
-  it('lists the values with their counts, blanks first and the rest by label', () => {
+  it('lists the values with their counts, blanks first as one unlabelled option and the rest by label', () => {
     const { column } = setup(['b', 'a', null, 'b', '']);
     const { options } = setFilter(column, '');
 
-    expect(options.map(({ label, count }) => [label, count])).toEqual([
-      ['(Blank)', 2],
-      ['a', 1],
-      ['b', 2],
+    expect(options.map(({ label, blank, count }) => [label, blank, count])).toEqual([
+      ['', true, 2],
+      ['a', false, 1],
+      ['b', false, 2],
     ]);
   });
 

@@ -1,5 +1,6 @@
 import { Check } from 'lucide-react';
 
+import { editorErrorText, messages } from '@/components/data-grid/messages';
 import { Popover, PopoverContent } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { useCellEditor, useVirtualList, type CellEditorModel, type GridCell } from '@istec/grid';
@@ -15,7 +16,11 @@ export function CellEditor<TData extends object>({ cell }: { cell: GridCell<TDat
 
   return (
     <>
-      <input {...inputProps} className={cn(inputClassName, kind === 'number' && 'text-right')} />
+      <input
+        {...inputProps}
+        aria-label={messages.editValue}
+        className={cn(inputClassName, kind === 'number' && 'text-right')}
+      />
       {kind === 'select' && (
         <Popover open>
           <PopoverContent
@@ -34,7 +39,7 @@ export function CellEditor<TData extends object>({ cell }: { cell: GridCell<TDat
           role="alert"
           className="absolute top-full left-0 z-30 mt-0.5 rounded-sm bg-destructive px-2 py-1 whitespace-nowrap text-white shadow-sm"
         >
-          {error}
+          {editorErrorText(error)}
         </div>
       )}
     </>
