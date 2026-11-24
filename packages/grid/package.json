@@ -1,6 +1,6 @@
 {
   "name": "@istec/grid",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Headless React data grid on TanStack Table: grouping, aggregation, range selection, editing and filters as hooks, for any UI kit. The shadcn/ui implementation installs with the shadcn CLI.",
   "keywords": [
     "data-grid",
