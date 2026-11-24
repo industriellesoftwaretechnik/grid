@@ -10,7 +10,7 @@ function hasModifier(event: unknown, key: 'ctrlKey' | 'metaKey' | 'shiftKey'): b
   return typeof event === 'object' && event !== null && Reflect.get(event, key) === true;
 }
 
-export const { createAppColumnHelper: createGridColumnHelper, useAppTable } = createTableHook({
+const tableHook = createTableHook({
   features,
   tableContext,
   globalFilterFn: quickFilter,
@@ -33,9 +33,13 @@ export const { createAppColumnHelper: createGridColumnHelper, useAppTable } = cr
   },
 });
 
-// The component holding the table selects no state, so it renders only for its own: each grid component subscribes
-// to what it shows through `useGridSelector`.
+/** Typed column definitions for `useGrid`, with the grid's column options and `meta`. */
+export const createGridColumnHelper = tableHook.createAppColumnHelper;
+export const { useAppTable } = tableHook;
+
+// The table's owner renders only for its own state; grid components subscribe through `useGridSelector`.
 export const selectNoState = (_state: TableState<GridFeatures>): null => null;
 
+/** The table `useGrid` returns: a `CoreTable` with TanStack's React helpers, such as `AppTable`. */
 export type GridInstance<TData extends object> = ReturnType<typeof useAppTable<TData, null>>;
 export type GridTableOptions<TData extends object> = Parameters<typeof useAppTable<TData>>[0];

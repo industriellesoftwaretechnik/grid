@@ -10,16 +10,13 @@ import {
 } from '@tanstack/react-table';
 
 interface GridActionsTable {
-  /** The number of column filters set, and 1 more while there is a search. */
+  /** Returns the number of column filters, plus one while the search has text. */
   getActiveFilterCount: () => number;
-  /** Removes every column filter and the search. */
+  /** Removes every column filter and clears the search. */
   clearFilters: () => void;
-  /** Whether there are parent rows to open and close: the rows are grouped, or a tree. */
+  /** Whether the rows are grouped or a tree, so `expandParentRows` has rows to expand. */
   getCanExpandParentRows: () => boolean;
-  /**
-   * Opens every group and tree node, not the details of master rows; `toggleAllRowsExpanded(true)` would open those
-   * too. `toggleAllRowsExpanded(false)` closes them all.
-   */
+  /** Expands every row with child rows; unlike `toggleAllRowsExpanded(true)`, it opens no row details. */
   expandParentRows: () => void;
 }
 
@@ -62,10 +59,11 @@ function activeFilterCount(table: ActionsTable): number {
 
 function expandParentRows(table: ActionsTable) {
   const parents = table.getPreExpandedRowModel().flatRows.filter((row) => row.subRows.length > 0);
-  table.setExpanded(Object.fromEntries(parents.map((row) => [row.id, true])));
+  table.setExpanded((expanded) =>
+    expanded === true ? true : { ...expanded, ...Object.fromEntries(parents.map((row) => [row.id, true])) }
+  );
 }
 
-/** The actions of the controls around a grid that TanStack lacks: clearing all filters and opening all groups. */
 export const gridActionsFeature: TableFeature = {
   constructTableAPIs: (table) => {
     assignTableAPIs('gridActionsFeature', table, {

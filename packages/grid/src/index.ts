@@ -1,12 +1,7 @@
-// The public API, one section per folder: core/ is what every part builds on, parts/ has a folder per part a UI renders. Every hook takes the table from `useGrid` (or a row, column, cell or header
-// of it) and returns a model: values to show, actions to call and props for the UI's elements. The grid has no texts:
-// models hold values and ids, which the UI words. A control of the UI's own reads the table through `useGridSelector`
-// and calls the table's actions, as the grid's own hooks do.
-
-// core/table/: creating the table and subscribing to it
+// core/table/
 export { useGrid, type GridOptions } from '#/core/table/useGrid.ts';
 export { createGridColumnHelper, type GridInstance } from '#/core/table/tableHook.ts';
-export { useTableContext as useGridContext } from '#/core/table/tableContext.ts';
+export { useGridContext } from '#/core/table/tableContext.ts';
 export { useGridSelector } from '#/core/table/useGridSelector.ts';
 export { useFormatNumber } from '#/core/table/useFormatNumber.ts';
 export { gridMeta, type GridMeta } from '#/core/table/gridMeta.ts';
@@ -23,8 +18,7 @@ export type {
   GridState,
 } from '#/core/table/types.ts';
 
-// core/plugins/: the grid's state and actions on the table, beyond TanStack's, such as `table.clearFilters()`,
-// `table.expandParentRows()`, `table.moveColumn()`, `table.moveGrouping()` and `column.getAggregation()`
+// core/plugins/
 export type { GridLayout, GroupDisplay } from '#/core/plugins/gridLayoutFeature.ts';
 export type { ColumnAggregationState } from '#/core/plugins/columnAggregationFeature.ts';
 export type {
@@ -34,7 +28,7 @@ export type {
   EditingCellState,
 } from '#/core/plugins/cellEditingFeature.ts';
 
-// core/columns/: column settings and how values show
+// core/columns/
 export {
   dataTypeDefaults,
   type CellEditorProps,
@@ -49,10 +43,10 @@ export { formatAggregate, formatNumber, formatValue } from '#/core/columns/forma
 export { groupColumnId } from '#/core/columns/groupColumn.ts';
 export type { AggregationName } from '#/core/table/aggregations.ts';
 
-// core/shared/: menus as data, to map, filter or extend before rendering
+// core/shared/
 export type { GridMenuEntry, GridMenuId, GridMenuItem, GridMenuSection, GridSubmenu } from '#/core/shared/menu.ts';
 
-// parts/view/: the frame, with header, body and footer as tables sharing the column widths
+// parts/view/
 export { useGridView, type GridViewModel, type GridViewOptions } from '#/parts/view/useGridView.ts';
 export { useColumnWidths, type ColumnWidth, type ColumnWidths } from '#/parts/view/useColumnWidths.ts';
 export { useVirtualList, type VirtualListModel } from '#/parts/view/useVirtualList.ts';
@@ -90,12 +84,12 @@ export {
 } from '#/parts/editing/useCellEditor.ts';
 export type { EditorKind } from '#/core/columns/editorValue.ts';
 
-// core/selection/ and parts/selection/: rows, cell ranges and the clipboard
+// selection
 export { useSelectAll, useRowSelect, type SelectionCheckboxModel } from '#/parts/selection/useRowSelection.ts';
 export type { CellPosition } from '#/core/selection/cellRanges.ts';
 export { copyText, pasteText } from '#/core/selection/clipboard.ts';
 
-// parts/filters/: inputs over a filter or the search, read and written through a codec
+// parts/filters/
 export { useFilterInput, useSearch, type DraftInput } from '#/parts/filters/useDraftInput.ts';
 export {
   boundsCodec,

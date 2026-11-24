@@ -59,6 +59,15 @@ describe('expanding parent rows', () => {
     table.toggleAllRowsExpanded(false);
     expect(table.getRowModel().rows).toHaveLength(2);
   });
+
+  it('keeps open row details open', () => {
+    const table = setup();
+    table.setGrouping(['team']);
+    table.setExpanded({ '1': true });
+
+    table.expandParentRows();
+    expect(table.atoms.expanded.get()).toMatchObject({ '1': true });
+  });
 });
 
 describe('moving', () => {

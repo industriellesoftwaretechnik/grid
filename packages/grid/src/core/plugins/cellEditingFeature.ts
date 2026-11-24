@@ -14,67 +14,84 @@ import {
 
 import { samePosition, type CellPosition } from '#/core/selection/cellRanges.ts';
 
-/** The edited cell. `initialText` is what the editor starts with instead of the value, such as the typed key. */
+/** The cell being edited, or `null`; `initialText`, such as the typed key, replaces the value in the editor. */
 export type EditingCellState = (CellPosition & { initialText?: string }) | null;
 
+/** A value to set in a cell with `table.setCellValues`. */
 export interface CellValueInput extends CellPosition {
   value: unknown;
 }
 
+/** A cell whose `validateCellValue` rejected the value, with its message. */
 export interface CellValueRejection extends CellPosition {
   message: string;
 }
 
-/** What `onCellValueChange` receives. The table never changes `data`; its owner applies `updatedRow`. */
+/** A changed cell, reported to `onCellValueChange`; the table never changes `data`, its owner applies `updatedRow`. */
 export interface CellValueChange<TFeatures extends TableFeatures, TData extends RowData> {
+  /** The row as it was before the change. */
   row: Row<TFeatures, TData>;
   columnId: string;
   value: unknown;
   previousValue: unknown;
   /**
-   * A copy of the row's data with the value written, by the column's `setCellValue` or at its `accessorKey`. When
-   * one action changes several cells of a row, such as a paste, each change builds on the one before.
+   * A copy of the row's data with the value set; when one action, such as a paste, changes several cells of a row,
+   * each builds on the one before.
    */
   updatedRow: TData;
 }
 
 interface CellEditingColumnDef<TFeatures extends TableFeatures, TData extends RowData, TValue extends CellData> {
-  /** Turns editing on for the column, or for the rows the function accepts. Defaults to `false`. */
+  /**
+   * Whether the column's cells can be edited, per row when a function; editing also needs a string `accessorKey` or
+   * `setCellValue`, and group rows are never edited. Default: `false`.
+   */
   enableEditing?: boolean | ((row: Row<TFeatures, TData>) => boolean);
-  /** Writes an edited value into a copy of the row. Needed for columns without an `accessorKey`. */
+  /** Returns a copy of the row's data with the value set; needed for columns without a string `accessorKey`. */
   setCellValue?: (original: TData, value: TValue) => TData;
-  /** Returns a message when the value is not accepted; the editor then stays open. */
+  /** Returns a message to reject the value, which keeps the editor open, or `undefined` to accept it. */
   validateCellValue?: (value: TValue, row: Row<TFeatures, TData>) => string | undefined;
 }
 
 interface CellEditingOptions<TFeatures extends TableFeatures, TData extends RowData> {
-  /** `false` turns editing off for every column. Defaults to `true`. */
+  /** `false` turns editing off for every column. Default: `true`. */
   enableEditing?: boolean;
+  /** Called for each changed cell, also on undo and redo; apply `change.updatedRow` to `data`. */
   onCellValueChange?: (change: CellValueChange<TFeatures, TData>) => void;
   onEditingCellChange?: OnChangeFn<EditingCellState>;
-  /** How many edits Ctrl+Z can undo; a paste counts as one. Defaults to 50; 0 turns undo off. */
+  /** How many edits undo keeps; a paste counts as one, `0` turns undo off. Default: `50`. */
   cellEditHistoryLimit?: number;
 }
 
 interface CellEditingTable {
+  /** Returns the cell being edited, or `null`. */
   getEditingCell: () => EditingCellState;
+  /** Sets the cell being edited without checking that it can be edited; `cell.startEditing` checks. */
   setEditingCell: (updater: Updater<EditingCellState>) => void;
+  /** Closes the editor without changing the value. */
   stopEditing: () => void;
   /**
-   * Sets several cells as one undoable edit, skipping cells that cannot be edited or reject their value. Returns the
-   * rejected cells with their validation messages.
+   * Sets several cells as one undoable edit and returns the cells that reject their value; cells that cannot be edited
+   * or keep their value are skipped.
    */
   setCellValues: (values: readonly CellValueInput[]) => CellValueRejection[];
-  /** Reverts the last edit through `onCellValueChange`. Returns whether there was one. */
+  /** Reverts the latest edit through `onCellValueChange`; returns `false` when there is none. */
   undoCellEdit: () => boolean;
+  /** Reapplies the latest undone edit through `onCellValueChange`; returns `false` when there is none. */
   redoCellEdit: () => boolean;
 }
 
 interface CellEditingCell {
+  /** Whether the cell can be edited: see the column's `enableEditing`. */
   getCanEdit: () => boolean;
+  /** Whether the editor is open on this cell. */
   getIsEditing: () => boolean;
+  /** Opens the editor if the cell can be edited; `initialText`, such as a typed key, replaces the value. */
   startEditing: (initialText?: string) => void;
-  /** Validates the value and reports it through `onCellValueChange`; returns the validation message instead. */
+  /**
+   * Sets the value as one undoable edit through `onCellValueChange`, or returns the validation message; does nothing
+   * if the cell cannot be edited.
+   */
   setValue: (value: unknown) => string | undefined;
 }
 
@@ -142,7 +159,7 @@ function isEditingTable(table: unknown): table is EditingTable {
   return typeof table === 'object' && table !== null && 'options' in table && 'atoms' in table;
 }
 
-/** Writes `value` at a dotted `accessorKey` path into copies of the objects along it. */
+/** Copies the objects along the dotted path instead of mutating them. */
 export function setAtPath(target: unknown, path: string, value: unknown): unknown {
   const [key, ...rest] = path.split('.');
   if (key === undefined) return value;
@@ -164,7 +181,6 @@ function write(column: AnyColumn, original: unknown, value: unknown): unknown {
   return setAtPath(original, String(accessorKey), value);
 }
 
-/** Reports the edits, each building on the earlier ones of its row. */
 function emit(table: EditingTable, edits: readonly Edit[]) {
   const updated = new Map<string, unknown>();
   for (const edit of edits) {
@@ -200,7 +216,9 @@ function setValues(table: EditingTable, values: readonly CellValueInput[]): Cell
   if (edits.length > 0) {
     emit(table, edits);
     const history = table.cellEditHistory;
-    history.undo = [...history.undo, edits].slice(-(table.options.cellEditHistoryLimit ?? 50));
+    const limit = table.options.cellEditHistoryLimit ?? 50;
+    // `slice(-0)` would keep everything.
+    history.undo = limit > 0 ? [...history.undo, edits].slice(-limit) : [];
     history.redo = [];
   }
   return rejected;
