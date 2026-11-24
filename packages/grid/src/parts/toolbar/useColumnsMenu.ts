@@ -6,7 +6,6 @@ import { menuItem, type GridMenuItem, type GridMenuSection } from '#/core/shared
 import type { CoreTable } from '#/core/table/types.ts';
 import { useGridSelector } from '#/core/table/useGridSelector.ts';
 
-/** The columns the user can show and hide, in display order, each checked while shown and labelled with its name. */
 export function columnChoices<TData extends RowData>(table: CoreTable<TData>): GridMenuItem[] {
   return columnOrderIds(table).flatMap((id): GridMenuItem[] => {
     const column = table.getColumn(id);
@@ -25,8 +24,8 @@ export function columnChoices<TData extends RowData>(table: CoreTable<TData>): G
 }
 
 /**
- * The columns menu, as data: each column the user can hide as a check item that keeps the menu open, then "Reset
- * columns". It stays current while rendered, so render it only while the menu is open.
+ * The toolbar's columns menu: a visibility item per column that can be hidden, and a layout reset. It stays current
+ * while rendered, so render it only while the menu is open.
  */
 export function useColumnsMenu<TData extends RowData>(table: CoreTable<TData>): GridMenuSection[] {
   return useGridSelector(table, (): GridMenuSection[] => [

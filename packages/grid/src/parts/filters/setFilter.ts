@@ -3,16 +3,16 @@ import type { RowData } from '@tanstack/react-table';
 import { formatValue, localeFormats } from '#/core/columns/format.ts';
 import type { GridColumn } from '#/core/table/types.ts';
 
+/** A value a set filter offers to check. */
 export interface SetFilterOption {
-  /** Unique in the list; usable as key. */
   key: number;
-  /** The value as the column shows it; empty for the blank option, which the UI names. */
+  /** Empty for the blank option, which the UI names. */
   label: string;
-  /** Whether it is the option for blank values, which comes first. */
+  /** The option for blank values comes first. */
   blank: boolean;
-  /** The values the option stands for: one, or every blank value for the blank option. */
+  /** One value, or every blank value for the blank option. */
   values: unknown[];
-  /** The rows the other filters let through that have one of `values`. */
+  /** Among the rows the other filters let through. */
   count: number;
 }
 
@@ -22,11 +22,7 @@ export interface CheckState {
   disabled: boolean;
 }
 
-/**
- * The values of a column as set filter options, among the rows the other filters let through, sorted in the grid's
- * locale. null, undefined and '' look the same in a cell, so they share one option. The column's meta.options are
- * offered even where no row has them.
- */
+// null, undefined and '' look the same in a cell, so they share one option; meta.options show even where no row has them.
 export function setFilterOptions<TData extends RowData>(column: GridColumn<TData>): SetFilterOption[] {
   const { collator } = localeFormats(column.table.options.meta?.locale);
   const counts = new Map<unknown, number>(column.columnDef.meta?.options?.map((value) => [value, 0]));
@@ -49,15 +45,11 @@ export function setFilterOptions<TData extends RowData>(column: GridColumn<TData
   return options;
 }
 
-/**
- * The set filter of a column: its values as options, which of them pass, and actions that write the filter. `query`
- * narrows the options to those whose label contains it. Everything checked means no filter.
- */
+// Everything checked means no filter.
 export function setFilter<TData extends RowData>(column: GridColumn<TData>, query: string) {
   return setFilterModel(column, setFilterOptions(column), column.getFilterValue(), query);
 }
 
-/** `setFilter` from the column's options and filter value as they were read. */
 export function setFilterModel<TData extends RowData>(
   column: GridColumn<TData>,
   options: SetFilterOption[],
@@ -86,17 +78,21 @@ export function setFilterModel<TData extends RowData>(
   return {
     /** The options `query` finds. */
     options: found,
+    /** Every option is checked while the column is not filtered. */
     isChecked,
+    /** Checks or unchecks the options; checking all of them removes the filter. */
     toggle,
-    /** The "select all" checkbox over the options found. */
+    /** The select-all checkbox, over the options found. */
     selectAll: {
       checked: found.length > 0 && foundChecked === found.length,
       indeterminate: foundChecked > 0 && foundChecked < found.length,
       disabled: found.length === 0,
     } satisfies CheckState,
+    /** Checks or unchecks the options found. */
     toggleAll: (checked: boolean) => toggle(found, checked),
-    /** Keeps only the values found, as Enter in the search does. */
+    /** Checks only the options found, as Enter in the search does. */
     keepFound: () => apply(new Set(found.flatMap((option) => option.values))),
+    /** Removes the filter. */
     clear: () => column.setFilterValue(undefined),
   };
 }

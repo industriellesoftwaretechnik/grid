@@ -2,25 +2,23 @@ import type { ReactNode } from 'react';
 
 import type { ColumnVisibilityState } from '@tanstack/react-table';
 
-/** The values `useGrid` gives the components through `table.options.meta`; the grid's actions are table APIs. */
+/** The values `useGrid` puts in the table's `meta`; the grid's actions are table methods. */
 export interface GridMeta {
-  /** The table's `id`; its DOM elements carry it as `data-table-id`. */
+  /** The `id` option; DOM elements carry it as `data-table-id`. */
   tableId: string;
-  /** The locale values are formatted and sorted in, from `useGrid`'s `locale`; unset for the browser's. */
+  /** `undefined` is the browser's locale. */
   locale: string | undefined;
-  /** Whether the rows come as a tree through `getSubRows`. */
+  /** `true` when `getSubRows` is given. */
   treeData: boolean;
-  /**
-   * The column whose cells hold the toggles of tree nodes and master rows; unset without either. The group column takes
-   * them while it is shown, and the first shown data column while this one is hidden.
-   */
+  /** `undefined` without tree data or `renderDetail`; a shown group column takes the toggles instead. */
   expandColumn: string | undefined;
-  /** The detail of an expanded master row, by row id. */
+  /** Renders the detail of the row with this id; `undefined` without the `renderDetail` option. */
   renderDetail: ((rowId: string) => ReactNode) | undefined;
-  /** The user's own choices; the table also hides the group column while ungrouped and columns of collapsed groups. */
+  /** The user's choices, without the columns the table hides itself, such as the group column while ungrouped. */
   ownColumnVisibility: ColumnVisibilityState;
 }
 
+/** Returns the `GridMeta` of a table from `useGrid`; throws for any other table. */
 export function gridMeta(table: { options: { meta?: GridMeta } }): GridMeta {
   const { meta } = table.options;
   if (!meta) throw new Error('The grid components need a table from useGrid.');

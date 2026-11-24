@@ -7,7 +7,6 @@ import { useCellEditor, useVirtualList, type CellEditorModel, type GridCell } fr
 
 const inputClassName = 'h-full w-full min-w-0 bg-background px-2 text-xs outline-none';
 
-/** Renders inside the edited cell. */
 export function CellEditor<TData extends object>({ cell }: { cell: GridCell<TData> }) {
   const editor = useCellEditor(cell);
   const { kind, custom, error, input, inputProps } = editor;

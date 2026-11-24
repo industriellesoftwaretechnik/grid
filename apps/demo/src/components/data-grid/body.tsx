@@ -213,7 +213,6 @@ function BodyCell<TData extends object>({
   );
 }
 
-/** A cell's content behind the chevron that expands its row: a group, a tree node or a master row. */
 function RowToggle<TData extends object>({
   row,
   level,
@@ -248,7 +247,6 @@ function RowToggle<TData extends object>({
   );
 }
 
-/** The full-width row under a master row. Its content stays in view while the columns scroll sideways. */
 function DetailRow({
   index,
   measureRef,
@@ -273,7 +271,6 @@ function DetailRow({
   );
 }
 
-/** The full-width cell of a group row (`groupDisplay: 'rows'`). */
 function GroupRowCell<TData extends object>({
   row,
   colSpan,

@@ -50,10 +50,6 @@ const iconButtonClassName =
 // Keeps a press on a button inside the header from starting a column drag.
 const stopDrag = { onPointerDown: (event: { stopPropagation: () => void }) => event.stopPropagation() };
 
-/**
- * A header cell. A column's label sorts; beside it, a filter button while a filter is set and the menu button, which
- * narrow columns leave out. A right click opens the menu too. Scrolling columns are dragged to reorder them.
- */
 function HeaderCell<TData extends object>({ slot, height }: { slot: HeaderSlot<TData>; height: number }) {
   const model = useHeaderCell(slot);
   const { header, region, edge } = slot;
@@ -134,10 +130,6 @@ function HeaderCell<TData extends object>({ slot, height }: { slot: HeaderSlot<T
   );
 }
 
-/**
- * The header's label; a button that sorts where the column can be sorted. End-aligned labels sit at the right. The
- * group column's header has no text of its own.
- */
 function HeaderLabel<TData extends object>({
   slot: { header, toggleSorting, sorted, sortPosition },
   reverse,
@@ -163,7 +155,6 @@ function HeaderLabel<TData extends object>({
   );
 }
 
-/** The direction a column is sorted in, with its place in a multi-sort; nothing while it is not sorted. */
 export function SortIndicator({ sorted, position }: { sorted: false | SortDirection; position: number }) {
   if (!sorted) return null;
 
@@ -175,7 +166,6 @@ export function SortIndicator({ sorted, position }: { sorted: false | SortDirect
   );
 }
 
-/** The header's content, which a right click opens the column menu on. */
 function ColumnContent<TData extends object>({
   column,
   enabled,
@@ -238,7 +228,6 @@ function ColumnMenuEntries<TData extends object>({
   );
 }
 
-/** The divider at a header's right edge; it is the resize handle where the column can be resized. */
 function ColumnResizer<TData extends object>({ header }: { header: GridHeader<TData> }) {
   const { canResize, resizing, handleProps } = useColumnResizer(header);
   const line = (

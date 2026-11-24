@@ -16,13 +16,14 @@ import { groupingCell } from '#/parts/body/useGroupRowCell.ts';
 import { cellStickyStyle, type Region } from '#/parts/view/layout.ts';
 import { useFocusTarget } from '#/parts/view/useFocusTarget.ts';
 
+/** Handlers for clicks on body cells. */
 export interface CellEvents<TData extends RowData> {
   onCellClick?: (cell: GridCell<TData>, event: MouseEvent) => void;
   /** Called before a double click starts editing; `event.preventDefault()` keeps it from doing so. */
   onCellDoubleClick?: (cell: GridCell<TData>, event: MouseEvent) => void;
 }
 
-/** How the focus and the cell ranges show on a cell. A range is drawn only when it spans more than one cell. */
+/** How a body cell is drawn in the selection; a range is drawn only when it spans more than one cell. */
 export interface CellLook {
   focused: boolean;
   inRange: boolean;
@@ -31,21 +32,23 @@ export interface CellLook {
   right: boolean;
   bottom: boolean;
   left: boolean;
-  /** Whether the cell shows the handle that fills the range downwards or sideways. */
+  /** The bottom-right cell of the only range, where the cell can be selected and edited. */
   fillHandle: boolean;
 }
 
 /**
- * What a body cell shows: `editor` while it is edited, `group` for the cell holding its group's toggle and count,
- * `toggle` for the cell holding a tree node's or master row's toggle, `empty` for data columns of a group row that
- * neither group nor aggregate, `value` otherwise. Each but `editor` and `empty` renders `shownCell`.
+ * What a body cell shows: `group` a group's value with its toggle, `toggle` a tree or master row's toggle, `empty` a
+ * group row's cell that neither groups nor aggregates. All but `editor` and `empty` render `shownCell`.
  */
 export type BodyCellContent = 'editor' | 'group' | 'toggle' | 'empty' | 'value';
 
+/** Options of `useBodyCell`. */
 export interface BodyCellOptions<TData extends RowData> extends CellEvents<TData> {
+  /** The `region` of the cell's slot in `useDataRow`'s `cells`. */
   region: Region;
+  /** The `index` of the cell's slot in `useDataRow`'s `cells`, within its region. */
   index: number;
-  /** Whether the cells of grouped columns hold their group's toggle (`groupDisplay: 'columns'`). */
+  /** `useDataRow`'s `groupToggles`. */
   groupToggles: boolean;
 }
 
@@ -69,7 +72,7 @@ const isControl = (target: EventTarget) =>
   target instanceof Element &&
   target.closest('a[href], button, input, label, select, textarea, [role=checkbox]') !== null;
 
-/** A body cell: its focus, range and editing state, what it shows, and the props for its element. */
+/** The body cell: its content, selection look and tooltip, and props for its element and fill handle. */
 export function useBodyCell<TData extends RowData, TElement extends HTMLElement = HTMLTableCellElement>(
   cell: GridCell<TData>,
   { region, index, groupToggles, onCellClick, onCellDoubleClick }: BodyCellOptions<TData>
@@ -122,7 +125,7 @@ export function useBodyCell<TData extends RowData, TElement extends HTMLElement 
   const onMouseDown = (event: MouseEvent<TElement>) => {
     if (cell.getIsEditing()) return;
     if (event.button === 0 && !isControl(event.target) && cell.getCanSelect()) {
-      // Keeps the browser from selecting text while a range is dragged; the cell takes focus itself.
+      // Keeps the browser from selecting text while a range is dragged.
       event.preventDefault();
       cell.getSelectionStartHandler()(event);
       event.currentTarget.focus({ preventScroll: true });
@@ -134,15 +137,16 @@ export function useBodyCell<TData extends RowData, TElement extends HTMLElement 
   return {
     look,
     content,
-    /** The cell to render with `FlexRender`: in the group column, a group row shows the cell of its grouped column. */
+    /** In the group column, a group row shows the cell of its grouped column. */
     shownCell: groupCell ?? cell,
     align,
-    /** For an aggregated value in a group row: its aggregation, for the UI to mark it by, such as Σ for a sum. */
+    /** Set for an aggregated value in a group row, to mark it by, such as Σ for a sum. */
     aggregation,
-    /** The indentation of the toggle, in levels. */
+    /** How far to indent the toggle, in levels. */
     toggleLevel: grouped || inGroupColumn || treeData ? cell.row.depth : 0,
-    /** The column's `cellClassName` for this cell. */
+    /** The column's `meta.cellClassName` for this cell. */
     className: typeof meta.cellClassName === 'function' ? meta.cellClassName(value, rowData) : meta.cellClassName,
+    /** Props for the `<td>` element; its `title` is the tooltip. */
     cellProps: {
       ref,
       tabIndex: look.focused ? 0 : -1,
@@ -158,10 +162,7 @@ export function useBodyCell<TData extends RowData, TElement extends HTMLElement 
       },
       style: cellStickyStyle(region, index) satisfies CSSProperties | undefined,
     },
-    /**
-     * For the fill handle's element, shown where `look.fillHandle` is set and the cell is not edited. Dragging it over
-     * further cells fills the range with its values, as one undoable edit.
-     */
+    /** Props for the fill handle, shown where `look.fillHandle` is set and the cell is not edited. */
     fillHandleProps: {
       'aria-hidden': true as const,
       onMouseDown: (event: MouseEvent) => {
@@ -173,5 +174,5 @@ export function useBodyCell<TData extends RowData, TElement extends HTMLElement 
   };
 }
 
-/** What `useBodyCell` gives a body cell. */
+/** What `useBodyCell` returns. */
 export type BodyCellModel = ReturnType<typeof useBodyCell>;

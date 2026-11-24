@@ -13,7 +13,10 @@ import {
 import { resolveMeta, type GridColumnMeta } from '#/core/columns/columnMeta.ts';
 import { isAggregationName, type AggregationName } from '#/core/table/aggregations.ts';
 
-/** The aggregation chosen for a column, by column id; `null` removes the one its definition sets. */
+/**
+ * The aggregation chosen per column id, over the column definition's `aggregationFn`; `null` removes the one the
+ * definition sets.
+ */
 export type ColumnAggregationState = Record<string, AggregationName | null>;
 
 interface ColumnAggregationOptions {
@@ -21,15 +24,16 @@ interface ColumnAggregationOptions {
 }
 
 interface ColumnAggregationTable {
+  /** Sets the aggregations chosen per column. */
   setColumnAggregation: (updater: Updater<ColumnAggregationState>) => void;
 }
 
 interface ColumnAggregationColumn {
   /** Chooses the column's aggregation; `null` turns it off. */
   setAggregation: (aggregation: AggregationName | null) => void;
-  /** The column's aggregation, chosen or from its definition; unset for none or a custom aggregation function. */
+  /** Returns the column's aggregation, or `undefined` for none or a custom aggregation function. */
   getAggregation: () => AggregationName | undefined;
-  /** The aggregations the user can choose from: `meta.aggregations`, or its data type's. None for display columns. */
+  /** Returns the aggregations the column offers: `meta.aggregations` or the data type's, none for display columns. */
   getAggregationOptions: () => readonly AggregationName[];
 }
 
@@ -64,7 +68,6 @@ function aggregationOf(column: AnyColumn): AggregationName | undefined {
   return isAggregationName(aggregation) ? aggregation : undefined;
 }
 
-/** The aggregation chosen for each column, as state the host may control. */
 export const columnAggregationFeature: TableFeature = {
   getInitialState: (state) => ({ columnAggregation: {}, ...state }),
   getDefaultTableOptions: (table) => ({

@@ -10,11 +10,9 @@ import type { CoreTable, GridColumn } from '#/core/table/types.ts';
 import { useGridSelector } from '#/core/table/useGridSelector.ts';
 import { cellStickyStyle, columnLayout, type Region } from '#/parts/view/layout.ts';
 
-/**
- * An aggregated value as text, with its aggregation for the UI to mark it by, since a mean or a count is no sum;
- * unset for a custom aggregation function.
- */
+/** An aggregated value as the column shows it. */
 export interface AggregatedValue {
+  /** Lets the UI mark the value, since a mean is no sum; unset for a custom aggregation function. */
   aggregation: AggregationName | undefined;
   text: string;
 }
@@ -23,22 +21,24 @@ export function aggregatedValue<TData extends RowData>(column: GridColumn<TData>
   return { aggregation: column.getAggregation(), text: formatAggregate(value, column) };
 }
 
+/** A cell of the totals row. */
 export interface TotalsCell<TData extends RowData> {
   column: GridColumn<TData>;
   region: Region;
+  /** The pinned cell next to the scrolling ones, which draws the border between them. */
   edge: boolean;
+  /** Keeps a pinned cell in place; unset for a scrolling one. */
   style: CSSProperties | undefined;
   align: ColumnAlign;
   /** Set for columns with an aggregation. */
   total?: AggregatedValue;
 }
 
-/** The footer row with the totals of the aggregated columns, re-rendering when they change. */
+/** The totals row, over the filtered rows: a cell per visible column; `'filler'` takes the spare width. */
 export function useTotalsRow<TData extends RowData>(table: CoreTable<TData>): (TotalsCell<TData> | 'filler')[] {
   return useGridSelector(table, () => totalsRow(table));
 }
 
-/** The footer row with the totals of the aggregated columns; `'filler'` takes the spare width. */
 export function totalsRow<TData extends RowData>(table: CoreTable<TData>): (TotalsCell<TData> | 'filler')[] {
   return columnLayout(table).map((slot) => {
     if (slot === 'filler') return slot;

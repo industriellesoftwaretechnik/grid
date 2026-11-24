@@ -11,17 +11,14 @@ import { moveFocus } from '#/core/selection/navigation.ts';
 import type { GridCell } from '#/core/table/types.ts';
 import { useGridSelector } from '#/core/table/useGridSelector.ts';
 
-/**
- * Why the editor did not take its value: text it cannot read as a `number`, `date` or `option` of a select, which the
- * UI words, or the `message` of the column's own validation.
- */
+/** `rule` carries the column's validation message; the others are text the editor cannot read as that type. */
 export type CellEditorError = { type: 'number' | 'date' | 'option' } | { type: 'rule'; message: string };
 
-/** A choice of a `select` editor. */
+/** A choice of a select editor. */
 export interface EditorChoice {
   value: unknown;
   label: string;
-  /** Whether it is the cell's value. */
+  /** It is the cell's value. */
   current: boolean;
 }
 
@@ -32,10 +29,8 @@ const stop = (event: MouseEvent) => {
 };
 
 /**
- * The editor inside an edited cell: an input for `text`, `number` and `date`, the column's own editor (`custom`), and
- * for `select` an input that searches the choices listed under it. Enter and Tab commit, Escape cancels, leaving a
- * typed value commits it if valid and leaving a select keeps the value. In a select, the arrow keys move through the
- * choices and a click picks one.
+ * The editor of the cell being edited: an input, a select with choices, or the column's own editor. Enter and Tab
+ * commit, Escape cancels; blur commits valid typed text and cancels otherwise, and always cancels a select.
  */
 export function useCellEditor<TData extends RowData>(cell: GridCell<TData>) {
   const { table, column } = cell;
@@ -139,9 +134,9 @@ export function useCellEditor<TData extends RowData>(cell: GridCell<TData>) {
 
   return {
     kind,
-    /** The input element once rendered; a select's choices are placed under it. */
+    /** The input element once mounted; a select's choices are placed under it. */
     input,
-    /** The column's own editor, rendered instead of the input. */
+    /** The column's `meta.editor` component, rendered instead of the input; unset without one. */
     custom:
       typeof editor === 'function'
         ? createElement(editor, {
@@ -152,8 +147,9 @@ export function useCellEditor<TData extends RowData>(cell: GridCell<TData>) {
             row: cell.row.original,
           })
         : undefined,
-    /** Why the value was not taken, shown until the text changes. */
+    /** Why the last commit failed; cleared when the text changes. */
     error,
+    /** Props for the `<input>` element; for `select`, it is the combobox. */
     inputProps: {
       ref: setInput,
       type: kind === 'date' ? 'date' : 'text',
@@ -177,13 +173,13 @@ export function useCellEditor<TData extends RowData>(cell: GridCell<TData>) {
         'aria-activedescendant': activeId,
       }),
     },
-    /** For `select`: the choices that match the text, an empty one for no value first while there is none. */
+    /** For `select`: a choice for no value comes first while the text is empty. */
     choices,
-    /** For `select`: the choice Enter picks, to highlight and keep in view. */
+    /** For `select`: the choice Enter picks. */
     activeIndex,
-    /** For `select`: the props of the list holding the choices. */
+    /** Props for the list of choices. */
     listProps: { id: listId, role: 'listbox' as const, 'aria-label': columnLabel(column), onMouseDown: stop },
-    /** For `select`: the props of a choice's element. */
+    /** Props for the choice at `index`; a click commits it. */
     choiceProps: (index: number) => ({
       id: `${listId}-${index}`,
       role: 'option' as const,
@@ -200,5 +196,5 @@ export function useCellEditor<TData extends RowData>(cell: GridCell<TData>) {
   };
 }
 
-/** What `useCellEditor` gives the editor of a cell. */
+/** What `useCellEditor` returns. */
 export type CellEditorModel = ReturnType<typeof useCellEditor>;

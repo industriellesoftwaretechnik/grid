@@ -10,6 +10,7 @@ declare module 'react' {
   }
 }
 
+/** Where a column sits: pinned to the start, scrolling in the center, or pinned to the end. */
 export type Region = 'start' | 'center' | 'end';
 
 export interface Placed<T> {
@@ -22,7 +23,6 @@ export interface Placed<T> {
 // The filler sits between center and end, so end-pinned columns stay at the right edge.
 export type LayoutSlot<T> = Placed<T> | 'filler';
 
-/** The items of the three regions in display order, with the filler between center and end. */
 export function placeSlots<T>(start: T[], center: T[], end: T[]): LayoutSlot<T>[] {
   return [
     ...start.map((item, index) => ({ item, region: 'start' as const, index, edge: index === start.length - 1 })),

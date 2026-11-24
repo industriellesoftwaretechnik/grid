@@ -3,11 +3,9 @@ import { reactCompilerPreset } from '@vitejs/plugin-react';
 import { defineConfig } from 'vite-plus';
 import { playwright } from 'vite-plus/test/browser-playwright';
 
-// Shared Vite+ config of the packages under `packages/*`: `vp pack` builds `src/index.ts` to an ESM `dist` with
-// declarations, `vp test` runs the colocated tests. Dependencies and peer dependencies stay external.
 export function libraryConfig() {
   return defineConfig({
-    // Tests import sibling packages through the tsconfig `paths` that point at their sources.
+    // Tests import sibling packages from their sources through the tsconfig `paths`.
     resolve: {
       tsconfigPaths: true,
     },
@@ -16,9 +14,7 @@ export function libraryConfig() {
       format: ['esm'],
       platform: 'neutral',
       dts: true,
-      // Consumers get components the React Compiler has already memoized; its output imports
-      // `react/compiler-runtime`, which React 19 ships.
-      // The reset check only serves an app's hot reload; a published build must not carry it.
+      // Ships precompiled (`react/compiler-runtime` comes with React 19); the reset check only serves hot reload.
       plugins: [
         babel({ presets: [reactCompilerPreset({ environment: { enableResetCacheOnSourceFileChanges: false } })] }),
       ],
@@ -35,8 +31,7 @@ export function libraryConfig() {
         },
         {
           extends: true,
-          // Found up front, the tests' dependencies are bundled before they run; found while they run, Vite reloads the
-          // page and the tests fail.
+          // Deps discovered mid-run make Vite reload the page and fail the tests, so they are prebundled.
           optimizeDeps: {
             entries: ['src/**/*.browser.test.{ts,tsx}'],
             // The scan misses it, as it resolves only inside the browser runner.

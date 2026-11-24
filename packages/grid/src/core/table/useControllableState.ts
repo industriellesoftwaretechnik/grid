@@ -2,11 +2,7 @@ import { useState } from 'react';
 
 import { functionalUpdate, type OnChangeFn, type Updater } from '@tanstack/react-table';
 
-/**
- * A state slice the host may control. Given `controlled`, it shows that and hands every change to `onChange`.
- * Otherwise it keeps the state itself and also reports each change to `onChange`. Changes are TanStack's updaters,
- * values or functions of the current state.
- */
+/** Uncontrolled, it keeps the state and still reports each change to `onChange`. */
 export function useControllableState<T>(
   controlled: T | undefined,
   onChange: OnChangeFn<T> | undefined,

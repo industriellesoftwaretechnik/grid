@@ -10,7 +10,7 @@ interface LocaleFormats {
 
 const cache = new Map<string | undefined, LocaleFormats>();
 
-/** The formats of a locale, made once each; `undefined` is the browser's locale. */
+/** Cached per locale; `undefined` is the browser's. */
 export function localeFormats(locale: string | undefined): LocaleFormats {
   let formats = cache.get(locale);
   if (!formats) {
@@ -31,12 +31,15 @@ interface LocaleTable {
 // Formatting also serves tables not made by `useGrid`, which have no grid meta: they format in the browser's locale.
 const localeOf = (table: LocaleTable) => table.options.meta?.locale;
 
-/** A number as the grid's locale writes it, with at most two decimals, as cells and totals show numbers. */
+/** Formats a number in the table's locale with at most two decimals. */
 export function formatNumber(value: number, table: LocaleTable): string {
   return localeFormats(localeOf(table)).number.format(value);
 }
 
-/** A value as its column shows it: through `meta.formatValue`, else numbers and dates in the grid's locale. */
+/**
+ * Formats a cell value as text through `meta.formatValue`, else numbers and dates in the table's locale; `null` and
+ * `undefined` give an empty string.
+ */
 export function formatValue<TData extends RowData, TValue extends CellData>(
   value: unknown,
   column: GridColumn<TData, TValue>
@@ -52,7 +55,10 @@ export function formatValue<TData extends RowData, TValue extends CellData>(
   return JSON.stringify(value) ?? '';
 }
 
-// Counts are numbers whatever the column holds, so the column's own formatter does not apply to them.
+/**
+ * Formats an aggregate like `formatValue`, except counts: they are numbers whatever the column holds, so the column's
+ * own formatter does not apply to them.
+ */
 export function formatAggregate<TData extends RowData, TValue extends CellData>(
   value: unknown,
   column: GridColumn<TData, TValue>

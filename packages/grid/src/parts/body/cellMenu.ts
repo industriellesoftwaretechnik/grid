@@ -10,7 +10,6 @@ const writeClipboard = (text: string | undefined) => {
   if (text !== undefined) void navigator.clipboard.writeText(text);
 };
 
-/** The body's context menu: copy, copy with headers and paste, for the range or the focused cell. */
 export function cellMenu<TData extends RowData>(table: CoreTable<TData>): GridMenuSection[] {
   const cell = findCell(table, focusedPosition(table));
   const canCopy = cell !== undefined || selectedLeafRows(table).length > 0 || selectedBlock(table) !== undefined;
@@ -28,16 +27,15 @@ export function cellMenu<TData extends RowData>(table: CoreTable<TData>): GridMe
   ];
 }
 
+/** What `useCellMenu` returns. */
 export interface CellMenuModel<TData extends RowData> {
-  /** The focused cell, which a right click focuses first; the app's own entries may act on it. */
+  /** The focused cell, unset while none is; a right click outside the range focuses its cell first. */
   cell: GridCell<TData> | undefined;
+  /** Copy, copy with headers and paste. */
   sections: GridMenuSection[];
 }
 
-/**
- * The context menu of the body, as data; it acts on the range or the focused cell. Add the app's own entries to
- * `sections` before rendering them.
- */
+/** The body's context menu; it acts on the selected rows, the range or the focused cell. */
 export function useCellMenu<TData extends RowData>(table: CoreTable<TData>): CellMenuModel<TData> {
   return useGridSelector(table, () => ({
     cell: findCell(table, focusedPosition(table)),

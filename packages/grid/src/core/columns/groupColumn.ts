@@ -1,13 +1,9 @@
 import type { GridColumnDef } from '#/core/table/types.ts';
 
-/** The id of the group column, whose header the UI names. */
+/** The id of the group column `groupDisplay: 'groupColumn'` adds; the UI names its header. */
 export const groupColumnId = 'auto-group';
 
-/**
- * The column that holds the groups of every level when `groupDisplay` is `groupColumn`, and the toggles of master rows
- * while it is shown. `useBodyCell` gives a group row's cell the grouped column's cell to show. It has no header text:
- * `useHeaderCell` marks it with `groupColumn`.
- */
+// Renders nothing itself: `useBodyCell` shows the grouped column's cell in it, and the UI names its header.
 export function groupColumn<TData extends object>(): GridColumnDef<TData> {
   return {
     id: groupColumnId,

@@ -6,24 +6,26 @@ import type { CoreTable, GridColumn, GridHeader } from '#/core/table/types.ts';
 import { useGridSelector } from '#/core/table/useGridSelector.ts';
 import { headerLayout, headerStickyStyle, type Region } from '#/parts/view/layout.ts';
 
+/** A header cell's place in its header row, with its sort and filter state; `useHeaderCell` takes it. */
 export interface HeaderSlot<TData extends RowData> {
   header: GridHeader<TData>;
   region: Region;
   /** The pinned header next to the scrolling ones, which draws the border between them. */
   edge: boolean;
-  /** Keeps a pinned header in place. */
+  /** Keeps a pinned header in place; unset for a scrolling one. */
   style: CSSProperties | undefined;
-  /** Sorts by the column, with Ctrl adding it to a multi-sort; unset where it cannot be sorted. */
+  /** Ctrl adds it to a multi-sort; unset where the column cannot be sorted. */
   toggleSorting: ((event: unknown) => void) | undefined;
   sorted: false | SortDirection;
-  /** The column's place in a multi-sort, from 1; 0 when the table sorts by one column or none. */
+  /** From 1; 0 when the table sorts by one column or none. */
   sortPosition: number;
   filtered: boolean;
 }
 
+/** One header row: column groups above, columns in the last. */
 export interface HeaderRow<TData extends RowData> {
   id: string;
-  /** The headers in display order; `'filler'` takes the spare width. */
+  /** `'filler'` takes the spare width. */
   slots: (HeaderSlot<TData> | 'filler')[];
 }
 
@@ -39,7 +41,6 @@ function sortHandler<TData extends RowData>(column: GridColumn<TData>) {
   return handler;
 }
 
-/** The header rows, column groups above the columns, each in display order. */
 export function headerRows<TData extends RowData>(table: CoreTable<TData>): HeaderRow<TData>[] {
   const multiSort = table.atoms.sorting.get().length > 1;
   return headerLayout(table).map(({ id, slots }) => ({
@@ -61,7 +62,7 @@ export function headerRows<TData extends RowData>(table: CoreTable<TData>): Head
   }));
 }
 
-/** The header rows, re-rendering when the columns, their order, sizes, sorting or filters change. */
+/** The header: its rows of header cells, pinned ones first and last, with a filler before the end-pinned ones. */
 export function useHeaderRows<TData extends RowData>(table: CoreTable<TData>): HeaderRow<TData>[] {
   return useGridSelector(table, () => headerRows(table));
 }

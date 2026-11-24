@@ -6,14 +6,13 @@ import type { GridMeta } from '#/core/table/gridMeta.ts';
 
 type MetaValues = Pick<GridMeta, 'locale' | 'treeData' | 'expandColumn' | 'ownColumnVisibility'>;
 
-/** The options and meta values the table's owner passes in, which are no state of the table. */
+/** Options and meta values the owner passes in; not table state. */
 export interface GridInputs extends Partial<MetaValues> {
   data: unknown;
   columns: unknown;
   groupDisplay: unknown;
 }
 
-/** What the grid's components render from: the table state with the inputs of its owner. */
 export interface GridSnapshot extends GridInputs {
   state: object;
 }
@@ -26,9 +25,9 @@ declare module '@tanstack/table-core' {
   }
   interface Table_FeatureMap<TFeatures extends TableFeatures, TData extends RowData> {
     gridStoreFeature: {
-      /** Everything the grid renders from; `useGridSelector` subscribes to it. */
+      /** The table state with the options and meta values passed in; what `useGridSelector` subscribes to. */
       gridStore: GridStore;
-      /** The owner's inputs, which `publishGridInputs` writes after each of its renders. */
+      /** The options and meta values passed in, which `useGrid` publishes after each render. */
       gridInputs: Atom<GridInputs>;
     };
   }
@@ -59,19 +58,11 @@ function inputsOf({ options }: InputsTable): GridInputs {
   };
 }
 
-/**
- * Writes the table's current options into its inputs, notifying the grid's components of what changed. `useGrid`
- * calls it after each render, when React's adapter publishes the controlled state too.
- */
 export function publishGridInputs(table: InputsTable & { gridInputs: Atom<GridInputs> }) {
   table.gridInputs.set(inputsOf(table));
 }
 
-/**
- * Adds `table.gridStore`, one source for everything the grid renders from: the table's state from `table.store`, and
- * `data`, `columns` and the values of the grid's meta, which are options and so no state. Other options are taken to
- * stay the same.
- */
+// Only the options in `GridInputs` are tracked; others are taken to stay the same.
 export const gridStoreFeature: TableFeature = {
   constructTableAPIs: (table) => {
     if (!isStoreTable(table)) throw new Error('gridStoreFeature needs a TanStack table.');

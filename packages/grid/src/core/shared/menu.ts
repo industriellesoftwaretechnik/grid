@@ -2,10 +2,7 @@ import type { ReactNode } from 'react';
 
 import type { AggregationName } from '#/core/table/aggregations.ts';
 
-/**
- * The ids of the grid's own menu entries. They carry no text or icon: the UI names them and picks their icons by id,
- * which also lets it leave entries out or reorder them.
- */
+/** Ids of the grid's own menu entries; they carry no text or icon, so the UI names them and picks their icons by id. */
 export type GridMenuId =
   | 'sort.asc'
   | 'sort.desc'
@@ -27,40 +24,41 @@ export type GridMenuId =
   | 'copy.with-headers'
   | 'paste';
 
+/** A menu entry that runs `onSelect`. */
 export interface GridMenuItem {
   type: 'item';
-  /** Unique in its menu; usable as key. The grid's own entries use a `GridMenuId`. */
+  /** Unique in its menu; the grid's own entries use a `GridMenuId`. */
   id: string;
-  /** Set where the text is data, such as a column's name, and on the app's own entries; else named by `id`. */
+  /** Set only where the text is data, such as a column's name; otherwise the UI names the entry by `id`. */
   label?: string;
-  /** The app's own entries' icon. */
   icon?: ReactNode;
-  /** A keyboard shortcut to show, for the app's own entries. */
+  /** The keyboard shortcut to show beside the entry; the grid's own entries leave it to the UI. */
   shortcut?: string;
-  /** A short text shown at the end, for the app's own entries. */
+  /** Secondary text to show beside the entry. */
   hint?: string;
   disabled?: boolean;
-  /** Set for an item that is on or off, such as one of several options; shown checked when true. */
+  /** Set only on items that can be on or off. */
   checked?: boolean;
-  /** Keeps the menu open after selecting, as when showing and hiding columns. */
+  /** Keeps the menu open after the entry is selected, such as to toggle several columns. */
   keepOpen?: boolean;
   onSelect: () => void;
 }
 
+/** A menu entry that opens further sections. */
 export interface GridSubmenu {
   type: 'submenu';
+  /** Unique in its menu; the grid's own entries use a `GridMenuId`. */
   id: string;
+  /** Set only where the text is data; otherwise the UI names the entry by `id`. */
   label?: string;
   icon?: ReactNode;
   sections: GridMenuSection[];
 }
 
+/** An entry of a menu section: an item or a submenu. */
 export type GridMenuEntry = GridMenuItem | GridSubmenu;
 
-/**
- * Entries that a menu separates from the next section. A menu has no empty sections. Menus are plain data: map,
- * filter or extend them before rendering to change what they offer.
- */
+/** A group of menu entries, set apart from the others; a menu has no empty sections. */
 export interface GridMenuSection {
   id: string;
   entries: GridMenuEntry[];

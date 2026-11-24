@@ -8,15 +8,13 @@ import { boundsCodec } from '#/parts/filters/inputCodecs.ts';
 import { setFilterModel, setFilterOptions } from '#/parts/filters/setFilter.ts';
 import { useFilterInput, type DraftInput } from '#/parts/filters/useDraftInput.ts';
 
+/** What `useRangeFilter` returns. */
 export interface RangeFilterModel extends DraftInput<[string, string]> {
-  /** For a number filter, the smallest and largest value among the rows the other filters let through. */
+  /** For a number filter, the min and max among the rows the other filters let through; unset for a date filter. */
   placeholders: [string, string] | undefined;
 }
 
-/**
- * The editor of a `number` or `date` filter: two inputs for the bounds, either of which may stay empty. `text` and
- * `change` take both inputs' text.
- */
+/** The full editor of a number or date range filter, with a from and a to input; `text` and `change` take both. */
 export function useRangeFilter<TData extends RowData>(
   column: GridColumn<TData>,
   type: 'number' | 'date'
@@ -27,7 +25,7 @@ export function useRangeFilter<TData extends RowData>(
   return { ...input, placeholders: range && codec.toText(range) };
 }
 
-/** The editor of a `set` filter: a search over the column's values and a checkbox for each, with select all. */
+/** The full editor of a set filter: a checkbox per value, searchable by `query`. */
 export function useSetFilter<TData extends RowData>(column: GridColumn<TData>) {
   const [query, setQuery] = useState('');
   const { options, value } = useGridSelector(column.table, () => ({
@@ -37,11 +35,13 @@ export function useSetFilter<TData extends RowData>(column: GridColumn<TData>) {
 
   return {
     ...setFilterModel(column, options, value, query),
+    /** The search text over the option labels. */
     query,
     setQuery,
+    /** The column is filtered. */
     canClear: value !== undefined,
   };
 }
 
-/** What `useSetFilter` gives a `set` filter editor. */
+/** What `useSetFilter` returns. */
 export type SetFilterModel = ReturnType<typeof useSetFilter>;

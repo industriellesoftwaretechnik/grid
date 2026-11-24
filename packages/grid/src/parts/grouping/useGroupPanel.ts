@@ -4,24 +4,21 @@ import { columnLabel } from '#/core/columns/columnInfo.ts';
 import type { CoreTable, GridColumn } from '#/core/table/types.ts';
 import { useGridSelector } from '#/core/table/useGridSelector.ts';
 
-/** A grouping level in the group panel. */
+/** A grouped column in the group panel. */
 export interface GroupChip<TData extends RowData> {
   column: GridColumn<TData>;
-  /** The column's name. */
   label: string;
   sorted: false | SortDirection;
-  /** The column's place in a multi-sort, from 1; 0 when the table sorts by one column or none. */
+  /** From 1; 0 when the table sorts by one column or none. */
   sortPosition: number;
   canSort: boolean;
-  /** Sorts by the grouped column, as its header does; Ctrl adds it to a multi-sort. */
+  /** Ctrl adds it to a multi-sort; a no-op where `canSort` is false. */
   toggleSorting: (event: unknown) => void;
+  /** Ungroups the column. */
   remove: () => void;
 }
 
-/**
- * The grouping levels, outermost first, as chips of the row above the header. Header columns dropped on it group by
- * them (`useColumnReorder`'s `groupBy`); `table.moveGrouping` reorders the levels.
- */
+/** The group panel's chips, outermost first; `useColumnReorder`'s `groupBy` adds one, `table.moveGrouping` reorders. */
 export function useGroupPanel<TData extends RowData>(table: CoreTable<TData>): GroupChip<TData>[] {
   const { grouping, sorting } = useGridSelector(table, () => ({
     grouping: table.atoms.grouping.get(),

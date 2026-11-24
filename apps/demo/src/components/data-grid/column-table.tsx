@@ -3,7 +3,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { useColumnWidths, type CoreTable } from '@istec/grid';
 
-/** A `<table>` sized to the visible columns. Header, body and footer are separate ones that share these widths. */
+/** Header, body and footer are separate tables that share these column widths. */
 export function ColumnTable<TData extends object>({
   table,
   className,

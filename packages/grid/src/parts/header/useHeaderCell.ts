@@ -13,25 +13,25 @@ const ariaSort = { asc: 'ascending', desc: 'descending' } as const;
 /** Narrower columns show only their label; their menu opens with a right click. */
 const menuButtonMinWidth = 72;
 
+/** What `useHeaderCell` returns. */
 export interface HeaderCellModel {
-  /** `group` for a column group, `column` for a column, `placeholder` for the empty cell above a column without group. */
+  /** `placeholder` is the empty cell above a column without group. */
   kind: 'group' | 'column' | 'placeholder';
-  /** Whether the column can be dragged to another place, which only scrolling columns can. */
+  /** A scrolling column without `meta.lockPosition`; only these can be dragged. */
   reorderable: boolean;
   align: ColumnAlign;
   /** The column's `meta.headerClassName`. */
   className: string | undefined;
-  /** Whether the column has a menu (`meta.menu` not `false`). */
+  /** A column, not a group, without `meta.menu: false`. */
   hasMenu: boolean;
-  /** Whether the column is wide enough for a menu button beside its label. */
+  /** The column has a menu and is at least 72 px wide; a narrower one leaves its menu to a right click. */
   showMenuButton: boolean;
-  /** The kind of the column's filter editor; unset where it cannot be filtered. */
+  /** Unset where the column cannot be filtered. */
   filter: FilterKind | undefined;
-  /** Whether a filter is set, which a header shows. */
   filtered: boolean;
-  /** Whether it is the header of the group column (`groupDisplay: 'groupColumn'`), which has no text: the UI names it. */
+  /** The group column's header has no text: the UI names it. */
   groupColumn: boolean;
-  /** For the `<th>`: keeps a pinned header in place and tells the sorting. */
+  /** Props for the `<th>` element. */
   cellProps: {
     colSpan: number;
     'aria-sort': 'ascending' | 'descending' | undefined;
@@ -39,7 +39,7 @@ export interface HeaderCellModel {
   };
 }
 
-/** A header cell: what it shows besides its label, and the props of its `<th>`. */
+/** The header cell: its kind, menu and filter state, and props for its element. */
 export function useHeaderCell<TData extends RowData>({
   header,
   region,

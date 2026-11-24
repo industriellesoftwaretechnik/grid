@@ -3,10 +3,7 @@ import type { GridStore } from '#/core/plugins/gridStoreFeature.ts';
 import type { GridMeta } from '#/core/table/gridMeta.ts';
 import { useGridSelector } from '#/core/table/useGridSelector.ts';
 
-/**
- * Writes numbers as the grid's locale does, with at most two decimals, as cells and totals show them: for the numbers
- * of `useStatusBar`. It follows a change of `useGrid`'s `locale`.
- */
+/** Returns a function that formats a number like `formatNumber`, and re-renders when the table's locale changes. */
 export function useFormatNumber(table: {
   gridStore: GridStore;
   options: { meta?: Partial<GridMeta> };

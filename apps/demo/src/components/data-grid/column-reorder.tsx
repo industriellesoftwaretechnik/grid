@@ -17,9 +17,8 @@ import { useColumnReorder, type CoreTable } from '@istec/grid';
 
 type DropAction = 'move' | 'group' | 'reject';
 
-// Over the group panel the pointer decides, so a header dragged up into it groups even when another header is
-// closer; elsewhere the closest header does. Column group headers are no drop targets: being wide, they would win
-// near column boundaries.
+// Over the group panel the pointer decides, so a drop there groups even when another header is closer.
+// Column group headers are no drop targets: being wide, they would win near column boundaries.
 function collisionDetectionFor(headerIds: ReadonlySet<UniqueIdentifier>): CollisionDetection {
   return (args) => {
     const panel = pointerWithin({
@@ -34,10 +33,7 @@ function collisionDetectionFor(headerIds: ReadonlySet<UniqueIdentifier>): Collis
   };
 }
 
-/**
- * Reorders the scrolling columns by dragging their headers, and groups by a column dropped into the group panel. It
- * wraps the header and the group panel. The dragged column follows the pointer; its icon tells what a drop does.
- */
+/** Wraps the header and the group panel, so a header dragged into the panel groups by its column. */
 export function ColumnReorder<TData extends object>({
   table,
   children,

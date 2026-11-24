@@ -4,21 +4,19 @@ import { canGroupBy, columnLabel } from '#/core/columns/columnInfo.ts';
 import type { CoreTable } from '#/core/table/types.ts';
 import { useGridSelector } from '#/core/table/useGridSelector.ts';
 
+/** What `useColumnReorder` returns. */
 export interface ColumnReorderModel {
-  /** The ids of the headers that can be dragged, in display order: the scrolling columns. */
+  /** The headers that can be dragged: scrolling columns without `meta.lockPosition`. */
   headerIds: string[];
-  /** Whether dropping the column into the group panel would group by it. */
+  /** Whether the column can be grouped and is not grouped yet. */
   canGroupBy: (columnId: string) => boolean;
-  /** Groups by the column, as dropping it into the group panel does. */
+  /** Adds a group level, as dropping the column into the group panel does; a no-op where `canGroupBy` is false. */
   groupBy: (columnId: string) => void;
-  /** The column's name, for a drag preview. */
+  /** The column's label for the drag preview; the id for an unknown column. */
   label: (columnId: string) => string;
 }
 
-/**
- * What a drag and drop of headers does: reorder the scrolling columns (`table.moveColumn`), or group by a column
- * dropped into the group panel. Pinned columns keep the order they were pinned in. The dragging itself is the UI's.
- */
+/** Column drag and drop: the dragging itself is the UI's; pinned columns keep the order they were pinned in. */
 export function useColumnReorder<TData extends RowData>(table: CoreTable<TData>): ColumnReorderModel {
   const headerIds = useGridSelector(table, () =>
     (table.getCenterHeaderGroups().at(-1)?.headers ?? [])

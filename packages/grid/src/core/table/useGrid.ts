@@ -20,43 +20,31 @@ import type { CoreTable, GridRow, GridState } from '#/core/table/types.ts';
 import { useControllableState } from '#/core/table/useControllableState.ts';
 import { usePersistState } from '#/core/table/usePersistState.ts';
 
-/** The options of a grid: TanStack's table options, and the grid's own. */
+/** Options of `useGrid`: TanStack's table options and those of the grid features, plus the grid's own. */
 export type GridOptions<TData extends object> = Omit<
   GridTableOptions<TData>,
   'meta' | 'initialState' | 'defaultLayout'
 > & {
-  /** Names the table; a persisted layout is stored under it. */
+  /** Identifies the table: its DOM elements carry it as `data-table-id`, and a persisted layout is stored under it. */
   id: string;
-  /**
-   * The locale numbers and dates are shown in and values sorted by, as a BCP 47 tag such as `de-DE`; the browser's by
-   * default. The grid has no texts of its own: its UI brings them.
-   */
+  /** BCP 47 tag for formatting numbers and dates and sorting values; `undefined` is the browser's. */
   locale?: string;
-  /** Keeps the layout across visits, in localStorage. `persistedSlices` lists what it keeps. */
+  /** Keeps the layout in localStorage; `persistedSlices` lists what it keeps. Default: `false`. */
   persist?: boolean;
-  /**
-   * The state of the slices the host does not control, as `state` gives the others. "Reset layout" returns to its
-   * layout, not to a persisted one.
-   */
+  /** The state the table starts with, below a persisted layout; `table.resetLayout` returns to it. */
   initialState?: Partial<GridState>;
   /**
-   * Makes rows master rows: expanding one shows this under it, across the table. `getRowCanExpand` limits it to
-   * some rows; rows with children expand to those instead.
+   * Renders a row's detail, shown full width under the row while it is expanded; rows with children expand to those
+   * instead. Every row has a detail unless `getRowCanExpand` says otherwise.
    */
   renderDetail?: (row: GridRow<TData>) => ReactNode;
-  /**
-   * The column whose cells hold the toggles of tree nodes and master rows. Defaults to the first data column. While the
-   * group column is shown it holds them, and while this column is hidden the first shown data column does.
-   */
+  /** The column with the tree and detail toggles; defaults to the first data column, yields to a shown group column. */
   expandColumn?: string;
 };
 
 const noGrouping: GroupingState = [];
 
-/**
- * The handler of a slice TanStack holds. Unless the host controls the slice, the table keeps holding it, and a host
- * that passes `onChange` only listens; TanStack alone would leave the slice to that host.
- */
+// TanStack alone hands an uncontrolled slice to a host that passes `onChange`; here the table keeps it.
 function keepAndReport<TData extends object, K extends keyof GridState>(
   table: () => CoreTable<TData>,
   state: Partial<GridState> | undefined,
@@ -70,7 +58,10 @@ function keepAndReport<TData extends object, K extends keyof GridState>(
   };
 }
 
-/** Creates the grid's table: TanStack's, with the grid's features. Pass it to the hooks of each part. */
+/**
+ * Creates the grid's table: a TanStack table with the grid features. A state slice passed in `state` is controlled;
+ * any other the table keeps itself and still reports to its `on…Change`.
+ */
 export function useGrid<TData extends object>({
   id,
   locale,
@@ -82,13 +73,12 @@ export function useGrid<TData extends object>({
   ...options
 }: GridOptions<TData>) {
   const storageKey = persist ? `istec-grid:${id}` : undefined;
-  // The host's initial state with the persisted layout over it; "Reset layout" returns to the host's alone.
+  // "Reset layout" returns to the host's initial state alone, without the persisted layout.
   const [startState] = useState((): Partial<GridState> => ({
     ...initialState,
     ...(storageKey === undefined ? {} : readPersistedState(storageKey)),
   }));
-  // The slices the columns and their visibility are built from are held here, unless the host controls them.
-  // TanStack holds the others.
+  // Held here, not by TanStack, because the columns and their visibility are built from them.
   const [columnAggregation, setColumnAggregation] = useControllableState<ColumnAggregationState>(
     options.state?.columnAggregation,
     options.onColumnAggregationChange,
@@ -116,8 +106,7 @@ export function useGrid<TData extends object>({
     const resolved = resolveColumns(options.columns, firstRow, columnAggregation);
     return showGroupColumn ? insertAfterLockedColumns(resolved, groupColumn<TData>()) : resolved;
   }, [options.columns, firstRow, columnAggregation, showGroupColumn]);
-  // The group column shows only while something is grouped. A new object is a visibility change to every subscriber,
-  // so it is only rebuilt when an input changes.
+  // Memoized: a new object is a visibility change to every subscriber.
   const grouped = activeGrouping.length > 0;
   const tableVisibility = useMemo<ColumnVisibilityState>(
     () => (showGroupColumn ? { ...columnVisibility, [groupColumnId]: grouped } : columnVisibility),

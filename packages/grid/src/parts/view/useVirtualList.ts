@@ -2,13 +2,20 @@ import { useEffect, useRef } from 'react';
 
 import { useVirtualView } from '#/parts/view/useVirtualView.ts';
 
-/**
- * A scrolling list of `count` items of `itemHeight` that renders only those in view, up to `maxHeight` tall, such as
- * the values of a set filter. `activeIndex` is scrolled into view whenever it changes.
- */
+/** A virtual list, such as a select editor's choices or a set filter's options; it scrolls `activeIndex` into view. */
 export function useVirtualList(
   count: number,
-  { itemHeight, maxHeight, activeIndex }: { itemHeight: number; maxHeight: number; activeIndex?: number }
+  {
+    itemHeight,
+    maxHeight,
+    activeIndex,
+  }: {
+    /** In px. */
+    itemHeight: number;
+    /** In px; the list is as tall as its items up to this. */
+    maxHeight: number;
+    activeIndex?: number;
+  }
 ) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { virtualizer, items, totalSize } = useVirtualView({
@@ -23,13 +30,14 @@ export function useVirtualList(
   }, [virtualizer, activeIndex, count]);
 
   return {
-    /** For the scroll container. */
+    /** Props for the scroll container. */
     scrollProps: {
       ref: scrollRef,
       style: { height: Math.min(count * itemHeight, maxHeight), overflowY: 'auto' as const },
     },
-    /** For the element inside it, positioned relative, that holds the items. */
+    /** For the element inside the scroll container that holds the items. */
     contentStyle: { position: 'relative' as const, height: totalSize },
+    /** The items to render, each with the style that places it. */
     items: items.map((item) => ({
       index: item.index,
       key: item.key,
@@ -38,5 +46,5 @@ export function useVirtualList(
   };
 }
 
-/** What `useVirtualList` gives a scrolling list. */
+/** What `useVirtualList` returns. */
 export type VirtualListModel = ReturnType<typeof useVirtualList>;

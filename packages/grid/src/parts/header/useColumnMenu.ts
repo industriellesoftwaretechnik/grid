@@ -5,10 +5,7 @@ import type { GridColumn } from '#/core/table/types.ts';
 import { useGridSelector } from '#/core/table/useGridSelector.ts';
 import { columnMenu, type ColumnMenuOptions } from '#/parts/header/columnMenu.ts';
 
-/**
- * The header menu of a column, as data: sorting, filtering, pinning, grouping and aggregation, hiding and "Reset
- * columns". It stays current while rendered; empty for `meta.menu: false`.
- */
+/** The column menu's sections: sort, filter, pin, group, aggregation, hide and reset; empty for `meta.menu: false`. */
 export function useColumnMenu<TData extends RowData>(
   column: GridColumn<TData>,
   options: ColumnMenuOptions = {}

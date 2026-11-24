@@ -11,7 +11,7 @@ function persistedJson({ state, ownColumnVisibility }: GridSnapshot): string {
   return JSON.stringify(Object.fromEntries(persistedSlices.map((slice) => [slice, values[slice]])));
 }
 
-/** Writes the layout under `key` once it settles, without rendering anything; without a key nothing is stored. */
+/** Writes once the layout settles; without a key nothing is stored. */
 export function usePersistState(key: string | undefined, store: GridStore) {
   const save = useDebouncedCallback(
     (json: string) => {

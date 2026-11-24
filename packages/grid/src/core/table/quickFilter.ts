@@ -13,8 +13,7 @@ function matchesRow(row: GridRow<RowData>, words: string[]): boolean {
   return words.every((word) => texts.some((text) => text.includes(word)));
 }
 
-// TanStack calls a global filter once per column and keeps the row if any call passes, so each call judges the
-// whole row and caches the answer per table.
+// TanStack calls a global filter per column and keeps the row if any passes, so each call judges the whole row.
 export const quickFilter = constructFilterFn<GridFeatures, RowData>({
   resolveFilterValue: (value: unknown) => (typeof value === 'string' ? value.trim().toLowerCase() : ''),
   filter: (_value, query: string, row) => {

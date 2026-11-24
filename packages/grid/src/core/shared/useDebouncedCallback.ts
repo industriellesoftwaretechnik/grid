@@ -1,11 +1,9 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 
 export interface Debounced<TArgs extends unknown[]> {
-  /** Calls the callback once `wait` passed without another call, with the arguments of the last one. */
+  /** Calls once `wait` passed without another call, with the last call's arguments. */
   run: (...args: TArgs) => void;
-  /** Makes a pending call now. */
   flush: () => void;
-  /** Drops a pending call. */
   cancel: () => void;
 }
 
@@ -30,14 +28,13 @@ function createDebounced<TArgs extends unknown[]>(initial: (...args: TArgs) => v
       clearTimeout(timer);
       pending = undefined;
     },
-    /** Calls `next` from now on. */
     update: (next: (...args: TArgs) => void) => {
       callback = next;
     },
   } satisfies Debounced<TArgs> & { update: unknown };
 }
 
-/** A debounced `callback`. With `flushOnUnmount`, a call still pending when the component unmounts is made. */
+/** With `flushOnUnmount`, a call still pending on unmount is made. */
 export function useDebouncedCallback<TArgs extends unknown[]>(
   callback: (...args: TArgs) => void,
   wait: number,

@@ -14,7 +14,6 @@ const initialState = {
   sorting: [{ id: 'lastName', desc: false }],
   columnPinning: { start: ['select'], end: [] },
 };
-// The cell menu is data: the demo adds a section of its own below copy and paste.
 const cellMenu: CellMenuSections<Person> = (sections, cell) =>
   cell
     ? [
@@ -36,7 +35,6 @@ const cellMenu: CellMenuSections<Person> = (sections, cell) =>
       ]
     : sections;
 
-/** The demo's toolbar: the grid renders none, the app places the parts it wants. */
 function Toolbar({ table }: { table: CoreTable<Person> }) {
   return (
     <div className="flex flex-wrap items-center justify-end gap-2">

@@ -37,7 +37,6 @@ afterEach(() => {
 
 type HostOptions = Omit<Partial<GridOptions<Person>>, 'data'>;
 
-/** Renders a grid with `options`; `rerender` passes new ones, as a host re-rendering with its state would. */
 function renderGrid(options: HostOptions) {
   let table: GridInstance<Person> | undefined;
   function Grid(props: HostOptions) {
@@ -57,7 +56,7 @@ function renderGrid(options: HostOptions) {
 
 const onChangeSpy = <T,>() => vi.fn<OnChangeFn<T>>();
 
-/** What the last change reported to `onChange` makes of `current`; like TanStack's, it may be an updater function. */
+// Like TanStack's, the reported change may be an updater function.
 function applied<T>(onChange: Mock<OnChangeFn<T>>, current: T): T {
   const call = onChange.mock.lastCall;
   if (!call) throw new Error('No change was reported.');

@@ -5,7 +5,7 @@ import type { GridMeta } from '#/core/table/gridMeta.ts';
 import { testFeatures } from '#/core/table/testFeatures.ts';
 import type { GridColumnDef } from '#/core/table/types.ts';
 
-/** A table without React, with the meta `useGrid` would give it; English unless `meta.locale` says otherwise. */
+/** English unless `meta.locale` says otherwise. */
 export function testTable<TData extends RowData>({
   columns,
   data,

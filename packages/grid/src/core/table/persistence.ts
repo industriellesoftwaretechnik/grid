@@ -1,6 +1,6 @@
 import type { GridState } from '#/core/table/types.ts';
 
-/** The state `persist: true` keeps across visits. */
+/** The state slices the `persist` option keeps in localStorage. */
 export const persistedSlices = [
   'columnOrder',
   'columnSizing',

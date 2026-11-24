@@ -17,7 +17,7 @@ function select<TData extends RowData>(table: CoreTable<TData>, bounds: CellSele
   if (range) table.setCellSelection([range]);
 }
 
-/** Starts dragging the fill handle of the selection; releasing the mouse writes the values as one undoable edit. */
+/** Releasing the mouse writes the values as one undoable edit. */
 export function startFillDrag<TData extends RowData>(table: CoreTable<TData>) {
   const [source, ...others] = table.getCellSelectionBounds();
   if (!source || others.length > 0) return;
@@ -32,7 +32,7 @@ export function startFillDrag<TData extends RowData>(table: CoreTable<TData>) {
   document.addEventListener('mouseup', finish);
 }
 
-/** Grows the dragged fill to the cell under the mouse. Returns whether a fill drag is going on. */
+/** Returns whether a fill drag is going on. */
 export function extendFillDrag<TData extends RowData>(cell: GridCell<TData>): boolean {
   const { table } = cell;
   const drag = drags.get(table);

@@ -4,15 +4,16 @@ import { rowSelectionState } from '#/core/selection/rowSelectionState.ts';
 import type { CoreTable, GridRow } from '#/core/table/types.ts';
 import { useGridSelector } from '#/core/table/useGridSelector.ts';
 
+/** What `useSelectAll` and `useRowSelect` return. */
 export interface SelectionCheckboxModel {
   checked: boolean;
   indeterminate: boolean;
   disabled: boolean;
-  /** Sets the selection; `range` (Shift held) selects the rows between the last one toggled and this one. */
+  /** `range` (Shift held) selects the rows between the last one toggled and this one; `useSelectAll` ignores it. */
   toggle: (checked: boolean, range?: boolean) => void;
 }
 
-/** The header checkbox of the selection column: all rows, some (indeterminate) or none. */
+/** The header checkbox that selects all rows the filters let through. */
 export function useSelectAll<TData extends RowData>(table: CoreTable<TData>): SelectionCheckboxModel {
   const { checked, indeterminate } = useGridSelector(table, () => {
     const all = table.getIsAllRowsSelected();
@@ -27,7 +28,7 @@ export function useSelectAll<TData extends RowData>(table: CoreTable<TData>): Se
   };
 }
 
-/** A row's checkbox. A group row is indeterminate while some of its rows are selected. */
+/** A row's selection checkbox; a group row's is indeterminate while some of its rows are selected. */
 export function useRowSelect<TData extends RowData>(row: GridRow<TData>): SelectionCheckboxModel {
   const { checked, indeterminate, disabled } = useGridSelector(row.table, () => ({
     ...rowSelectionState(row),

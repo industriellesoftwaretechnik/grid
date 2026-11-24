@@ -4,7 +4,6 @@ import { messages } from '@/components/data-grid/messages';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useRowSelect, useSelectAll, type CoreTable, type GridRow } from '@istec/grid';
 
-/** The header checkbox of the selection column: all rows, some (indeterminate) or none. */
 export function SelectAllCheckbox<TData extends object>({ table }: { table: CoreTable<TData> }) {
   const select = useSelectAll(table);
   return (

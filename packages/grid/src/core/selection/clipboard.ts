@@ -17,7 +17,10 @@ import {
 import { formatDelimited, parseDelimited } from '#/core/shared/delimited.ts';
 import type { CoreTable, GridColumn, GridRow } from '#/core/table/types.ts';
 
-/** The selected range, else the selected rows, else the focused cell, as spreadsheets copy them. */
+/**
+ * Returns the selected range, else the selected rows, else the focused cell as tab-separated text, without display
+ * columns; `undefined` when nothing is focused.
+ */
 export function copyText<TData extends RowData>(table: CoreTable<TData>, withHeaders = false): string | undefined {
   const block = selectedBlock(table);
   if (block) {
@@ -53,9 +56,9 @@ function fillBlock<TData extends RowData>(
 }
 
 /**
- * Pastes spreadsheet text as one undoable edit: into a selected range that it fits, repeated to fill it; else from the
- * range's or the focused cell's top-left, rightwards and down. A single value pasted into a selected row goes into the
- * focused column of every selected row. Cells that cannot be edited or read the text are skipped.
+ * Pastes tab-separated text as one undoable edit and returns the cells that reject their value. It repeats to fill a
+ * selected range it fits, else pastes from the range's top-left or the focused cell; a single value goes into the
+ * focused column of every selected row.
  */
 export function pasteText<TData extends RowData>(table: CoreTable<TData>, text: string): CellValueRejection[] {
   const focused = focusedPosition(table);
@@ -95,7 +98,6 @@ export function pasteText<TData extends RowData>(table: CoreTable<TData>, text: 
   );
 }
 
-/** Clears the editable cells of the selected range, or the focused cell, as one undoable edit. */
 export function clearCells<TData extends RowData>(table: CoreTable<TData>): CellValueRejection[] {
   const block = selectedBlock(table);
   if (block) return table.setCellValues(fillBlock(block.rows, block.columns, () => ''));

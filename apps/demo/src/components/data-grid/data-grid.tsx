@@ -32,11 +32,9 @@ export interface DataGridProps<TData extends object> extends Omit<DataRowOptions
   table: GridInstance<TData>;
   headerHeight?: number;
   rowHeight?: number;
-  /** Rows rendered beyond each edge of the viewport. */
   overscan?: number;
   /** Shown instead of the rows when none pass the filters. */
   noRows?: ReactNode;
-  /** Covers the rows with a spinner, such as while they are fetched. */
   loading?: boolean;
   /** Adds a footer row with the totals of the aggregated columns. */
   showTotals?: boolean;
@@ -48,14 +46,12 @@ export interface DataGridProps<TData extends object> extends Omit<DataRowOptions
   showStatusBar?: boolean;
   /** Shown at the end of the status bar. */
   statusBar?: ReactNode;
-  /** Changes the context menu of the focused cell, which a right click focuses first; it starts with copy and paste. */
+  /** Changes the focused cell's context menu (a right click focuses first); it starts with copy and paste. */
   cellMenu?: CellMenuSections<TData>;
-  /** The accessible name of the grid. */
   'aria-label'?: string;
   className?: string;
 }
 
-/** The grid of `@istec/grid` in shadcn/ui: header, virtualized rows and footer, with group panel and status bar. */
 export function DataGrid<TData extends object>({
   table,
   headerHeight = 36,
@@ -147,7 +143,7 @@ export function DataGrid<TData extends object>({
   );
 }
 
-// Rendered only while the menu is open; it acts on the range or the focused cell, which a right click focuses first.
+// Rendered only while the menu is open; a right click focuses its cell first.
 function CellMenu<TData extends object>({
   table,
   customize,

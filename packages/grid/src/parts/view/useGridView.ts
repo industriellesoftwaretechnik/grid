@@ -8,18 +8,21 @@ import type { GridInstance } from '#/core/table/tableHook.ts';
 import { useGridSelector } from '#/core/table/useGridSelector.ts';
 import { pinnedOffsetVariables } from '#/parts/view/layout.ts';
 
+/** Options of `useGridView`. */
 export interface GridViewOptions {
+  /** In px; Page Up and Page Down move by the rows that fit the body. */
   rowHeight: number;
-  /** Covers the rows, such as while they are fetched. */
+  /** Marks the grid busy. Default: `false`. */
   loading?: boolean;
+  /** Shows the totals row where some visible column aggregates. */
   showTotals: boolean;
+  /** Shows the group panel where some column can be grouped. */
   showGroupPanel: boolean;
 }
 
 /**
- * The frame of the grid: the element with the grid role and its keyboard and clipboard handling, the scrolling body,
- * and the header and footer that scroll sideways with it. Header, body and footer are separate tables that share the
- * column widths.
+ * The grid's frame: props for the grid, header, footer and body scroll elements. Header, body and footer are separate
+ * tables sharing the column widths; header and footer scroll with the body.
  */
 export function useGridView<TData extends object>(
   table: GridInstance<TData>,
@@ -52,20 +55,18 @@ export function useGridView<TData extends object>(
   }, [table]);
 
   return {
-    /** Whether to cover the rows, as `loading` asks. */
     busy: loading,
+    /** The rows pinned to the top; they render outside the virtual rows. */
     topRows: view.topRows,
+    /** The rows pinned to the bottom; they render outside the virtual rows. */
     bottomRows: view.bottomRows,
     /** Whether to show the totals row: asked for, and some visible column aggregates. */
     totals: showTotals && view.aggregates,
     /** Whether to show the group panel: asked for, and some column can be grouped. */
     groupPanel: showGroupPanel && view.groupable,
-    /** The scrolling element, for `useVirtualRows`. */
+    /** The body's scroll element, for `useVirtualRows`; `null` until it mounts. */
     scrollElement,
-    /**
-     * For the element around header, body and footer. AG Grid's root has the grid role too; the UI gives it its
-     * accessible name.
-     */
+    /** Props for the element around header, body and footer; the UI gives it its accessible name. */
     gridProps: {
       ref: gridRef,
       role: 'grid',
@@ -77,10 +78,11 @@ export function useGridView<TData extends object>(
       // Body cells read their sticky offsets from these, so resizing a column re-renders no row.
       style: view.pinnedOffsets,
     },
-    /** For the header's and the footer's scroll containers, which hide their scrollbars. */
+    /** Props for the header's scroll container, which follows the body's horizontal scroll; hide its scrollbar. */
     headerProps: { ref: headerRef },
+    /** Props for the footer's scroll container, which follows the body's horizontal scroll; hide its scrollbar. */
     footerProps: { ref: footerRef },
-    /** For the body's scroll container. Tabbing into it lands on the focused cell, or focuses the first one. */
+    /** Props for the body's scroll container; tabbing into it lands on the focused cell, or focuses the first one. */
     scrollProps: {
       ref: setScrollElement,
       tabIndex: view.noFocus ? 0 : -1,
@@ -101,5 +103,5 @@ export function useGridView<TData extends object>(
   };
 }
 
-/** What `useGridView` gives the frame of the grid. */
+/** What `useGridView` returns. */
 export type GridViewModel = ReturnType<typeof useGridView>;

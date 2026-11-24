@@ -57,10 +57,8 @@ const icons: Partial<Record<GridMenuId, LucideIcon>> = {
 
 const isGridMenuId = (id: string): id is GridMenuId => Object.hasOwn(menuLabels, id);
 
-/** An entry's text: its own label, else the grid's text for its id. */
 const entryLabel = (entry: GridMenuEntry) => entry.label ?? (isGridMenuId(entry.id) ? menuLabels[entry.id] : entry.id);
 
-// An aggregation's item ends with its mark, as the cells show it.
 const aggregationHints: Record<string, string> = Object.fromEntries(
   Object.entries(aggregationSymbols).map(([name, symbol]) => [`aggregation.${name}`, symbol])
 );
@@ -74,7 +72,6 @@ function EntryIcon({ entry }: { entry: GridMenuEntry }): ReactNode {
   return Icon ? <Icon /> : null;
 }
 
-/** The parts of a shadcn menu, which the context menu and the dropdown menu both have. */
 interface MenuParts {
   Group: ComponentType<{ children: ReactNode }>;
   Item: ComponentType<{ disabled?: boolean; closeOnClick?: boolean; onClick?: () => void; children: ReactNode }>;
@@ -116,7 +113,6 @@ function menuEntries(sections: GridMenuSection[], parts: MenuParts): ReactNode {
             <>
               {entry.checked === undefined && <EntryIcon entry={entry} />}
               {entryLabel(entry)}
-              {/* A hint, such as an aggregation's mark, looks as it does in the cells; a shortcut as shortcuts do. */}
               {hint !== undefined && <span className="ml-auto pl-4 text-muted-foreground">{hint}</span>}
               {hint === undefined && shortcut !== undefined && <Shortcut>{shortcut}</Shortcut>}
             </>
@@ -164,12 +160,10 @@ const dropdownMenuParts: MenuParts = {
   SubContent: DropdownMenuSubContent,
 };
 
-/** A grid menu's sections as context menu items, with a separator between sections. */
 export function ContextMenuEntries({ sections }: { sections: GridMenuSection[] }) {
   return menuEntries(sections, contextMenuParts);
 }
 
-/** A grid menu's sections as dropdown menu items, with a separator between sections. */
 export function DropdownMenuEntries({ sections }: { sections: GridMenuSection[] }) {
   return menuEntries(sections, dropdownMenuParts);
 }

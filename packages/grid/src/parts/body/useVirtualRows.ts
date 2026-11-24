@@ -9,21 +9,24 @@ import { bodyEntries, createBodyEntriesCache, isDetailEntry, type BodyEntry } fr
 import { stickyGroupRows } from '#/parts/body/stickyGroups.ts';
 import { useVirtualView } from '#/parts/view/useVirtualView.ts';
 
+/** A body row in view: a data or group row, or the detail row under an open master row. */
 export type VirtualRow<TData extends object> =
   | { kind: 'row'; key: string; index: number; row: GridRow<TData> }
-  /** The full-width row under an expanded master row. */
   | { kind: 'detail'; key: string; index: number; row: GridRow<TData>; detail: ReactNode };
 
+/** Options of `useVirtualRows`. */
 export interface VirtualRowsOptions {
+  /** `useGridView`'s `scrollElement`. */
   scrollElement: HTMLElement | null;
+  /** In px; detail rows are measured. */
   rowHeight: number;
-  /** Rows rendered beyond each edge of the viewport. */
+  /** The rows rendered beyond each end of the view. */
   overscan: number;
 }
 
 /**
- * The scrolling rows that are in view, with the padding that stands for the others, and the group rows that stick to
- * the top while their group scrolls. It scrolls to the focused row when the focus moves to another row.
+ * The body's rows in view, with the padding around them and the group rows that stick to the top. It scrolls to the
+ * focused row when the focus moves to another row.
  */
 export function useVirtualRows<TData extends object>(
   table: CoreTable<TData>,
@@ -83,18 +86,19 @@ export function useVirtualRows<TData extends object>(
 
   return {
     rows,
-    /** Space above and below the rendered rows. */
+    /** In px, for a spacer row above the rows. */
     paddingTop: items[0]?.start ?? 0,
+    /** In px, for a spacer row below the rows. */
     paddingBottom: view.totalSize - (items.at(-1)?.end ?? 0),
-    /** Group rows pinned to the top of the viewport while their group scrolls, outermost first. */
+    /** The group rows stuck to the top, outermost first; `top` is in px. */
     sticky: stickyRows(entries, view, rowHeight),
     /** Spans every column, the filler included. */
     colSpan,
-    /** The viewport's width, which a detail row's content keeps to while the columns scroll sideways. */
+    /** The body's visible width in px; a detail row's content keeps to it while the columns scroll sideways. */
     viewportWidth: view.viewportWidth,
-    /** Pass to each rendered row's `ref`, so rows of other heights, such as details, are measured. */
+    /** The `ref` of each rendered row with its `data-index`, so details and other heights are measured. */
     measureElement: virtualizer.measureElement,
-    /** Whether no row passes the filters. */
+    /** No row passes the filters. */
     empty: entries.length === 0,
   };
 }
@@ -117,5 +121,5 @@ function stickyRows<TData extends object>(
   });
 }
 
-/** What `useVirtualRows` gives the scrolling rows. */
+/** What `useVirtualRows` returns. */
 export type VirtualRowsModel = ReturnType<typeof useVirtualRows>;

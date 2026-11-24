@@ -2,10 +2,7 @@ import type { RowData, RowSelectionState } from '@tanstack/react-table';
 
 import type { CoreTable, GridRow } from '#/core/table/types.ts';
 
-/**
- * The selection without the ids of group rows. Selecting a group selects its records too, and TanStack would keep the
- * group's id after ungrouping, where nothing can deselect it again. Group rows show the state of their records instead.
- */
+// TanStack would keep a group's id after ungrouping, where nothing can deselect it; group rows show their records'.
 export function withoutGroupRows<TData extends RowData>(
   table: CoreTable<TData>,
   selection: RowSelectionState
@@ -24,10 +21,7 @@ interface SelectionState {
 // Components ask on every change of the table, and a group row may stand for many records.
 const groupStates = new WeakMap<object, { selection: RowSelectionState; state: SelectionState }>();
 
-/**
- * Whether a row's checkbox is checked or partly checked. A group row stands for its records, so its state comes from
- * the leaf rows.
- */
+/** A group row's state comes from its leaf rows. */
 export function rowSelectionState<TData extends RowData>(row: GridRow<TData>): SelectionState {
   // A tree node is a record of its own: it is checked only when selected itself, and partly when some below it are.
   if (!row.getIsGrouped()) {

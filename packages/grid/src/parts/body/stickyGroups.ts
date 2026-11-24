@@ -8,8 +8,6 @@ export interface StickyRow {
   top: number;
 }
 
-// In the flat row list a row's parent is the nearest earlier row of smaller depth. A row is open when the rows
-// after it are deeper: a group, a tree node or the detail of a master row.
 function groupChain(rows: TreeRow[], index: number) {
   const row = rows[index];
   if (!row) return [];
@@ -33,10 +31,7 @@ function lastInGroup(rows: TreeRow[], index: number) {
   return last;
 }
 
-/**
- * The open rows to pin over the top of the viewport, outermost first, each pushed up as its content scrolls out.
- * A pushed row slides under its parents, so parents must be drawn on top.
- */
+// A pushed row slides under its parents, so parents must be drawn on top.
 export function stickyGroupRows(
   rows: TreeRow[],
   offset: number,

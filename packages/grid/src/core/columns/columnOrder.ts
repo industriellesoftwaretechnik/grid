@@ -1,4 +1,3 @@
-/** What `columnOrderIds` reads of a table. */
 export interface OrderedTable {
   getAllColumns: () => readonly { getLeafColumns: () => readonly { id: string }[] }[];
   atoms: { columnOrder: { get: () => readonly string[] } };

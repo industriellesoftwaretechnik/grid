@@ -16,14 +16,8 @@ import {
   type CsvExportOptions,
 } from '@istec/grid';
 
-/*
- * Parts to place around a grid, anywhere on the page: each takes the table from `useGrid`. The grid renders none of
- * them itself; lay them out as you like, next to your own buttons. The buttons are outline buttons, so that they join
- * in a `ButtonGroup`. Each reads the table with `useGridSelector` and calls its actions; a control of your own does
- * the same.
- */
+// The grid renders none of these; place them anywhere. Outline buttons, so they join in a `ButtonGroup`.
 
-/** The search across all columns. */
 export function SearchInput<TData extends object>({
   table,
   className,
@@ -49,7 +43,7 @@ export function SearchInput<TData extends object>({
   );
 }
 
-/** Downloads the rows that pass the filters as CSV, named after the table unless `fileName` is given. */
+/** Downloads the filtered rows as CSV, named after the table unless `fileName` is given. */
 export function ExportButton<TData extends object>({
   table,
   ...options
@@ -62,7 +56,7 @@ export function ExportButton<TData extends object>({
   );
 }
 
-/** Opens and closes all groups or tree nodes; shown only while there are any. */
+/** Renders nothing while there are no groups or tree nodes. */
 export function ExpandCollapseButtons<TData extends object>({
   table,
   size,
@@ -89,7 +83,7 @@ export function ExpandCollapseButtons<TData extends object>({
   );
 }
 
-/** Removes every column filter and the search; disabled while there is none. */
+/** Also clears the search. */
 export function ClearFiltersButton<TData extends object>({ table }: { table: CoreTable<TData> }) {
   const count = useGridSelector(table, () => table.getActiveFilterCount());
 
@@ -101,7 +95,6 @@ export function ClearFiltersButton<TData extends object>({ table }: { table: Cor
   );
 }
 
-/** A menu that shows and hides columns, with "Reset columns". */
 export function ColumnsButton<TData extends object>({ table }: { table: CoreTable<TData> }) {
   return (
     <DropdownMenu>

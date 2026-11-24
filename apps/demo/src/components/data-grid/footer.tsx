@@ -7,7 +7,6 @@ import { barClassName, pinnedClassName, textAlign } from '@/components/data-grid
 import { cn } from '@/lib/utils';
 import { useFormatNumber, useStatusBar, useTotalsRow, type AggregationName, type CoreTable } from '@istec/grid';
 
-/** The mark of an aggregation, such as Σ, with its name as tooltip. */
 export function AggregationMark({
   aggregation,
   className,
@@ -28,7 +27,6 @@ export function AggregationMark({
   );
 }
 
-/** The footer row with the totals of the aggregated columns. */
 export function TotalsRow<TData extends object>({ table, rowHeight }: { table: CoreTable<TData>; rowHeight: number }) {
   const slots = useTotalsRow(table);
 
@@ -60,10 +58,6 @@ export function TotalsRow<TData extends object>({ table, rowHeight }: { table: C
   );
 }
 
-/**
- * The footer with the number of rows, of those passing the filters, of groups and of selected rows, and for a range
- * the number of its cells and the sum and average of its numbers.
- */
 export function StatusBar<TData extends object>({
   table,
   children,

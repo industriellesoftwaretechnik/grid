@@ -27,7 +27,6 @@ function readValue<TData extends RowData>(def: Def<TData>, row: TData): unknown 
   return value;
 }
 
-/** Completes each data column's meta and applies its filter and the aggregation chosen in the menu. */
 export function resolveColumns<TData extends RowData>(
   columns: readonly Def<TData>[],
   firstRow: TData | undefined,
@@ -51,7 +50,6 @@ export function resolveColumns<TData extends RowData>(
   return columns.map(resolve);
 }
 
-/** The id of the first column with a value, in definition order. */
 export function firstDataColumnId<TData extends RowData>(columns: readonly Def<TData>[]): string | undefined {
   for (const def of columns) {
     const children = childColumns(def);

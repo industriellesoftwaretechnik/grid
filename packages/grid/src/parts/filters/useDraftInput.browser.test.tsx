@@ -30,7 +30,6 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-/** Renders a grid with a search, a text filter on `name` and a typed number filter on `age`. */
 function renderInputs() {
   const current: {
     table?: GridInstance<Person>;

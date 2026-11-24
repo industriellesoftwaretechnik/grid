@@ -3,10 +3,7 @@ function isPlainObject(value: object): value is Record<string, unknown> {
   return prototype === Object.prototype || prototype === null;
 }
 
-/**
- * Whether two values look the same: equal, or arrays and plain objects whose items are, up to `depth` levels down.
- * Rows, cells, columns and other class-like objects compare by identity.
- */
+/** Arrays and plain objects compare by value up to `depth` levels; class-like objects such as rows by identity. */
 export function sameValue(a: unknown, b: unknown, depth = 6): boolean {
   if (Object.is(a, b)) return true;
   if (depth === 0 || typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false;
@@ -26,7 +23,6 @@ export function sameValue(a: unknown, b: unknown, depth = 6): boolean {
   );
 }
 
-/** Whether two values are equal, or objects whose own values are. */
 export function sameShallow(a: unknown, b: unknown): boolean {
   return sameValue(a, b, 1);
 }

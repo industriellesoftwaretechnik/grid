@@ -26,7 +26,6 @@ import {
   type SetFilterOption,
 } from '@istec/grid';
 
-/** The editor of a column's filter, by its kind. */
 export function FilterEditor<TData extends object>({ column, kind }: { column: GridColumn<TData>; kind: FilterKind }) {
   if (kind === 'text') return <TextFilter column={column} />;
   if (kind === 'set') return <SetFilter column={column} />;
@@ -164,7 +163,6 @@ function SetFilterList({
 const fieldClassName =
   'h-6 w-full min-w-0 rounded-sm border bg-background px-1.5 font-normal outline-none focus-visible:ring-1 focus-visible:ring-primary aria-invalid:border-destructive';
 
-/** The row under the header with a filter per column. */
 export function FloatingFilterRow<TData extends object>({
   table,
   height,

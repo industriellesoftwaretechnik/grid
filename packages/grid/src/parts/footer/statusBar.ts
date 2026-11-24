@@ -3,19 +3,20 @@ import type { RowData } from '@tanstack/react-table';
 import { selectionSummary } from '#/core/selection/cellSelection.ts';
 import type { CoreTable } from '#/core/table/types.ts';
 
-/** What a status bar tells, as numbers; `formatNumber` writes them in the grid's locale. */
+/** The counts a status bar shows; `formatNumber` writes them in the grid's locale. */
 export interface GridStatus {
-  /** All data rows, and those the filters let through. */
+  /** All data rows, tree rows included; `shownRows` are those the filters let through. */
   rows: number;
   shownRows: number;
-  /** The top-level groups; 0 while the rows are not grouped. */
+  /** Top-level groups; 0 while the rows are not grouped. */
   groups: number;
-  /** The selected data rows; group rows do not count. */
+  /** Selected data rows, also those the filters hide; group rows do not count. */
   selectedRows: number;
-  /** For a range of more than one cell: the number of its cells, and the sum and mean of its numbers. */
+  /** Set for more than one selected cell; `sum` and `mean` are over their numbers outside group rows, unset if none. */
   cells: { count: number; sum?: number; mean?: number } | undefined;
 }
 
+/** The table's status: row counts, selected rows and the selected cells. */
 export function gridStatus<TData extends RowData>(table: CoreTable<TData>): GridStatus {
   const coreRows = table.getCoreRowModel();
   const selection = table.atoms.rowSelection.get();

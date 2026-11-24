@@ -5,10 +5,7 @@ import type { FilterKind } from '#/core/columns/columnMeta.ts';
 import { formatValue } from '#/core/columns/format.ts';
 import type { GridColumn } from '#/core/table/types.ts';
 
-/**
- * A filter as the UI summarizes it, such as on a floating filter's button: the typed text, the bounds of a range, or
- * the chosen values of a set with `blank` for the blank one. The values are text, as the column shows them.
- */
+/** A column's filter, for showing it; values are text as the column shows them, `blank` stands for the blank value. */
 export type FilterSummary =
   | { kind: 'text'; text: string }
   | { kind: 'range'; from: string | undefined; to: string | undefined }
@@ -16,7 +13,7 @@ export type FilterSummary =
 
 const isBlank = (value: unknown) => value === null || value === undefined || value === '';
 
-/** A filter value as its summary; unset when nothing is filtered. */
+/** Summarizes a filter value of the given kind, writing values with `format`; unset when nothing is filtered. */
 export function filterSummary(
   kind: FilterKind,
   value: unknown,
@@ -36,7 +33,7 @@ export function filterSummary(
   return from === undefined && to === undefined ? undefined : { kind: 'range', from, to };
 }
 
-/** A column's filter as its summary, its values formatted as the column shows them. */
+/** Summarizes the column's filter; unset when it is not filtered or has no filter. */
 export function columnFilterSummary<TData extends RowData>(column: GridColumn<TData>): FilterSummary | undefined {
   const { filter } = columnMeta(column);
   if (!filter) return undefined;

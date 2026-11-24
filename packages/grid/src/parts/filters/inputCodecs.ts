@@ -1,19 +1,19 @@
 /**
- * How an input's text reads as a value and the value writes back as text, for `useFilterInput` and `useSearch`.
- * `toValue` gives `undefined` for text that means no value, and `null` for text it cannot read, which the input keeps
- * without writing it.
+ * Converts between a filter value and an input's text. `toValue` gives `undefined` for no value and `null` for
+ * unreadable text, which the input keeps without writing.
  */
 export interface InputCodec<T> {
   toText: (value: unknown) => T;
   toValue: (text: T) => unknown;
 }
 
-/** Plain text, as the search and a `text` filter take it; empty text is no filter. */
+/** A text filter typed into one input; empty text is no filter. */
 export const textCodec: InputCodec<string> = {
   toText: (value) => (typeof value === 'string' ? value : ''),
   toValue: (text) => text || undefined,
 };
 
+/** Inclusive bounds, from and to; an `undefined` bound is open. */
 export type NumberRange = [number | undefined, number | undefined];
 
 const number = String.raw`(-?\d+(?:[.,]\d+)*)`;
@@ -30,8 +30,8 @@ function parseNumber(text: string): number {
 }
 
 /**
- * Reads a typed number filter: `5`, `≥ 5` or `>= 5`, `≤ 5` or `<= 5`, and `5 – 10` or `5-10`. Bounds are inclusive,
- * so `>` reads as `≥`. Returns `undefined` for empty text and `null` for text it cannot read.
+ * Reads `5`, `≥ 5`, `<= 5`, `5 – 10` and the like, also with a decimal comma; bounds are inclusive, so `>` reads as
+ * `≥`. Gives `undefined` for empty text and `null` for unreadable text.
  */
 export function parseNumberRange(text: string): NumberRange | undefined | null {
   const trimmed = text.trim();
@@ -51,7 +51,7 @@ const plainNumber = new Intl.NumberFormat('en-US', { useGrouping: false, maximum
 const boundText = (bound: unknown) =>
   typeof bound === 'number' && Number.isFinite(bound) ? plainNumber.format(bound) : '';
 
-/** A number range typed into one input, as the floating filter takes it: `5`, `≥ 5`, `≤ 5` or `5 – 10`. */
+/** A number range typed into one input: `5`, `≥ 5`, `≤ 5` or `5 – 10`. */
 export const numberRangeCodec: InputCodec<string> = {
   toText: (value) => {
     if (!Array.isArray(value)) return '';
@@ -65,7 +65,6 @@ export const numberRangeCodec: InputCodec<string> = {
 
 const pad = (value: number) => String(value).padStart(2, '0');
 
-/** How one bound reads and writes the text of its input. */
 interface BoundText {
   toText: (value: unknown) => string;
   fromText: (text: string, bound: 0 | 1) => unknown;
@@ -94,10 +93,7 @@ const dateBound: BoundText = {
   },
 };
 
-/**
- * A range in two inputs, from and to, either of which may stay empty: numbers, or dates as the `yyyy-mm-dd` of a date
- * input.
- */
+/** A range typed into two inputs, from and to; either may stay empty, and dates are a date input's `yyyy-mm-dd`. */
 export function boundsCodec(type: 'number' | 'date'): InputCodec<[string, string]> {
   return type === 'number' ? numberBoundsCodec : dateBoundsCodec;
 }

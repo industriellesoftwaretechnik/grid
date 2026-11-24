@@ -19,10 +19,7 @@ export type FocusMove =
 
 const clamp = (value: number, max: number) => Math.max(0, Math.min(value, max));
 
-/**
- * The cell a move leads to among the displayed rows and columns. `next` and `previous` wrap across rows and return
- * `null` past the last or first cell, so Tab can leave the grid.
- */
+/** `next` and `previous` wrap across rows and return `null` past the ends, so Tab can leave the grid. */
 export function moveFocus(
   rowIds: IdList,
   columnIds: readonly string[],

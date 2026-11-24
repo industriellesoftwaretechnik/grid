@@ -1,9 +1,6 @@
 import type { AggregationName, CellEditorError, FilterSummary, GridMenuId, GridStatus } from '@istec/grid';
 
-/*
- * The data grid's texts. @istec/grid has none: its models hold values and ids, and these words are the UI's. Edit
- * them here to reword or translate the grid. Numbers and dates follow `useGrid`'s `locale`.
- */
+// The grid's texts: edit them here to reword or translate. Numbers and dates follow `useGrid`'s `locale`.
 
 export const messages = {
   search: 'Search…',
@@ -39,7 +36,6 @@ export const messages = {
   removeGrouping: 'Remove grouping',
 } as const;
 
-/** The grid's own menu entries, by id. */
 export const menuLabels: Record<GridMenuId, string> = {
   'sort.asc': 'Sort ascending',
   'sort.desc': 'Sort descending',
@@ -70,10 +66,7 @@ export const menuLabels: Record<GridMenuId, string> = {
 
 export const menuShortcuts: Partial<Record<GridMenuId, string>> = { copy: 'Ctrl+C', paste: 'Ctrl+V' };
 
-/**
- * Short marks for the aggregations, shown before a total and an aggregated value. Each is plain characters of one
- * font: combined marks such as x̃ or #≠ mix fallback fonts and sit askew.
- */
+// Plain characters of one font: combined marks such as x̃ or #≠ mix fallback fonts and sit askew.
 export const aggregationSymbols: Record<AggregationName, string> = {
   sum: 'Σ',
   mean: 'Ø',
@@ -86,7 +79,6 @@ export const aggregationSymbols: Record<AggregationName, string> = {
 
 export const aggregationName = (aggregation: AggregationName) => menuLabels[`aggregation.${aggregation}`];
 
-/** The status bar's texts; `format` writes a number in the grid's locale. */
 export function statusTexts(status: GridStatus, format: (value: number) => string) {
   return {
     rows:
@@ -106,7 +98,7 @@ export function editorErrorText(error: CellEditorError): string {
   return 'Not a valid value';
 }
 
-/** A filter as text, as AG Grid's floating filters show it: `a – b`, `≥ a`, `≤ b`, or `(3) a, b, c`. */
+// As AG Grid's floating filters show it: `a – b`, `≥ a`, `≤ b`, or `(3) a, b, c`.
 export function filterSummaryText(summary: FilterSummary | undefined): string {
   if (!summary) return '';
   if (summary.kind === 'text') return summary.text;

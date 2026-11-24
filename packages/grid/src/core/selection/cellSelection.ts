@@ -26,7 +26,6 @@ export function rangeOf<TData extends RowData>(
   };
 }
 
-/** The values a fill handle writes: the cells of `target` outside `source` repeat the source block. */
 export function fillValues<TData extends RowData>(
   table: CoreTable<TData>,
   source: CellSelectionBounds,
@@ -50,12 +49,12 @@ export function fillValues<TData extends RowData>(
 
 export interface SelectionSummary {
   count: number;
-  /** Over the numbers among the values; `undefined` when there are none. */
+  /** `undefined` when no value is a number. */
   sum?: number;
   average?: number;
 }
 
-/** The number of selected cells and the sum and average of their numbers, for a range of more than one cell. */
+/** Only for a range of more than one cell. */
 export function selectionSummary<TData extends RowData>(table: CoreTable<TData>): SelectionSummary {
   const count = table.getSelectedCellCount();
   if (count < 2) return { count };

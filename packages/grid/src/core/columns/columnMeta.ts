@@ -3,50 +3,56 @@ import type { ReactNode } from 'react';
 import type { EditorKind } from '#/core/columns/editorValue.ts';
 import type { AggregationName } from '#/core/table/aggregations.ts';
 
+/** What a column holds; it sets the column's defaults through `dataTypeDefaults`. */
 export type DataType = 'text' | 'number' | 'date' | 'enum';
+/** The kind of column filter: text search, number range, date range or a set of values. */
 export type FilterKind = 'text' | 'number' | 'date' | 'set';
+/** Alignment of the column's header, cells and total. */
 export type ColumnAlign = 'start' | 'center' | 'end';
 
-/** What a custom editor in `meta.editor` gets. It renders inside the cell while the cell is edited. */
+/** Props of a custom cell editor given as `meta.editor`. */
 export interface CellEditorProps {
+  /** The cell's value. */
   value: unknown;
-  /** The key that started the edit, to replace the value with. */
+  /** The typed key that started the edit, to replace the value with; `undefined` otherwise. */
   initialText: string | undefined;
   /** Sets the value and closes the editor, or returns the validation message and keeps it open. */
   commit: (value: unknown) => string | undefined;
+  /** Closes the editor without changing the value. */
   cancel: () => void;
   /** The row's data. */
   row: unknown;
 }
 
-/** Called with the cell's value and the row's data. */
+/** Computes a column setting per cell from its value and the row's data. */
 export type CellRule<T> = (value: unknown, row: unknown) => T;
 
-/** Column settings, set in a column definition's `meta`. Unset ones come from `dataTypeDefaults`. */
+/** The grid's settings in a column definition's `meta`; unset ones come from `dataTypeDefaults`. */
 export interface GridColumnMeta {
   /** Inferred from the first row as `number`, `date` or `text`; `enum` must be set. */
   dataType?: DataType;
-  /** The name in menus and group rows. Defaults to a string header, then the column id. */
+  /** The column's name in menus, panels and copied headers; defaults to a string header, then the column id. */
   label?: string;
+  /** Defaults to the data type's. */
   align?: ColumnAlign;
   headerClassName?: string;
-  /** Classes for every cell, or per cell from its value, such as a color for negative numbers. */
+  /** A class for every cell, or per cell from a rule. */
   cellClassName?: string | CellRule<string | undefined>;
-  /** `true` shows the cell's text as a tooltip, which helps where it is cut off. */
+  /** `true` shows the cell's text as the tooltip; a rule gives the tooltip per cell. */
   tooltip?: boolean | CellRule<string | undefined>;
-  /** The editor of an editable column, or a component of its own. Defaults to one for its data type. */
+  /** A built-in editor or a component rendering a custom one; defaults to the data type's. */
   editor?: EditorKind | ((props: CellEditorProps) => ReactNode);
-  /** The choices of a `select` editor, in this order. Defaults to the values in the column, sorted. */
+  /** The `select` editor's choices; defaults to the column's values, sorted. */
   options?: readonly unknown[];
-  /** The text of a value in cells, the search, set filter options and totals. */
+  /** Turns a value other than `null` or `undefined` into text for cells, the search, set filter options and totals. */
   formatValue?: (value: unknown) => string;
-  /** `false` turns column filtering off. */
+  /** `false` turns the column filter off; defaults to the data type's. */
   filter?: FilterKind | false;
-  /** `false` removes the header's context menu. */
+  /** `false` removes the header's menu. */
   menu?: false;
-  /** The aggregations the column menu offers. */
+  /** The aggregations the column menu offers; defaults to the data type's. */
   aggregations?: readonly AggregationName[];
-  /** Keeps the column where it is defined: it cannot be moved, and a full-width group row leaves its cell. */
+  /** The column cannot be moved, and a full-width group row leaves its cell. */
   lockPosition?: boolean;
 }
 
@@ -57,10 +63,7 @@ export interface ResolvedColumnMeta extends GridColumnMeta {
   aggregations: readonly AggregationName[];
 }
 
-/**
- * What a column gets from its data type for each setting its `meta` leaves unset. `editor` is also how a custom editor's
- * column reads pasted text.
- */
+/** The settings each data type gives a column; `editor` also sets how a custom editor's column parses pasted text. */
 export const dataTypeDefaults: Record<
   DataType,
   Pick<ResolvedColumnMeta, 'align' | 'filter' | 'aggregations'> & { editor: EditorKind }

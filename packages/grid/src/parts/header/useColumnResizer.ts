@@ -5,11 +5,13 @@ import type { RowData } from '@tanstack/react-table';
 import type { GridHeader } from '#/core/table/types.ts';
 import { useGridSelector } from '#/core/table/useGridSelector.ts';
 
+/** What `useColumnResizer` returns. */
 export interface ColumnResizerModel {
-  /** Column groups resize through their columns. */
+  /** False for a column group, which resizes through its columns. */
   canResize: boolean;
+  /** The column is being resized right now. */
   resizing: boolean;
-  /** For the handle at the header's right edge; a double click returns the column to its defined width. */
+  /** Props for the handle at the header's right edge; a double click returns the column to its defined width. */
   handleProps: {
     'aria-hidden': true;
     onMouseDown: (event: MouseEvent) => void;
@@ -18,7 +20,7 @@ export interface ColumnResizerModel {
   };
 }
 
-/** The resize handle of a header. */
+/** The resize handle of a header cell. */
 export function useColumnResizer<TData extends RowData>(header: GridHeader<TData>): ColumnResizerModel {
   const { column } = header;
   const { canResize, resizing } = useGridSelector(column.table, () => ({

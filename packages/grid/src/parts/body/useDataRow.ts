@@ -8,17 +8,19 @@ import { useGridSelector } from '#/core/table/useGridSelector.ts';
 import type { CellEvents } from '#/parts/body/useBodyCell.ts';
 import { placeSlots, type LayoutSlot, type Placed } from '#/parts/view/layout.ts';
 
+/** Options of `useDataRow`; it leaves the cell events to `useBodyCell`. */
 export interface RowOptions<TData extends RowData> extends CellEvents<TData> {
+  /** In px. */
   rowHeight: number;
   onRowClick?: (row: GridRow<TData>) => void;
   onRowDoubleClick?: (row: GridRow<TData>) => void;
 }
 
-/** A group row of `groupDisplay: 'rows'`: locked columns such as the checkbox keep their cell, one spans the rest. */
+/** Locked columns such as the checkbox keep their cell, one spans the rest. */
 export interface FullWidthGroup<TData extends RowData> {
   kept: Placed<GridCell<TData>>[];
   colSpan: number;
-  /** Where the label stays while the columns scroll sideways, past the pinned kept cells. */
+  /** Where the label stays while the columns scroll sideways. */
   stickyLeft: number;
 }
 
@@ -37,10 +39,7 @@ function fullWidthGroup<TData extends RowData>(
   return { kept, colSpan: slots.length - kept.length, stickyLeft };
 }
 
-/**
- * A body row: whether it is selected, its cells in display order (`'filler'` takes the spare width), or for a group
- * row of `groupDisplay: 'rows'` its full-width layout, and the props for its element.
- */
+/** The body row: its cells by region, or a full-width group row, and props for its element. */
 export function useDataRow<TData extends RowData, TElement extends HTMLElement = HTMLTableRowElement>(
   row: GridRow<TData>,
   {
@@ -49,7 +48,12 @@ export function useDataRow<TData extends RowData, TElement extends HTMLElement =
     onRowDoubleClick,
     index,
     measureRef,
-  }: RowOptions<TData> & { index?: number; measureRef?: Ref<TElement> }
+  }: RowOptions<TData> & {
+    /** The `VirtualRow`'s `index`. */
+    index?: number;
+    /** `useVirtualRows`'s `measureElement`. */
+    measureRef?: Ref<TElement>;
+  }
 ) {
   const grouped = row.getIsGrouped();
   const { selected, groupToggles, start, center, end, startWidths } = useGridSelector(row.table, () => {
@@ -60,7 +64,6 @@ export function useDataRow<TData extends RowData, TElement extends HTMLElement =
       start: row.getStartVisibleCells(),
       center: row.getCenterVisibleCells(),
       end: row.getEndVisibleCells(),
-      // Set for a full-width group row, whose label keeps clear of the pinned cells it keeps.
       startWidths:
         groupDisplay === 'rows' && grouped
           ? row.table.getStartVisibleLeafColumns().map((column) => column.getSize())
@@ -71,14 +74,19 @@ export function useDataRow<TData extends RowData, TElement extends HTMLElement =
   const groupRow = startWidths ? fullWidthGroup(slots, startWidths) : undefined;
 
   return {
+    /** The row is selected; a group row is when all its selectable rows are. */
     selected,
+    /** A group row. */
     grouped,
+    /** `onRowClick` is given. */
     clickable: onRowClick !== undefined,
-    /** Unset for a full-width group row. */
+    /** Unset for a full-width group row; `'filler'` takes the spare width. */
     cells: groupRow ? undefined : slots,
+    /** Set for a group row under `groupDisplay: 'rows'`, which spans the columns after its locked ones. */
     groupRow,
-    /** Whether the cells of grouped columns hold their group's toggle. */
+    /** Set for `groupDisplay: 'columns'`; for `useBodyCell`. */
     groupToggles,
+    /** Props for the `<tr>` element. */
     rowProps: {
       'data-index': index,
       ref: measureRef,
@@ -90,5 +98,5 @@ export function useDataRow<TData extends RowData, TElement extends HTMLElement =
   };
 }
 
-/** What `useDataRow` gives a body row. */
+/** What `useDataRow` returns. */
 export type DataRowModel = ReturnType<typeof useDataRow>;

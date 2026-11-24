@@ -1,10 +1,11 @@
+/** The built-in cell editors. */
 export type EditorKind = 'text' | 'number' | 'date' | 'select';
 
 export type ParseResult = { value: unknown } | { error: 'number' | 'date' | 'option' };
 
 const pad = (value: number) => String(value).padStart(2, '0');
 
-/** The text an editor input starts with. Dates use the `yyyy-mm-dd` of a date input. */
+/** Dates use the `yyyy-mm-dd` of a date input. */
 export function toEditorText(value: unknown, kind: EditorKind): string {
   if (value === null || value === undefined) return '';
   if (kind === 'date' && value instanceof Date && !Number.isNaN(value.getTime())) {
@@ -34,7 +35,7 @@ function parseDate(text: string): Date | undefined {
   return date.getMonth() === Number(month) - 1 ? date : undefined;
 }
 
-/** The options whose text contains the query, ignoring case: those starting with it first, then in their order. */
+/** Ignores case; options starting with the query come first. */
 export function matchingOptions<T>(options: readonly T[], query: string, format: (option: T) => string): T[] {
   const wanted = query.trim().toLowerCase();
   if (wanted === '') return [...options];
@@ -48,10 +49,7 @@ export function matchingOptions<T>(options: readonly T[], query: string, format:
   return [...starting, ...containing];
 }
 
-/**
- * Turns typed or pasted text into a value of the column's kind. Empty text clears the value. A select accepts an
- * option or the text it is shown with.
- */
+/** Empty text clears the value; a select accepts an option or the text it is shown with. */
 export function parseEditorText(
   text: string,
   kind: EditorKind,

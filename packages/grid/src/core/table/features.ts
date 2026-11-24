@@ -76,4 +76,5 @@ export const features = tableFeatures({
   tableMeta,
 });
 
+/** The TanStack features, row models and functions the grid's table is built with. */
 export type GridFeatures = typeof features;

@@ -30,12 +30,6 @@ function hasTextSelection(): boolean {
   return selection !== null && !selection.isCollapsed;
 }
 
-/**
- * The spreadsheet keys of the body: arrows, Tab, Home, End and the page keys move the focused cell and with Shift
- * extend the range, Enter and F2 edit it or open its group, Enter in the expand column opens a tree node or detail,
- * typing replaces its value, Delete clears it or the range, Space selects its row, Ctrl+Z and Ctrl+Y undo and redo,
- * Ctrl+A selects all rows, and Ctrl+C and Ctrl+V copy and paste.
- */
 export function gridEvents<TData extends RowData>(table: CoreTable<TData>, pageSize: () => number) {
   const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     const target = cellTarget(event.target);
@@ -102,11 +96,7 @@ export function gridEvents<TData extends RowData>(table: CoreTable<TData>, pageS
   return { onKeyDown };
 }
 
-/**
- * Copy and paste of the focused cell or range. Browsers send these events to the selection or the body rather than to a
- * focused cell, so they are listened to on the document and act while focus is in a cell of 
-oot.
- */
+// Browsers send copy and paste to the selection or the body, not the focused cell, so listen on the document.
 export function listenToClipboard<TData extends RowData>(table: CoreTable<TData>, root: HTMLElement) {
   const inCell = () => {
     const active = document.activeElement;
@@ -141,10 +131,7 @@ function stopOnNativeTargets(event: MouseEvent) {
   }
 }
 
-/**
- * Right clicks on links, inputs and detail rows open the browser's menu, with "open in new tab" or "paste", instead of
- * the cell's: the event is stopped before it reaches a cell menu listening above the grid.
- */
+// Links, inputs and detail rows keep the browser's menu: the event stops before a cell menu listening above the grid.
 export function keepNativeContextMenu(root: HTMLElement) {
   root.addEventListener('contextmenu', stopOnNativeTargets);
   return () => root.removeEventListener('contextmenu', stopOnNativeTargets);

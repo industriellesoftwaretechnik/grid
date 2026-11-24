@@ -2,7 +2,7 @@ function quote(value: string, separator: string): string {
   return value.includes(separator) || /["\r\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
 }
 
-/** Rows of text as CSV or, with a tab, as the TSV spreadsheets put on the clipboard. */
+/** CSV, or with a tab the TSV spreadsheets put on the clipboard. */
 export function formatDelimited(rows: readonly (readonly string[])[], separator: string): string {
   return rows.map((row) => row.map((value) => quote(value, separator)).join(separator)).join('\r\n');
 }

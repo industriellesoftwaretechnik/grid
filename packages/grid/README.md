@@ -1,69 +1,103 @@
 # @istec/grid
 
-A headless React data grid on TanStack Table v9 with the features otherwise found only in AG Grid Enterprise.
-Bring your own UI components, or use the shadcn/ui implementation.
+Headless React data grid on [TanStack Table v9](https://tanstack.com/table), with the features AG Grid keeps for
+Enterprise. Free and MIT licensed. Use your own components, or the ready-made [shadcn/ui grid](#shadcnui-grid).
+
+[![npm](https://img.shields.io/npm/v/@istec/grid)](https://www.npmjs.com/package/@istec/grid)
+[![license](https://img.shields.io/npm/l/@istec/grid)](https://github.com/industriellesoftwaretechnik/grid/blob/main/LICENSE)
 
 > `0.x`: the API may change between minor versions.
 
-## Enterprise features
+## Features
 
-AG Grid has these only in its paid Enterprise edition:
+- Row grouping, aggregation (sum, mean, median, min, max, count…) and a totals row
+- Cell range selection, fill handle, copy and paste
+- Cell editing with validation and undo
+- Text, range and set filters, floating filters and quick search
+- Master/detail rows and tree data
+- Column menu, cell context menu and status bar
+- Virtualized rows, pinned rows and columns, column resizing and reordering
+- Persisted state and CSV export
 
-- Row grouping
-- Aggregation per column (e.g. sum, average, median, min, max, count)
-- Cell range selection, with cell count, sum and average in the status bar
-- Fill handle
-- Copy and paste of ranges, with headers if wanted
-- Master/detail rows
-- Tree data
-- Column menu and cell context menu
-- Status bar
-- And many more ...
-
-## Not included
-
-Server-side rows, pivoting, charts, Excel (`.xlsx`) export, tool panels / side bar, row dragging, styles of its own.
-React 19 and ESM only.
+Not included: server-side rows, pivoting, Excel export, row dragging. React 19 and ESM only.
 
 ## Install
 
 ```sh
 pnpm add @istec/grid @tanstack/react-table
+```
+
+## Quick start
+
+### shadcn/ui grid
+
+```sh
 npx shadcn add https://raw.githubusercontent.com/industriellesoftwaretechnik/grid/main/registry/data-grid.json
 ```
 
-The second line adds the shadcn/ui grid to `components/data-grid/`. Skip it to build your own UI.
+```tsx
+import { DataGrid } from '@/components/data-grid/data-grid';
+import { createGridColumnHelper, useGrid } from '@istec/grid';
+
+const helper = createGridColumnHelper<Person>();
+const columns = helper.columns([
+  helper.accessor('name', { header: 'Name', enableEditing: true }),
+  helper.accessor('salary', { header: 'Salary', aggregationFn: 'sum' }),
+]);
+
+function People({ people }: { people: Person[] }) {
+  const table = useGrid({ id: 'people', columns, data: people, getRowId: (person) => person.id });
+  return <DataGrid table={table} aria-label="People" showFloatingFilters />;
+}
+```
+
+The components land in `components/data-grid/` and are yours to change. Their texts are in `messages.ts`.
+
+### Your own UI
+
+Every part of the grid is a hook that returns values, actions and element props. It renders nothing and has no texts:
 
 ```tsx
-const table = useGrid({ id: 'people', columns, data: people, getRowId: (person) => person.id });
-return <DataGrid table={table} showFloatingFilters />;
+function StatusBar({ table }: { table: CoreTable<Person> }) {
+  const status = useStatusBar(table);
+  return (
+    <footer>
+      {status.shownRows} of {status.rows} rows
+    </footer>
+  );
+}
+```
+
+A control needs no hook. Read the table with `useGridSelector` and call its actions:
+
+```tsx
+function ClearFilters({ table }: { table: CoreTable<Person> }) {
+  const count = useGridSelector(table, () => table.getActiveFilterCount());
+  return (
+    <button disabled={count === 0} onClick={() => table.clearFilters()}>
+      Clear filters ({count})
+    </button>
+  );
+}
 ```
 
 ## Hooks
 
-`useGrid` returns the TanStack table with the grid's features; every state slice is controllable as in TanStack. Each
-part of the grid has a hook that returns its values, actions and element props:
-
 | Part      | Hooks                                                                                                            |
 | --------- | ---------------------------------------------------------------------------------------------------------------- |
-| Frame     | `useGridView`, `useColumnWidths`, `useVirtualList`                                                               |
+| Grid      | `useGrid`, `useGridSelector`, `useGridView`, `useColumnWidths`, `useVirtualList`                                 |
 | Header    | `useHeaderRows`, `useHeaderCell`, `useColumnResizer`, `useColumnReorder`, `useColumnMenu`                        |
 | Body      | `useVirtualRows`, `useDataRow`, `useBodyCell`, `useGroupRowCell`, `useRowToggle`, `useCellEditor`, `useCellMenu` |
 | Selection | `useSelectAll`, `useRowSelect`                                                                                   |
-| Filters   | `useFilterInput`, `useFloatingFilter`, `useRangeFilter`, `useSetFilter`                                          |
+| Filters   | `useFilterInput`, `useFloatingFilter`, `useRangeFilter`, `useSetFilter`, `useSearch`                             |
 | Grouping  | `useGroupPanel`                                                                                                  |
 | Footer    | `useTotalsRow`, `useStatusBar`, `useFormatNumber`                                                                |
-| Toolbar   | `useSearch`, `useColumnsMenu`                                                                                    |
+| Toolbar   | `useColumnsMenu`                                                                                                 |
 
-Controls of your own need no hook of the grid: read the table with `useGridSelector` and call its actions, such as
-`table.clearFilters()`, `table.expandParentRows()`, `table.moveColumn()`, `table.moveGrouping()` or
-`column.setAggregation()`.
-
-The grid has no texts. Models hold values and ids, such as a status bar's row counts or a menu entry's `GridMenuId`,
-and your UI words them; `useGrid`'s `locale` sets how numbers and dates are shown. Menus are plain data to map, filter
-or extend before rendering; dragging is left to your drag-and-drop library. The shadcn implementation
-(`apps/demo/src/components/data-grid`, its texts in `messages.ts`) shows how each hook is used.
+`useGrid` returns the TanStack table with the grid's features, and every state slice is controllable as in TanStack.
+The [shadcn/ui grid](https://github.com/industriellesoftwaretechnik/grid/tree/main/apps/demo/src/components/data-grid) uses every hook and
+serves as the reference.
 
 ## License
 
-MIT © ISTEC Industrielle Software-Technik GmbH
+[MIT](https://github.com/industriellesoftwaretechnik/grid/blob/main/LICENSE) © ISTEC Industrielle Software-Technik GmbH

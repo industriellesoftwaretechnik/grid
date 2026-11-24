@@ -9,34 +9,30 @@ import type { CoreTable, GridColumn } from '#/core/table/types.ts';
 import { useGridSelector } from '#/core/table/useGridSelector.ts';
 import { textCodec, type InputCodec } from '#/parts/filters/inputCodecs.ts';
 
-/** An input over a value of the table, such as a column filter or the search. */
+/** An input that writes to the table as the user types; a change from elsewhere replaces its text. */
 export interface DraftInput<T> {
   /** The typed text, else the value as text. */
   text: T;
-  /** Shows the text at once and writes its value after a pause in typing; unreadable text is kept, not written. */
+  /** Shows the text at once and writes its value 300 ms after typing stops; unreadable text is not written. */
   change: (text: T) => void;
-  /** Removes the value and the text at once. */
+  /** Clears the text and the value at once, without the pause. */
   clear: () => void;
-  /** Whether the text cannot be read, so the value before it stays. */
+  /** The text cannot be read, so the value before it stays. */
   invalid: boolean;
-  /** Whether there is a value or text to clear. */
+  /** The text or the value is set. */
   canClear: boolean;
 }
 
 const keyOf = (value: unknown) => JSON.stringify(value ?? null);
 
 interface Draft<T> {
-  /** The value last seen, as a key. */
   seen: string;
-  /** What was typed, shown until the value changes to something this input did not write. */
+  /** Shown until the value changes to something this input did not write. */
   text: T | undefined;
   written: string | undefined;
 }
 
-/**
- * The typed text of an input that other places may change the value of, such as a header's filter editor, the floating
- * filter and "Clear filters". Typing writes the value, debounced; a change from elsewhere replaces the text.
- */
+// Other places, such as "Clear filters", may change the value too; a change from elsewhere replaces the text.
 function useDraftInput<T>(
   table: { gridStore: GridStore },
   read: () => unknown,
@@ -75,10 +71,7 @@ function useDraftInput<T>(
   };
 }
 
-/**
- * An input for a column's filter, with a codec from `inputCodecs`: `textCodec` for a `text` filter, `numberRangeCodec`
- * for a number range typed into one input, `boundsCodec` for two inputs. `codec` must keep its identity.
- */
+/** An input for the column's filter value; `codec` must keep its identity. */
 export function useFilterInput<TData extends RowData, T>(
   column: GridColumn<TData>,
   codec: InputCodec<T>
@@ -91,7 +84,7 @@ export function useFilterInput<TData extends RowData, T>(
   );
 }
 
-/** The input of the search across all columns. */
+/** The input for the table's search, its global filter. */
 export function useSearch<TData extends RowData>(table: CoreTable<TData>): DraftInput<string> {
   return useDraftInput(
     table,

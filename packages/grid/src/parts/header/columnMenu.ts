@@ -3,6 +3,7 @@ import type { RowData } from '@tanstack/react-table';
 import { menuItem, type GridMenuEntry, type GridMenuSection } from '#/core/shared/menu.ts';
 import type { CoreTable, GridColumn } from '#/core/table/types.ts';
 
+/** Options of `useColumnMenu`. */
 export interface ColumnMenuOptions {
   /** Opens the column's filter editor; without it, the menu offers only to clear a filter. */
   onFilter?: () => void;
@@ -10,10 +11,6 @@ export interface ColumnMenuOptions {
 
 const pinSides = ['none', 'start', 'end'] as const;
 
-/**
- * The header's menu: sorting, filtering, pinning, grouping and aggregation, hiding the column and "Reset columns".
- * Showing hidden columns again is the columns menu's (`useColumnsMenu`). Entries are named by their `GridMenuId`.
- */
 export function columnMenu<TData extends RowData>(
   table: CoreTable<TData>,
   column: GridColumn<TData>,

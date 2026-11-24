@@ -28,11 +28,8 @@ function viewOf<TScroll extends Element>(
   };
 }
 
-/**
- * `useVirtualizer` with its current items and sizes as values. The virtualizer stays the same object while it scrolls,
- * so the React Compiler would keep what a component reads from it; its position is read as a value on every render,
- * and what depends on it is recomputed when it or the options change.
- */
+// The virtualizer stays the same object while it scrolls, so the React Compiler would memoize reads from it; its
+// position is read as a value instead, and `viewOf` recomputes when it or the options change.
 export function useVirtualView<TScroll extends Element>(options: Options<TScroll>) {
   const virtualizer = useVirtualizer<TScroll, Element>(options);
   const readPosition = () => positionOf(virtualizer);

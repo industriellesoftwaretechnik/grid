@@ -1,9 +1,4 @@
-// Builds the shadcn registry of the grid's shadcn/ui implementation. Every file of `apps/demo/src/components/data-grid`
-// becomes part of the `data-grid` item, installed to `components/data-grid/`. Its npm dependencies and the shadcn
-// components it needs are read from the files' imports, so they cannot drift from the code. `shadcn build` then writes
-// `registry/`, which hosts add with `npx shadcn add <raw URL of registry/data-grid.json>`.
-//
-// `--check` builds into a temporary folder instead and fails when `registry/` or `registry.json` differ from it.
+// Dependencies are read from the imports so they cannot drift; `--check` fails when `registry/` is stale.
 import { execSync } from 'node:child_process';
 import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -44,7 +39,6 @@ function packageVersion(dir: string): string {
   return String(manifest.version);
 }
 
-/** The package an import specifier comes from: `@scope/name` or `name`. */
 function packageOf(specifier: string): string {
   const parts = specifier.split('/');
   return (specifier.startsWith('@') ? parts.slice(0, 2) : parts.slice(0, 1)).join('/');

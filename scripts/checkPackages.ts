@@ -1,4 +1,4 @@
-// Packs every publishable package with pnpm (as a release would) and checks the tarballs with publint and attw.
+// Packs with pnpm, as a release does, so the checked tarballs match the published ones.
 import { execSync } from 'node:child_process';
 import { mkdirSync, readdirSync, rmSync } from 'node:fs';
 import path from 'node:path';

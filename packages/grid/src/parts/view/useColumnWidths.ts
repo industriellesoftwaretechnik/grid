@@ -4,21 +4,17 @@ import type { CoreTable } from '#/core/table/types.ts';
 import { useGridSelector } from '#/core/table/useGridSelector.ts';
 import { columnLayout } from '#/parts/view/layout.ts';
 
-/** The width of one `<col>`; `'filler'` takes the spare width and has none. */
+/** A column's width in px; `'filler'` takes the spare width and has none. */
 export type ColumnWidth = { id: string; width: number } | 'filler';
 
+/** The widths of the visible columns in display order. */
 export interface ColumnWidths {
-  /** The table's width: the sum of the visible columns. */
+  /** The sum of the column widths, in px. */
   width: number;
-  /** One per `<col>` of a `<colgroup>`, in display order. */
   columns: ColumnWidth[];
 }
 
-/**
- * The widths of the visible columns, for the `<colgroup>` of a fixed-layout `<table>`. Header, body and footer are
- * separate tables that share them. A fixed-layout table spreads spare width over all columns unless one has no width,
- * so the filler `<col>` gets none.
- */
+/** Widths for the `<colgroup>` of each fixed-layout table; the filler, having none, keeps spare width off the rest. */
 export function useColumnWidths<TData extends RowData>(table: CoreTable<TData>): ColumnWidths {
   return useGridSelector(table, () => ({
     width: table.getTotalSize(),

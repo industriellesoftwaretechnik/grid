@@ -1,10 +1,7 @@
-// Workspace-wide toolchain config. Vite+ reads `lint` and `fmt` from the root config only; each package's own
-// vite.config.ts carries its Vite, test and pack settings. Globs here resolve from this file and match every
-// package under `packages/*` and app under `apps/*`, so a new one needs no change here.
+// Vite+ reads `lint` and `fmt` from the root config only.
 import { defineConfig } from 'vite-plus';
 
 export default defineConfig({
-  // Each entry runs that package's tests with its own vite.config.ts.
   test: {
     projects: ['apps/*', 'packages/*'],
   },
@@ -36,8 +33,7 @@ export default defineConfig({
     ],
     rules: {
       'no-console': ['error', { allow: ['warn', 'error'] }],
-      // `vp lint --fix` rewrites relative imports. Packages use their package.json `imports` (`#/`, with extension);
-      // apps override this with the tsconfig `paths` alias (`@/`, without).
+      // Packages import via package.json `imports` (`#/`, with extension); apps override this with `@/`.
       'workspace/no-relative-imports': 'error',
       'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', ignoreRestSiblings: true }],
       'import/no-cycle': 'error',
@@ -70,8 +66,7 @@ export default defineConfig({
         },
       },
       {
-        // useVirtualizer returns the same object while its values change; this hook reads its position as a value,
-        // so what the compiler memoizes is recomputed when it moves.
+        // useVirtualizer returns a stable object with changing values; the hook reads them so memoization follows them.
         files: ['packages/grid/src/parts/view/useVirtualView.ts'],
         rules: {
           'react/incompatible-library': 'off',
@@ -107,7 +102,7 @@ export default defineConfig({
     singleQuote: true,
     trailingComma: 'es5',
     arrowParens: 'always',
-    // Generated files are rewritten by their generators on every run; formatting them only creates churn.
+    // Generated files are rewritten on every run; formatting them only creates churn.
     ignorePatterns: ['**/*.gen.ts', 'pnpm-lock.yaml', '**/CHANGELOG.md', '.pack', 'registry'],
     // Import order is a formatter concern (oxlint's sort-imports cannot group).
     sortImports: {

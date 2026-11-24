@@ -14,10 +14,7 @@ import { groupPanelId, useColumnDragAndDrop } from '@/components/data-grid/use-c
 import { cn } from '@/lib/utils';
 import { useColumnReorder, useGroupPanel, type CoreTable, type GroupChip } from '@istec/grid';
 
-/**
- * The row above the header that shows the grouping. Header columns are dragged into it to group by them, so it sits
- * inside `ColumnReorder`.
- */
+/** Must sit inside `ColumnReorder`: header columns are dragged into it to group by them. */
 export function GroupPanel<TData extends object>({ table }: { table: CoreTable<TData> }) {
   const chips = useGroupPanel(table);
   const reorder = useColumnReorder(table);
@@ -50,13 +47,10 @@ export function GroupPanel<TData extends object>({ table }: { table: CoreTable<T
   );
 }
 
-/** While the levels are reordered, arrows between chips would point between the wrong ones, so they hide. */
+// While the levels are reordered, arrows between chips would point between the wrong ones, so they hide.
 const ReorderingContext = createContext(false);
 
-/**
- * The grouped columns as chips in their level order, dragged sideways to reorder the levels; they have their own drag
- * and drop, apart from the header's. `pending` is a column dragged over the panel, shown as the level it would add.
- */
+// `pending` is a header column dragged over the panel, shown as the level it would add.
 function GroupChips<TData extends object>({
   table,
   chips: levels,
@@ -67,14 +61,13 @@ function GroupChips<TData extends object>({
   pending?: string;
 }) {
   const [dragging, setDragging] = useState<string>();
-  // The grouping reaches the panel a render after the drop, while dnd-kit drops its transforms at once; until then
-  // the chips keep the dropped order, or they would show the old one for a frame and slide back.
+  // The grouping arrives a render after the drop but dnd-kit drops its transforms at once; keeping the dropped
+  // order meanwhile stops the chips from showing the old order for a frame and sliding back.
   const [dropped, setDropped] = useState<{ order: string[]; over: string }>();
   const grouping = levels.map((chip) => chip.column.id);
   const groupingKey = grouping.join('\n');
   if (dropped && dropped.over !== groupingKey) setDropped(undefined);
   const ids = dropped?.order ?? grouping;
-  // The levels in the order shown, which a drop changes a render before the table does.
   const chips = ids.flatMap((id) => levels.filter((chip) => chip.column.id === id));
   const dragAndDrop = useColumnDragAndDrop(({ active, over }) => {
     if (!over || active.id === over.id) return;
@@ -133,7 +126,7 @@ function GroupChips<TData extends object>({
   );
 }
 
-// The arrow before a chip sits in the gap, outside the chip's width, so the widths the drag measured stay true.
+// Sits in the gap, outside the chip's width, so the widths the drag measured stay true.
 function LevelArrow({ hidden = false }: { hidden?: boolean }) {
   return (
     <ChevronRight

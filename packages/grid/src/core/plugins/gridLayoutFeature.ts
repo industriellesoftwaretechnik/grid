@@ -16,12 +16,12 @@ import { columnOrderIds, moveColumns, type OrderedTable } from '#/core/columns/c
 import type { ColumnAggregationState } from '#/core/plugins/columnAggregationFeature.ts';
 
 /**
- * `columns` shows a group in the cell of its grouped column, `groupColumn` in one extra column for all levels, and
- * `rows` gives each group a full-width row.
+ * How group rows show their group: `columns` in the cell of its grouped column, `groupColumn` in one extra column for
+ * all levels, `rows` in a full-width row.
  */
 export type GroupDisplay = 'columns' | 'groupColumn' | 'rows';
 
-/** The slices "Reset columns" returns to. */
+/** The state slices of the column layout, which `table.resetLayout` returns to `defaultLayout`. */
 export interface GridLayout {
   columnOrder?: ColumnOrderState;
   columnSizing?: ColumnSizingState;
@@ -32,27 +32,25 @@ export interface GridLayout {
 }
 
 interface GridLayoutOptions {
+  /** How group rows show their group. Default: `'columns'`. */
   groupDisplay?: GroupDisplay;
-  /** What `resetLayout` returns to; slices left out return to empty. */
+  /** What `resetLayout` returns to; slices left out return to empty. `useGrid` sets it to `initialState`. */
   defaultLayout?: GridLayout;
 }
 
 interface GridLayoutTable {
-  /** Returns column order, sizes, pinning, visibility, grouping and aggregation to `defaultLayout`. */
+  /** Returns the `GridLayout` slices to `defaultLayout` and the expanded rows to their initial state. */
   resetLayout: () => void;
-  /** Moves the grouping level at `from` to `to`, as dragging a group panel chip does; out of range does nothing. */
+  /** Moves a grouping level from one index to another; an index out of range does nothing. */
   moveGrouping: (from: number, to: number) => void;
-  /**
-   * Moves a column to where another one is: after it when moving forward, before it when moving back, as dragging a
-   * header does.
-   */
+  /** Moves a column next to `targetId`: after it when moving forward, before it when moving back. */
   moveColumn: (columnId: string, targetId: string) => void;
 }
 
 interface GridLayoutColumn {
   /**
-   * Groups or ungroups by the column as the UI does. Like AG Grid, grouping hides the column and ungrouping shows it,
-   * unless the grouped columns hold the group toggles (`groupDisplay: 'columns'`).
+   * Groups or ungroups by the column; unless `groupDisplay` is `'columns'`, grouping also hides a column that can be
+   * hidden and ungrouping shows it.
    */
   toggleGroupBy: () => void;
 }
@@ -123,7 +121,6 @@ function moveColumn(table: LayoutTable, columnId: string, targetId: string) {
   if (columnId !== targetId) table.setColumnOrder(moveColumns(columnOrderIds(table), [columnId], [targetId]));
 }
 
-/** The layout actions of the grid's UI: grouping from the UI, moving columns and grouping levels, "Reset columns". */
 export const gridLayoutFeature: TableFeature = {
   constructTableAPIs: (table) => {
     assignTableAPIs('gridLayoutFeature', table, {

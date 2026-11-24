@@ -18,12 +18,10 @@ export const aggregationFns = {
   uniqueCount: aggregationFn_uniqueCount,
 };
 
+/** The aggregations the grid registers, by name. */
 export type AggregationName = keyof typeof aggregationFns;
 
-/**
- * Short marks for the aggregations, shown before a total and an aggregated value. Each is plain characters of one
- * font: combined marks such as x̃ or #≠ mix fallback fonts and sit askew.
- */
+// Plain characters of one font: combined marks such as x̃ or #≠ mix fallback fonts and sit askew.
 export const aggregationSymbols: Record<AggregationName, string> = {
   sum: 'Σ',
   mean: 'Ø',
