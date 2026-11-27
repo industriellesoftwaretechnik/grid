@@ -10,14 +10,15 @@ vp install      # install dependencies
 pnpm dev        # start apps/demo, which uses the package from source with hot reload
 ```
 
-| Script                | What                                                                                   |
-| --------------------- | -------------------------------------------------------------------------------------- |
-| `pnpm check`          | Format check and lint (`vp check`); `pnpm check:fix` fixes what it can                 |
-| `pnpm typecheck`      | `tsc -b --noEmit` (TypeScript 7) for the root configs and every package                |
-| `pnpm test`           | All tests (`vp test`)                                                                  |
-| `pnpm build`          | `vp pack` for the package, `vp build` for the apps                                     |
-| `pnpm check:packages` | Packs the packages with pnpm and runs publint and attw on the tarballs (needs a build) |
-| `pnpm verify`         | All of the above, the gate CI runs on every PR                                         |
+| Script                | What                                                                                         |
+| --------------------- | -------------------------------------------------------------------------------------------- |
+| `pnpm check`          | Format check and lint (`vp check`); `pnpm check:fix` fixes what it can                       |
+| `pnpm typecheck`      | `tsc -b --noEmit` (TypeScript 7) for the root configs and every package                      |
+| `pnpm test`           | All tests (`vp test`)                                                                        |
+| `pnpm build`          | `vp pack` for the package, `vp build` for the apps                                           |
+| `pnpm typecheck:dist` | Type-checks the demo against the built `dist` types, as a consumer sees them (needs a build) |
+| `pnpm check:packages` | Packs the packages with pnpm and runs publint and attw on the tarballs (needs a build)       |
+| `pnpm verify`         | All of the above, the gate CI runs on every PR                                               |
 
 Workspace packages resolve to each other's sources (tsconfig `paths`, picked up by Vite), so nothing has to be
 built before `dev`, `test` or `typecheck`. See [AGENTS.md](AGENTS.md) for layout and code rules.

@@ -1,0 +1,10 @@
+{
+  // The demo against the built `dist` types instead of the sources, as a consumer of the published package sees them.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.dist.tsbuildinfo",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}

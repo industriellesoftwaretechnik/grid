@@ -120,3 +120,4 @@ export { useStatusBar } from '#/parts/footer/useStatusBar.ts';
 // parts/toolbar/
 export { downloadCsv, tableCsv, type CsvExportOptions } from '#/parts/toolbar/csvExport.ts';
 export { useColumnsMenu } from '#/parts/toolbar/useColumnsMenu.ts';
+export type { GridActionsTable } from '#/core/plugins/gridActionsFeature.ts';

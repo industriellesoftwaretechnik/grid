@@ -5,13 +5,14 @@ import { CSS } from '@dnd-kit/utilities';
 import { FlexRender, type SortDirection } from '@tanstack/react-table';
 import { ArrowDown, ArrowUp, EllipsisVertical, ListFilter } from 'lucide-react';
 
+import { AnchoredPopoverContent } from '@/components/data-grid/anchored-popover';
 import { FilterEditor } from '@/components/data-grid/filters';
 import { ContextMenuEntries, DropdownMenuEntries } from '@/components/data-grid/menu-entries';
 import { messages } from '@/components/data-grid/messages';
 import { flexAlign, pinnedClassName } from '@/components/data-grid/styles';
 import { ContextMenu, ContextMenuContent, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Popover, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import {
   useColumnMenu,
@@ -119,9 +120,9 @@ function HeaderCell<TData extends object>({ slot, height }: { slot: HeaderSlot<T
             {model.showMenuButton && <ColumnMenuButton column={header.column} onFilter={() => setFilterOpen(true)} />}
           </ColumnContent>
           {model.filter && (
-            <PopoverContent anchor={cell} align="start" className="w-64 gap-2 p-2" {...stopDrag}>
+            <AnchoredPopoverContent anchor={cell} className="w-64 gap-2 p-2" {...stopDrag}>
               <FilterEditor column={header.column} kind={model.filter} />
-            </PopoverContent>
+            </AnchoredPopoverContent>
           )}
         </Popover>
       ) : null}

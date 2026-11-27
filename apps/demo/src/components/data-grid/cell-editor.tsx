@@ -1,7 +1,8 @@
 import { Check } from 'lucide-react';
 
+import { AnchoredPopoverContent } from '@/components/data-grid/anchored-popover';
 import { editorErrorText, messages } from '@/components/data-grid/messages';
-import { Popover, PopoverContent } from '@/components/ui/popover';
+import { Popover } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { useCellEditor, useVirtualList, type CellEditorModel, type GridCell } from '@istec/grid';
 
@@ -22,15 +23,9 @@ export function CellEditor<TData extends object>({ cell }: { cell: GridCell<TDat
       />
       {kind === 'select' && (
         <Popover open>
-          <PopoverContent
-            anchor={input}
-            align="start"
-            initialFocus={false}
-            finalFocus={false}
-            className="w-auto min-w-48 gap-0 p-1"
-          >
+          <AnchoredPopoverContent anchor={input} initialFocus={false} finalFocus={false} className="min-w-48 p-1">
             <ChoiceList editor={editor} />
-          </PopoverContent>
+          </AnchoredPopoverContent>
         </Popover>
       )}
       {error !== undefined && (

@@ -12,9 +12,10 @@
     "check": "vp check",
     "check:fix": "vp check --fix",
     "check:packages": "node scripts/checkPackages.ts",
+    "typecheck:dist": "tsc -p apps/demo/tsconfig.dist.json --noEmit",
     "registry": "node scripts/buildRegistry.ts",
     "check:registry": "node scripts/buildRegistry.ts --check",
-    "verify": "pnpm check && pnpm typecheck && pnpm test && pnpm build && pnpm check:packages && pnpm check:registry",
+    "verify": "pnpm check && pnpm typecheck && pnpm test && pnpm build && pnpm typecheck:dist && pnpm check:packages && pnpm check:registry",
     "changeset": "changeset",
     "version-packages": "changeset version"
   },

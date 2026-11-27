@@ -9,6 +9,7 @@
       "title": "Data Grid",
       "description": "The shadcn/ui implementation of @istec/grid: a data grid with grouping, aggregation, range selection, editing and filters, built from your shadcn components on the headless hooks of @istec/grid.",
       "dependencies": [
+        "@base-ui/react",
         "@dnd-kit/core",
         "@dnd-kit/modifiers",
         "@dnd-kit/sortable",
@@ -29,6 +30,11 @@
         "popover"
       ],
       "files": [
+        {
+          "path": "src/components/data-grid/anchored-popover.tsx",
+          "type": "registry:component",
+          "target": "components/data-grid/anchored-popover.tsx"
+        },
         {
           "path": "src/components/data-grid/body.tsx",
           "type": "registry:component",

@@ -9,7 +9,7 @@ import {
   type Updater,
 } from '@tanstack/react-table';
 
-interface GridActionsTable {
+export interface GridActionsTable {
   /** Returns the number of column filters, plus one while the search has text. */
   getActiveFilterCount: () => number;
   /** Removes every column filter and clears the search. */
