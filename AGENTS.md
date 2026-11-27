@@ -33,3 +33,11 @@ docs are in `node_modules/vite-plus/docs`.
   the shadcn texts are in `messages.ts`.
 - The shadcn implementation is the reference use of every hook and changes together with it, as does the hooks table
   in `packages/grid/README.md`.
+
+## To do
+
+- **The shadcn implementation only works with Base UI.** `anchored-popover.tsx` imports `@base-ui/react` directly, so
+  the registry installs it as a dependency, and other files use Base UI props (`render` on `DropdownMenuTrigger`,
+  `initialFocus`/`finalFocus` on `PopoverContent`). It should work with any shadcn flavour, Radix included, using
+  only the components from `@/components/ui/`. For the popovers, one way is to position them against an invisible
+  `PopoverTrigger` that covers the cell.
